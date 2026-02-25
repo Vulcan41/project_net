@@ -3,20 +3,68 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-
-    /* center card */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    height: 100vh;
     background: #f5f5f5;
 }
 
 #layout {
+    flex: 1; /* takes remaining space */
     display: flex;
     align-items: center;
-    gap: 60px; /* distance between panels */
+    justify-content: center;
+    gap: 60px;
+}
+
+#page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#top-header {
+    height: 70px;
+    width: 100%;
+    background: #ffffff00;
+    border-bottom: 1px solid #eeeeee00;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* centers menu */
+}
+
+.header-menu {
+    display: flex;
+    gap: 40px;
+}
+
+.header-menu button {
+    background: none;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: #222;
+    cursor: pointer;
+    padding: 6px 0;
+    transition: color 0.2s ease;
+}
+
+.header-menu button:hover {
+    color: #881b61; /* matches your theme */
+}
+
+.header-menu button.active {
+    color: #881b61;               /* your theme color */
+}
+
+.header-divider {
+    width: 1000px;
+    height: 1px;
+    margin: 0 auto;
+    background: linear-gradient(
+    to right,
+    transparent,
+    #cfcfcf,
+    transparent
+    );
 }
 
 /* ---------- TITLE ---------- */
