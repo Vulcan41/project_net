@@ -1,0 +1,209 @@
+/* index.css */
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+
+    /* center card */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    height: 100vh;
+    background: #f5f5f5;
+}
+
+#layout {
+    display: flex;
+    align-items: center;
+    gap: 60px; /* distance between panels */
+}
+
+/* ---------- TITLE ---------- */
+
+.auth-title {
+    margin: 0;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.auth-subtitle {
+    margin: 0 0 30px 0;
+    line-height: 1.4;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+}
+
+/* ---------- CARD ---------- */
+
+#auth {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    min-height: 350px;
+    width: 300px;
+    gap: 12px;
+    padding: 30px;
+    background: radial-gradient(
+    circle at top left,
+    #ffffff 0%,
+    #ffffff 18%,
+    #ffffff 45%,
+    #ffffff 100%
+    );
+
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* ---------- INPUTS ---------- */
+
+input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    font-size: 14px;
+    background-color: #f8f9fc;
+    border: 2px solid #d6d9e0;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+input:focus {
+    border-color: #5d093f;
+    background-color: #ffffff;
+    outline: none;
+    box-shadow: none;
+}
+
+input::placeholder {
+    color: #9aa3b2;
+}
+
+/* ---------- BUTTON LAYOUT ---------- */
+
+.auth-buttons {
+    display: flex;
+    margin: 10px 0 0 0;
+    gap: 10px;
+}
+
+/* ---------- BUTTON STYLE ---------- */
+
+.glow-btn {
+    flex: 1;
+    height: 42px;
+    background: #000;
+    color: white;
+    border: 1px solid transparent; /* important */
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+/* HOVER */
+.glow-btn:hover {
+    background: white;
+    color: #5d093f;
+    border-color: #5d093f;
+}
+
+
+/* ---------- LEFT PANEL ---------- */
+
+#left-panel {
+    width: 800px;
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 30px; /* tighter like Archimedes */
+}
+
+/* ---------- ARCHIMEDES-STYLE LABELS ---------- */
+
+.panel-label {
+    margin: 0;
+    display: inline-block;
+    width: fit-content;
+    padding: 0px 0px 0px 0px;
+    font-size: 60px;        /* very large */
+    font-weight: 800;       /* heavy */
+    line-height: 0.9;      /* compact */
+    letter-spacing: -1.5px; /* VERY important */
+    color: white;
+    border-radius: 0px;     /* almost square */
+}
+
+.label-1 {
+    background: #5d093f;
+    margin-left: 0px;
+}
+
+.label-2 {
+    background: #0c0741;
+    margin-left: 80px;  /* move right */
+}
+
+.label-3 {
+    background: #1e2d73;
+    margin-left: 40px;  /* move more right */
+}
+
+
+.keep-signed {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #444;
+    margin-top: 4px;
+}
+
+.keep-signed input {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid #999;
+    border-radius: 2px;
+    background: #fff;
+    cursor: pointer;
+
+    display: grid;
+    place-items: center;
+
+    transform: scale(0.8);
+    transform-origin: center;
+    transition: all 0.2s ease;
+}
+
+.keep-signed input:hover {
+    border-color: #5d093f66;
+}
+
+/* ✨ outer purple + inner white */
+.keep-signed input:checked {
+    border-color: #5d093f;
+    background: #5d093f;
+    box-shadow: inset 0 0 0 4px white;
+}
+
+.keep-signed label {
+    cursor: pointer;
+}
+
+
+
+
+

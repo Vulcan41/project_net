@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Staff Network - Login</title>
+  <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+
+<div id="layout">
+
+  <div id="left-panel">
+    <h1 class="panel-label label-1">eHub Διδασκαλίας</h1>
+    <h1 class="panel-label label-2">Ψηφιακή Βιβλιοθήκη</h1>
+    <h1 class="panel-label label-3">Δικτύωση</h1>
+  </div>
+
+<div id="auth">
+
+  <h2 class="auth-title">Καλωσήρθατε</h2>
+  <p class="auth-subtitle">Συνδεθείτε για να συνεχίσετε<br>ή δημιουργήστε έναν νέο λογαριασμό</p>
+
+  <input
+          id="email"
+          type="email"
+          placeholder="Email"
+          autocomplete="off"
+  >
+  <input
+          id="password"
+          type="password"
+          placeholder="Κωδικός Πρόσβασης"
+          autocomplete="new-password"
+  >
+
+  <label class="keep-signed">
+    <input type="checkbox" id="keepSignedIn">
+    Να παραμείνω συνδεδεμένος
+  </label>
+
+  <div class="auth-buttons">
+    <button class="glow-btn" onclick="signUp()">
+      <span>Σύνδεση</span>
+    </button>
+    <button class="glow-btn" onclick="login()">
+      <span>Εγγραφή</span>
+    </button>
+  </div>
+</div>
+</div>
+
+<script type="module" src="index.js"></script>
+</body>
+</html>
