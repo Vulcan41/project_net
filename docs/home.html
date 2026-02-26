@@ -1,15 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Staff Network - Home</title>
+  <meta charset="UTF-8">
+  <title>noesis</title>
+  <link rel="stylesheet" href="home.css">
 </head>
 <body>
 
-<h2>Staff Social Network</h2>
+<div id="page">
 
-<div id="user">
-  <h3 id="welcome"></h3>
-  <button onclick="logout()">Logout</button>
+  <header id="top-header"></header>
+
+  <div id="home-content">
+    <div id="user">
+      <h3 id="welcome"></h3>
+      <button onclick="logout()">Logout</button>
+    </div>
+
+    <div id="profile-test">
+      <input id="test-name" type="text" placeholder="Full name">
+      <input id="test-username" type="text" placeholder="Username">
+      <textarea id="test-bio" placeholder="Bio"></textarea>
+      <button id="save-profile">Save Profile</button>
+    </div>
+  </div>
+
 </div>
 
 <script type="module" src="home.js"></script>

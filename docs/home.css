@@ -1,0 +1,40 @@
+/* home.css */
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f5f5; /* same light gray as index */
+}
+
+/* PAGE LAYOUT */
+
+#page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* WHITE HEADER */
+
+#top-header {
+    height: 60px;
+    width: 100%;
+    background: white;
+    border-bottom: 1px solid #eee;
+}
+
+#profile-test {
+    margin-top: 30px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    width: 300px;
+}
+
+#profile-test input,
+#profile-test textarea {
+    padding: 8px;
+    font-size: 14px;
+}

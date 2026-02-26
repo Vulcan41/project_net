@@ -24,10 +24,20 @@ body {
     height: 70px;
     width: 100%;
     background: #ffffff00;
-    border-bottom: 1px solid #eeeeee00;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: center; /* centers menu */
+}
+
+.header-logo {
+    justify-self: end;     /* push logo toward center */
+    margin-right: 100px;   /* offset FROM center */
+}
+
+.header-logo img {
+    height: 30px;
+    width: auto;
+    display: block;
 }
 
 .header-menu {
@@ -160,8 +170,8 @@ input::placeholder {
 
 /* HOVER */
 .glow-btn:hover {
-    background: white;
-    color: #5d093f;
+    background: #5d093f;
+    color: #ffffff;
     border-color: #5d093f;
 }
 
@@ -177,7 +187,29 @@ input::placeholder {
     gap: 30px; /* tighter like Archimedes */
 }
 
-/* ---------- ARCHIMEDES-STYLE LABELS ---------- */
+.panel-x {
+    position: absolute;
+    font-size: 30px;
+    font-weight: bold;
+    color: #5d093f;
+}
+
+.x1 {
+    top: 300px;
+    left: 300px;
+}
+
+.x2 {
+    top: 400px;
+    left: 880px;
+}
+
+.x3 {
+    top: 650px;
+    left: 500px;
+}
+
+/* ---------- LABELS ---------- */
 
 .panel-label {
     margin: 0;
@@ -186,7 +218,7 @@ input::placeholder {
     padding: 0px 0px 0px 0px;
     font-size: 60px;        /* very large */
     font-weight: 800;       /* heavy */
-    line-height: 0.9;      /* compact */
+    line-height: 1;      /* compact */
     letter-spacing: -1.5px; /* VERY important */
     color: white;
     border-radius: 0px;     /* almost square */
