@@ -21,25 +21,24 @@ window.logout = async function () {
 
 
 
-const saveBtn = document.getElementById("save-profile");
+document.getElementById("save-profile")
+    ?.addEventListener("click", async () => {
 
-saveBtn?.addEventListener("click", async () => {
+    const { data: userData } =
+    await supabase.auth.getUser();
 
-    // get logged in user
-    const { data: userData } = await supabase.auth.getUser();
     const user = userData.user;
+    if (!user) return;
 
-    if (!user) {
-        alert("No user logged in");
-        return;
-    }
+    const full_name =
+    document.getElementById("test-name").value;
 
-    // read form values
-    const full_name = document.getElementById("test-name").value;
-    const username = document.getElementById("test-username").value;
-    const bio = document.getElementById("test-bio").value;
+    const username =
+    document.getElementById("test-username").value;
 
-    // update profile
+    const bio =
+    document.getElementById("test-bio").value;
+
     const { error } = await supabase
         .from("profiles")
         .update({
@@ -50,22 +49,27 @@ saveBtn?.addEventListener("click", async () => {
         .eq("id", user.id);
 
     if (error) {
-        console.error(error);
-        alert("Error saving profile");
-    } else {
-        alert("Profile saved!");
-        loadProfile();
+        console.error("SAVE ERROR:", error);
+        alert("Error saving");
+        return;
     }
+
+    alert("Profile saved!");
+
+    // ⭐ THIS IS THE IMPORTANT PART
+    await loadProfile();
 });
 
 
 
 async function loadProfile() {
 
-    const { data: userData } = await supabase.auth.getUser();
-    const user = userData.user;
+    const { data: userData, error: userError } =
+    await supabase.auth.getUser();
 
-    if (!user) return;
+    if (userError || !userData.user) return;
+
+    const user = userData.user;
 
     const { data, error } = await supabase
         .from("profiles")
@@ -74,10 +78,11 @@ async function loadProfile() {
         .single();
 
     if (error) {
-        console.error(error);
+        console.error("LOAD ERROR:", error);
         return;
     }
 
+    // update UI
     document.getElementById("show-name").textContent =
     data.full_name || "";
 
