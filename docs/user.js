@@ -75,8 +75,8 @@ export async function setupSaveProfile() {
         });
 
         if (error) {
-            console.error(error);
-            alert("Error saving profile");
+            console.error("SAVE ERROR:", error);
+            alert(error.message);   // ⭐ show real message
             return;
         }
 
