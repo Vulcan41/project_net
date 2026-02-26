@@ -54,5 +54,38 @@ saveBtn?.addEventListener("click", async () => {
         alert("Error saving profile");
     } else {
         alert("Profile saved!");
+        loadProfile();
     }
 });
+
+
+
+async function loadProfile() {
+
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData.user;
+
+    if (!user) return;
+
+    const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    document.getElementById("show-name").textContent =
+    data.full_name || "";
+
+    document.getElementById("show-username").textContent =
+    data.username || "";
+
+    document.getElementById("show-bio").textContent =
+    data.bio || "";
+}
+
+loadProfile();
