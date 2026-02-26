@@ -9,28 +9,28 @@
 
 <div id="page">
 
-  <header id="top-header"></header>
+  <!-- HEADER -->
+  <header id="top-header">
 
-  <div id="home-content">
-    <div id="user">
-      <h3 id="welcome"></h3>
-      <button onclick="logout()">Logout</button>
+    <div id="header-left"></div>
+
+    <div id="header-right">
+      <span id="credits-indicator">Credits: --</span>
+      <button id="logout-btn">Logout</button>
     </div>
 
-    <div id="profile-test">
-      <input id="test-name" type="text" placeholder="Full name">
-      <input id="test-username" type="text" placeholder="Username">
-      <textarea id="test-bio" placeholder="Bio"></textarea>
-      <button id="save-profile">Save Profile</button>
-    </div>
+  </header>
 
-    <div id="profile-preview">
-      <h3>Saved Profile</h3>
-      <p><strong>Name:</strong> <span id="show-name"></span></p>
-      <p><strong>Username:</strong> <span id="show-username"></span></p>
-      <p><strong>Bio:</strong> <span id="show-bio"></span></p>
-    </div>
-  </div>
+  <!-- MAIN AREA -->
+  <main id="home-layout">
+
+    <!-- LEFT PANEL -->
+    <aside id="left-panel"></aside>
+
+    <!-- RIGHT / MAIN CONTENT (empty for now) -->
+    <section id="main-content"></section>
+
+  </main>
 
 </div>
 
