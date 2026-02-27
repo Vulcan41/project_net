@@ -20,8 +20,12 @@ body {
     border-bottom: 1px solid #eaeaea;
     display: flex;
     align-items: center;
-    justify-content: flex-end; /* ← pushes everything right */
+    justify-content: flex-end;
     padding-right: 20px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 10;
 }
 
 #header-left {
@@ -32,28 +36,52 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+    padding-right: 20px;
 }
 
-/* credits badge */
+/* ---------- CREDITS BADGE ---------- */
+
 #credits-indicator {
-    font-size: 13px;
-    font-weight: 600;
-    color: #333;
-    background: #f2f2f2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     padding: 5px 10px;
-    border-radius: 6px;
+    border-radius: 8px;
+    background: #f3f3f300;
+    font-weight: 700;
+    font-size: 13px;
 }
 
-#top-header {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 10;
+/* purple 4-ray star */
+.credits-star {
+    color: #5d093f;   /* purple */
+    font-size: 14px;
+    line-height: 1;
+}
+
+#logout-btn {
+    background: white;
+    border: 1px solid #ddd;
+
+    color: #333;
+    font-size: 13px;
+    font-weight: 500;
+
+    padding: 5px 12px;
+    border-radius: 7px;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#logout-btn:hover {
+    border-color: #bbb;
+    background: #fafafa;
 }
 
 #left-panel {
     position: fixed;
-    top: 50px;
+    top: 40px;
     left: 0;
     bottom: 0;
     width: 260px;

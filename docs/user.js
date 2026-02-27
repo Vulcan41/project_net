@@ -21,25 +21,37 @@ export async function loadProfile() {
         return;
     }
 
-    // preview
-    document.getElementById("show-name").textContent =
+    /* ---------- PROFILE PREVIEW ---------- */
+
+    document.getElementById("show-name")?.textContent =
     data.full_name || "";
 
-    document.getElementById("show-username").textContent =
+    document.getElementById("show-username")?.textContent =
     data.username || "";
 
-    document.getElementById("show-bio").textContent =
+    document.getElementById("show-bio")?.textContent =
     data.bio || "";
 
-    // autofill form
-    document.getElementById("test-name").value =
+    /* ---------- FORM AUTOFILL ---------- */
+
+    document.getElementById("test-name")?.value =
     data.full_name || "";
 
-    document.getElementById("test-username").value =
+    document.getElementById("test-username")?.value =
     data.username || "";
 
-    document.getElementById("test-bio").value =
+    document.getElementById("test-bio")?.value =
     data.bio || "";
+
+    /* ---------- HEADER: CREDITS ---------- */
+
+    document.getElementById("credits-value")?.textContent =
+    data.credits ?? 0;
+
+    /* ---------- AVATAR ---------- */
+
+    document.getElementById("avatar-preview")?.src =
+    data.avatar_url || "";
 }
 
 /* ---------- SAVE PROFILE ---------- */
