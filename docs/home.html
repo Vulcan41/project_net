@@ -16,7 +16,7 @@
 
     <div id="header-content">
 
-      <div class="tooltip-wrapper" data-tooltip="Προφίλ">
+      <div class="tooltip-wrapper" data-tooltip="Λογαριασμός">
         <button id="user-btn">
           <img src="assets/user_icon_2.jpg" alt="User">
         </button>
@@ -69,18 +69,25 @@
   </header>
 
   <!-- MAIN AREA -->
-  <main id="home-layout">
+  <main id="main-content"></main>
 
-    <!-- LEFT PANEL -->
-    <aside id="left-panel"></aside>
-
-    <!-- RIGHT / MAIN CONTENT (empty for now) -->
-    <section id="main-content"></section>
-
-  </main>
 
 </div>
 
 <script type="module" src="home.js"></script>
+
+<!-- LOGOUT MODAL -->
+<div id="logout-modal" class="modal-hidden">
+  <div id="logout-dialog">
+    <p>Είστε σίγουροι ότι θέλετε να αποσυνδεθείτε;</p>
+    <div class="modal-actions">
+      <button id="cancel-logout">Ακύρωση</button>
+      <button id="confirm-logout">Αποσύνδεση</button>
+    </div>
+  </div>
+</div>
+
+
+
 </body>
 </html>

@@ -38,8 +38,24 @@ loadCredits();
 
 /* ---------- LOGOUT ---------- */
 
-document.getElementById("logout-btn")
-    .addEventListener("click", async () => {
+const logoutBtn = document.getElementById("logout-btn");
+const modal = document.getElementById("logout-modal");
+
+const cancelBtn = document.getElementById("cancel-logout");
+const confirmBtn = document.getElementById("confirm-logout");
+
+/* open modal */
+logoutBtn?.addEventListener("click", () => {
+    modal.classList.remove("modal-hidden");
+});
+
+/* cancel */
+cancelBtn?.addEventListener("click", () => {
+    modal.classList.add("modal-hidden");
+});
+
+/* confirm logout */
+confirmBtn?.addEventListener("click", async () => {
     await supabase.auth.signOut();
     window.location.href = "index.html";
 });

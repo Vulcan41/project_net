@@ -17,7 +17,7 @@ body {
 #top-header {
     height: 40px;
     background: white;
-    border-bottom: 1px solid #eaeaea;
+    border-bottom: 1px solid #e0e0e0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -182,16 +182,16 @@ body {
 }
 
 
-/* black rectangle */
 [data-tooltip]::after {
     content: attr(data-tooltip);
     position: absolute;
     left: 50%;
-    top: calc(100% + 10px); /* ← 20px below */
+    top: calc(100% + 10px);
     transform: translateX(-50%);
-    background: black;
-    color: white;
-    font-weight: 700;
+    background: #000000;          /* background color */
+    color: #ffffff;                /* text color */
+    border: 1px solid #00000000;     /* stroke */
+    font-weight: 600;
     font-size: 11px;
     padding: 4px 8px;
     border-radius: 6px;
@@ -213,19 +213,87 @@ body {
 
 
 
-#left-panel {
-    position: fixed;
-    top: 40px;
-    left: 0;
-    bottom: 0;
-    width: 260px;
-    background: #ffffff00;
-    border-right: 1px solid #eaeaea00;
+#main-content {
+    width: 100%;
+    max-width: 1200px;      /* fixed content width */
+    margin: 60px auto 20px; /* top gap, centered, bottom gap */
+    background: white;      /* optional */
+    min-height: calc(100vh - 90px);
+    border-radius: 10px;    /* optional modern look */
 }
 
-#main-content {
-    margin-top: 70px;
-    margin-left: 260px;
-    padding: 20px;
+
+/* ---------- FLOATING MODAL ---------- */
+
+#logout-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;   /* page still feels normal */
 }
+
+/* hidden */
+.modal-hidden {
+    display: none !important;
+}
+
+/* ---------- DIALOG ---------- */
+
+#logout-dialog {
+    background: white;
+    padding: 25px 24px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    min-width: 280px;
+    text-align: center;
+    pointer-events: auto; /* clickable */
+}
+
+#logout-dialog p {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+}
+
+.modal-actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* base style */
+.modal-actions button {
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 7px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #333;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* hover */
+.modal-actions button:hover {
+    background: #f6f6f6;
+    border-color: #bbb;
+}
+
+#cancel-logout {
+    background: #5d093f;
+    color: white;
+    border-color: #5d093f;
+}
+
+#cancel-logout:hover {
+    background: #720c4d;
+    border-color: #5d093f;
+}
+
 
