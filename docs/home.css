@@ -20,7 +20,7 @@ body {
     border-bottom: 1px solid #eaeaea;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     padding-right: 20px;
     position: fixed;
     top: 0;
@@ -28,22 +28,27 @@ body {
     z-index: 10;
 }
 
-#header-right {
+#top-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding-right: 200px;
+    justify-content: center;
+    gap: 20px;
 }
 
-
-/* ---------- HEADER LEFT ---------- */
-
-#header-left {
-    margin-right: auto;
-    padding-left: 200px;
+#header-content {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;   /* spacing between groups */
+}
+
+/* ---------- HEADER LOGO ---------- */
+
+#header-logo {
+    height: 20px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    margin-right: 20px;
 }
 
 /* ---------- USER BUTTON ---------- */
@@ -131,8 +136,9 @@ body {
 }
 
 #header-search input {
-    width: 200px;
+    width: 300px;
     height: 28px;
+    margin-left: 20px;
     padding: 0 10px;
     border: 1px solid #ddd;
     border-radius: 7px;
@@ -151,8 +157,10 @@ body {
 #credits-indicator {
     display: flex;
     align-items: center;
+    margin-left: 10px;
     gap: 6px;
-    padding: 5px 10px;
+    width: auto;
+    padding: 0 6px;
     border-radius: 8px;
     background: #f3f3f300;
     font-weight: 700;
@@ -166,25 +174,6 @@ body {
     line-height: 1;
 }
 
-#logout-btn {
-    background: white;
-    border: 1px solid #ddd;
-
-    color: #333;
-    font-size: 13px;
-    font-weight: 500;
-
-    padding: 5px 12px;
-    border-radius: 7px;
-
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-#logout-btn:hover {
-    border-color: #bbb;
-    background: #fafafa;
-}
 
 /* ---------- TOOLTIP ---------- */
 
@@ -202,6 +191,7 @@ body {
     transform: translateX(-50%);
     background: black;
     color: white;
+    font-weight: 700;
     font-size: 11px;
     padding: 4px 8px;
     border-radius: 6px;
@@ -220,22 +210,6 @@ body {
     position: relative;
     display: flex;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

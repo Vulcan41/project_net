@@ -12,11 +12,13 @@
   <!-- HEADER -->
   <header id="top-header">
 
-    <div id="header-left">
+    <img id="header-logo" src="assets/logo_5.png" alt="Logo">
+
+    <div id="header-content">
 
       <div class="tooltip-wrapper" data-tooltip="Προφίλ">
         <button id="user-btn">
-          <img src="assets/user_icon.png" alt="User">
+          <img src="assets/user_icon_2.jpg" alt="User">
         </button>
       </div>
       <div id="user-info">
@@ -24,13 +26,18 @@
       </div>
       <div id="user-actions">
         <button class="user-action-btn"
+                id="friends-btn"
+                data-tooltip="Επαφές">
+          <img src="assets/friends.png" alt="friends">
+        </button>
+        <button class="user-action-btn"
                 id="messages-btn"
                 data-tooltip="Μηνύματα">
           <img src="assets/1111.png" alt="Messages">
         </button>
         <button class="user-action-btn"
                 id="notifications-btn"
-                data-tooltip="Ηδοποιήσεις">
+                data-tooltip="Ειδοποιήσεις">
           <img src="assets/2222.png" alt="">
         </button>
         <button class="user-action-btn"
@@ -38,22 +45,26 @@
                 data-tooltip="Ρυθμίσεις">
           <img src="assets/3333.png" alt="Settings">
         </button>
-
       </div>
 
-    </div>
-
-    <div id="header-right">
+      <button class="user-action-btn"
+              id="credits-indicator"
+              data-tooltip="Credits">
+        <span id="credits-value">--</span>
+        <span class="credits-star">✦</span>
+      </button>
 
       <div id="header-search">
         <input type="text" placeholder="Αναζήτηση...">
       </div>
-      <div id="credits-indicator">
-        <span id="credits-value">--</span>
-        <span class="credits-star">✦</span>
-      </div>
-      <button id="logout-btn">Αποσύνδεση</button>
+
+      <button class="user-action-btn"
+              id="logout-btn"
+              data-tooltip="Αποσύνδεση">
+        <img src="assets/logout.png" alt="Logout">
+      </button>
     </div>
+
 
   </header>
 
