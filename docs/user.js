@@ -21,6 +21,11 @@ export async function loadProfile() {
         return;
     }
 
+    /* ---------- HEADER USERNAME ---------- */
+
+    document.getElementById("user-name")?.textContent =
+    data.username || "Username";
+
     /* ---------- PROFILE PREVIEW ---------- */
 
     document.getElementById("show-name")?.textContent =
@@ -69,26 +74,29 @@ export async function setupSaveProfile() {
         if (!user) return;
 
         const full_name =
-        document.getElementById("test-name").value;
+        document.getElementById("test-name")?.value || "";
 
         const username =
-        document.getElementById("test-username").value;
+        document.getElementById("test-username")?.value || "";
 
         const bio =
-        document.getElementById("test-bio").value;
+        document.getElementById("test-bio")?.value || "";
 
         const { error } = await supabase
             .from("profiles")
-            .upsert({
-            id: user.id,
-            full_name,
-            username,
-            bio
-        });
+            .upsert(
+            {
+                id: user.id,
+                full_name,
+                username,
+                bio
+            },
+            { onConflict: "id" }
+        );
 
         if (error) {
             console.error("SAVE ERROR:", error);
-            alert(error.message);   // ⭐ show real message
+            alert(error.message);
             return;
         }
 

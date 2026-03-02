@@ -12,9 +12,42 @@
   <!-- HEADER -->
   <header id="top-header">
 
-    <div id="header-left"></div>
+    <div id="header-left">
+
+      <div class="tooltip-wrapper" data-tooltip="Προφίλ">
+        <button id="user-btn">
+          <img src="assets/user_icon.png" alt="User">
+        </button>
+      </div>
+      <div id="user-info">
+        <div id="user-name">Username</div>
+      </div>
+      <div id="user-actions">
+        <button class="user-action-btn"
+                id="messages-btn"
+                data-tooltip="Μηνύματα">
+          <img src="assets/1111.png" alt="Messages">
+        </button>
+        <button class="user-action-btn"
+                id="notifications-btn"
+                data-tooltip="Ηδοποιήσεις">
+          <img src="assets/2222.png" alt="">
+        </button>
+        <button class="user-action-btn"
+                id="settings-btn"
+                data-tooltip="Ρυθμίσεις">
+          <img src="assets/3333.png" alt="Settings">
+        </button>
+
+      </div>
+
+    </div>
 
     <div id="header-right">
+
+      <div id="header-search">
+        <input type="text" placeholder="Αναζήτηση...">
+      </div>
       <div id="credits-indicator">
         <span id="credits-value">--</span>
         <span class="credits-star">✦</span>
@@ -26,8 +59,6 @@
 
   <!-- MAIN AREA -->
   <main id="home-layout">
-    <input type="file" id="avatar-upload" accept="image/*">
-    <img id="avatar-preview" width="80">
 
     <!-- LEFT PANEL -->
     <aside id="left-panel"></aside>

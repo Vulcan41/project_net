@@ -28,15 +28,122 @@ body {
     z-index: 10;
 }
 
-#header-left {
-    justify-self: start;
-}
-
 #header-right {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding-right: 20px;
+    padding-right: 200px;
+}
+
+
+/* ---------- HEADER LEFT ---------- */
+
+#header-left {
+    margin-right: auto;
+    padding-left: 200px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ---------- USER BUTTON ---------- */
+
+#user-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;              /* VERY important */
+    border: none;
+    background: transparent;
+    border-radius: 50%;      /* use 50% for perfect circle */
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s ease,
+    filter 0.2s ease;
+}
+
+#user-btn:hover {
+    transform: scale(1.05);
+    filter: brightness(0.95);
+}
+
+#user-btn img {
+    width: 100%;
+    height: 100%;
+    display: block;          /* removes inline image gap */
+    object-fit: cover;
+}
+
+/* ---------- USER INFO ---------- */
+
+#user-info {
+    display: flex;
+    align-items: center;
+}
+
+#user-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #464646;
+}
+
+/* ---------- USER ACTION BUTTONS ---------- */
+
+#user-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* exact square buttons */
+.user-action-btn {
+    width: 26px;
+    height: 26px;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 6px;
+    opacity: 1;
+    transition: background 0.2s ease;
+}
+
+.user-action-btn:hover {
+    background: #f2f2f200;
+}
+
+.user-action-btn img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    display: block;
+}
+
+/* ---------- HEADER SEARCH ---------- */
+
+#header-search {
+    display: flex;
+    align-items: center;
+}
+
+#header-search input {
+    width: 200px;
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    background: white;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#header-search input:focus {
+    border-color: #bbb;
 }
 
 /* ---------- CREDITS BADGE ---------- */
@@ -79,14 +186,67 @@ body {
     background: #fafafa;
 }
 
+/* ---------- TOOLTIP ---------- */
+
+[data-tooltip] {
+    position: relative;
+}
+
+
+/* black rectangle */
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 10px); /* ← 20px below */
+    transform: translateX(-50%);
+    background: black;
+    color: white;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+/* show on hover */
+[data-tooltip]:hover::after {
+    opacity: 1;
+}
+
+.tooltip-wrapper {
+    position: relative;
+    display: flex;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #left-panel {
     position: fixed;
     top: 40px;
     left: 0;
     bottom: 0;
     width: 260px;
-    background: white;
-    border-right: 1px solid #eaeaea;
+    background: #ffffff00;
+    border-right: 1px solid #eaeaea00;
 }
 
 #main-content {
