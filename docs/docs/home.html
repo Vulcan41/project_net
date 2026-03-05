@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>noesis</title>
+  <link rel="stylesheet" href="header.css">
+  <link rel="stylesheet" href="views/basic/basic.css">
+  <link rel="stylesheet" href="views/settings/settings.css">
+  <link rel="stylesheet" href="views/settings/tabs/profile.css">
+  <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+
+<div id="page">
+
+  <!-- HEADER -->
+  <header id="top-header">
+
+    <img id="header-logo" src="assets/logo_5.png" alt="Logo">
+
+    <div id="header-content">
+
+      <div id="header-search">
+        <input type="text" placeholder="Αναζήτηση...">
+      </div>
+
+
+      <div id="user-actions">
+        <button class="user-action-btn"
+                id="home-btn"
+                data-tooltip="Αρχική">
+          <img src="assets/home_icon.png" alt="friends">
+        </button>
+        <button class="user-action-btn"
+                id="friends-btn"
+                data-tooltip="Επαφές">
+          <img src="assets/friends_2.png" alt="friends">
+        </button>
+        <button class="user-action-btn"
+                id="messages-btn"
+                data-tooltip="Μηνύματα">
+          <img src="assets/1111.png" alt="Messages">
+        </button>
+        <button class="user-action-btn"
+                id="notifications-btn"
+                data-tooltip="Ειδοποιήσεις">
+          <img src="assets/2222.png" alt="">
+        </button>
+        <button class="user-action-btn"
+                id="settings-btn"
+                data-tooltip="Ρυθμίσεις">
+          <img src="assets/3333.png" alt="Settings">
+        </button>
+      </div>
+
+      <button class="user-action-btn"
+              id="credits-indicator"
+              data-tooltip="Credits">
+        <span id="credits-value">--</span>
+        <span class="credits-star">✦</span>
+      </button>
+
+      <div class="user-wrapper">
+
+        <div class="tooltip-wrapper" data-tooltip="Λογαριασμός">
+          <button id="user-btn">
+            <img src="assets/user_icon_2.jpg" alt="User">
+          </button>
+        </div>
+
+        <div id="user-info">
+          <div id="user-name">Username</div>
+        </div>
+
+        <div id="user-dropdown" class="dropdown-menu dropdown-hidden">
+          <button class="dropdown-item" id="dropdown-profile">
+            Προφίλ
+          </button>
+          <button class="dropdown-item">
+            Ρυθμίσεις
+          </button>
+          <button class="dropdown-item" id="dropdown-logout">
+            Αποσύνδεση
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+
+  </header>
+
+  <!-- MAIN AREA -->
+  <main id="main-content"></main>
+
+
+</div>
+
+<script type="module" src="home.js"></script>
+
+<!-- LOGOUT MODAL -->
+<div id="logout-modal" class="modal-hidden">
+  <div id="logout-dialog">
+    <p>Είστε σίγουροι ότι θέλετε να αποσυνδεθείτε;</p>
+    <div class="modal-actions">
+      <button id="cancel-logout">Ακύρωση</button>
+      <button id="confirm-logout">Αποσύνδεση</button>
+    </div>
+  </div>
+</div>
+
+
+
+</body>
+</html>

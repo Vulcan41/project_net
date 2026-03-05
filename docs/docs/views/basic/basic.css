@@ -1,0 +1,79 @@
+/* =========================================================
+   BASIC MAIN LAYOUT
+========================================================= */
+
+#main-content {
+    width: 100%;
+    max-width: 1200px;
+    margin: 60px auto 20px;
+    background: white;
+    min-height: calc(100vh - 90px);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e0e0e0;
+}
+
+.basic-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 20px;
+    padding: 10px 10px 10px 10px;
+    flex: 1;
+}
+
+.basic-left {
+    background: #f2f2f200;
+    border-radius: 10px;
+    position: relative;
+}
+
+/* Vertical Divider */
+.basic-left::after {
+    content: "";
+    position: absolute;
+    top: 20px;          /* small top spacing */
+    bottom: 20px;       /* small bottom spacing */
+    right: -10px;       /* align inside the grid gap */
+    width: 1px;
+    background: #e5e5e5;
+}
+
+.basic-right {
+    background: #f2f2f200;
+    border-radius: 10px;
+}
+
+/* =========================================================
+   BASIC MENU
+========================================================= */
+
+.basic-left {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 10px;
+    gap: 2px;
+}
+
+/* Menu buttons */
+
+.basic-menu-btn {
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.basic-menu-btn:hover {
+    background: #f2f2f2;
+}
+
+.basic-menu-btn.active {
+    background: #5d093f;
+    color: white;
+}

@@ -1,0 +1,114 @@
+/* SETTINGS LAYOUT */
+
+.settings-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 30px;
+    padding: 0px;
+    flex: 1;
+}
+
+/* LEFT MENU */
+
+.settings-left {
+    background: #f5f6f673;
+    border-radius: 10px;
+    padding: 18px;
+    border: 1px solid #d5d5d5;
+}
+
+
+/* RIGHT AREA */
+
+.settings-right {
+    padding: 10px 10px;
+}
+
+
+/* =========================================================
+   SETTINGS MENU GROUP
+========================================================= */
+
+.settings-menu-group {
+    margin-bottom: 16px;
+}
+
+
+/* =========================================================
+   GROUP TITLE
+========================================================= */
+
+
+.settings-group-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: #9d9d9d;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    background: #67676710;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+/* left accent bar */
+.settings-group-title::before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 14px;
+    background: #09495d;
+    border-radius: 4px;
+}
+
+/* remove old dividers */
+.settings-group-title::after,
+.settings-menu-group:not(:first-child) .settings-group-title::before {
+    display: none;
+}
+
+
+/* =========================================================
+   MENU BUTTON
+========================================================= */
+
+.settings-menu-btn {
+    width: 100%;
+    text-align: left;
+    padding: 6px 12px;
+    margin-bottom: 6px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: #444;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0px;
+    transition: all 0.18s ease;
+}
+
+
+/* Hover */
+
+.settings-menu-btn:hover {
+    background: #f3f3f3;
+    transform: translateX(0px);
+}
+
+
+/* Active */
+
+.settings-menu-btn.active {
+    background: #09495d15;
+    color: #09495d;
+    font-weight: 550;
+}
+
+
