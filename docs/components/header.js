@@ -60,10 +60,10 @@ function loadHeaderUser() {
         avatarEl.src =
         profile.avatar_url && profile.avatar_url.trim() !== ""
         ? profile.avatar_url
-        : "assets/user_icon_2.jpg";
+        : "/assets/user_icon_2.jpg";
 
         avatarEl.onerror = () => {
-            avatarEl.src = "assets/user_icon_2.jpg";
+            avatarEl.src = "/assets/user_icon_2.jpg";
         };
     }
 
