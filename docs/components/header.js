@@ -49,11 +49,7 @@ function loadHeaderUser() {
     if (!profile) return;
 
     const nameEl = document.getElementById("user-name");
-    const avatarEl = document.getElementById("user-avatar");
-
-    if (nameEl) {
-        nameEl.textContent = profile.username || "Username";
-    }
+    const avatarEl = document.querySelector("#user-btn img");
 
     if (avatarEl) {
 
@@ -65,6 +61,11 @@ function loadHeaderUser() {
         avatarEl.onerror = () => {
             avatarEl.src = "/assets/user_icon_2.jpg";
         };
+
+    }
+
+    if (nameEl) {
+        nameEl.textContent = profile.username || "Username";
     }
 
 }
@@ -171,3 +172,7 @@ function setupLogoutModal() {
     });
 
 }
+
+
+
+
