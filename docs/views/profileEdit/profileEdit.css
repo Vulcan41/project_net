@@ -32,6 +32,29 @@ html, body {
     max-width: 600px;
 }
 
+/* AVATAR UPLOAD */
+
+#avatar-upload {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+#edit-avatar-preview {
+
+    width: 80px;
+    height: 80px;
+
+    border-radius: 50%;
+    object-fit: cover;
+
+    border: 1px solid #d2d2d7;
+}
+
+#edit-avatar-input {
+    border: none;
+}
+
 /* FORM FIELDS */
 
 .edit-field {
