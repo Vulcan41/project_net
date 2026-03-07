@@ -1,7 +1,20 @@
 import { supabase } from "../core/supabase.js";
 import { loadView } from "../core/router.js";
-import { userStore } from "../state/userStore.js";
 
+/* =========================================================
+   INIT HEADER
+========================================================= */
+
+export async function initHeader() {
+
+    await loadHeaderUser();
+    await loadCredits();
+
+    setupNavigation();
+    setupDropdown();
+    setupLogoutModal();
+
+}
 
 /* =========================================================
    NAVIGATION
@@ -25,29 +38,36 @@ function setupNavigation() {
 
 }
 
-export function initHeader() {
-
-    loadHeaderUser();
-    loadCredits();
-    setupNavigation();   // ← add this
-    setupDropdown();
-    setupLogoutModal();
-
-}
-
-
 /* =========================================================
-   LOAD HEADER USERNAME
+   LOAD HEADER USERNAME + AVATAR
 ========================================================= */
 
-function loadHeaderUser() {
+async function loadHeaderUser() {
 
-    const profile = userStore.getProfile();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-    if (!profile) return;
+    const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("username, avatar_url")
+        .eq("id", user.id)
+        .single();
 
-    document.getElementById("user-name").textContent =
-    profile.username || "Username";
+    if (error) {
+        console.error("Header profile load failed:", error);
+        return;
+    }
+
+    const nameEl = document.getElementById("user-name");
+    const avatarEl = document.getElementById("user-avatar");
+
+    if (nameEl) {
+        nameEl.textContent = profile.username || "Username";
+    }
+
+    if (avatarEl) {
+        avatarEl.src = profile.avatar_url || "assets/user_icon_2.jpg";
+    }
 
 }
 
@@ -55,10 +75,21 @@ function loadHeaderUser() {
    LOAD CREDITS
 ========================================================= */
 
-function loadCredits() {
+async function loadCredits() {
 
-    const profile = userStore.getProfile();
-    if (!profile) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("credits")
+        .eq("id", user.id)
+        .single();
+
+    if (error) {
+        console.error("Credits load failed:", error);
+        return;
+    }
 
     const creditsEl = document.getElementById("credits-value");
 
