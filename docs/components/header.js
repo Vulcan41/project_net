@@ -35,7 +35,7 @@ function setupNavigation() {
     messagesBtn?.addEventListener("click", () => loadView("messages"));
     notificationsBtn?.addEventListener("click", () => loadView("notifications"));
     settingsBtn?.addEventListener("click", () => loadView("settings"));
-    debugBtn?.addEventListener("click", () => loadView("debug"));
+    debugBtn?.addEventListener("click", () => loadView("profileOther"));
 
 }
 

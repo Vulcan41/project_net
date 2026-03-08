@@ -7,7 +7,8 @@ const routes = {
     settings: "settings",
     profile: "profile",
     debug: "debug",
-    profileEdit: "profileEdit"
+    profileEdit: "profileEdit",
+    profileOther: "profileOther"
 
 };
 

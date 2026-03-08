@@ -1,22 +1,29 @@
 import { supabase } from "../../core/supabase.js";
-import { userStore } from "../../state/userStore.js";
-import { loadView } from "../../core/router.js";
 
-export function initProfile() {
+export async function initProfileOther(userId) {
 
-    loadProfile();
-    setupEditButton();
+    if (!userId) return;
+
+    const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+    if (error) {
+        console.error("Failed to load profile:", error);
+        return;
+    }
+
+    renderProfile(profile);
 
 }
 
 /* =========================
-   LOAD PROFILE DATA
+   RENDER PROFILE
 ========================= */
 
-function loadProfile() {
-
-    const profile = userStore.getProfile();
-    if (!profile) return;
+function renderProfile(profile) {
 
     const avatar = document.getElementById("profile-avatar");
 
@@ -37,21 +44,5 @@ function loadProfile() {
 
     document.getElementById("profile-bio").textContent =
     profile.bio ?? "";
-
-}
-
-/* =========================
-   EDIT PROFILE
-========================= */
-
-function setupEditButton() {
-
-    const btn = document.getElementById("profile-edit-btn");
-
-    btn?.addEventListener("click", () => {
-
-        loadView("profileEdit");
-
-    });
 
 }

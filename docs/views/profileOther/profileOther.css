@@ -1,0 +1,122 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+#profile-page {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 90px);
+}
+
+/* =============================
+   TOP AREA
+============================= */
+
+#top-area {
+
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 40px;
+    border-bottom: 1px solid #e0e0e0;
+
+}
+
+/* LEFT SIDE */
+
+#profile-left {
+
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+}
+
+/* avatar */
+
+#profile-avatar {
+
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+
+}
+
+/* name + username */
+
+#profile-main-info {
+
+    display: flex;
+    flex-direction: column;
+
+}
+
+#profile-fullname {
+
+    font-size: 20px;
+    font-weight: 600;
+
+}
+
+#profile-username {
+
+    margin-top: 4px;
+    color: #777;
+
+}
+
+#profile-bio {
+
+    margin-top: 14px;
+    font-size: 14px;
+    color: #000000;
+    max-width: 420px;
+
+}
+
+/* RIGHT SIDE STATS */
+
+#profile-stats {
+
+    display: flex;
+    gap: 40px;
+
+}
+
+.profile-stat {
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+.stat-label {
+
+    margin-top: 10px;
+    font-size: 14px;
+    color: #777;
+
+}
+
+.stat-value {
+
+    font-size: 18px;
+    font-weight: 600;
+
+}
+
+/* =============================
+   MIDDLE CONTENT (scroll area)
+============================= */
+
+#profile-content {
+
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px 40px;
+
+}
