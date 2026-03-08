@@ -14,6 +14,7 @@ export async function initHeader() {
     setupNavigation();
     setupDropdown();
     setupLogoutModal();
+    setupSearch();
 
 }
 
@@ -35,7 +36,7 @@ function setupNavigation() {
     messagesBtn?.addEventListener("click", () => loadView("messages"));
     notificationsBtn?.addEventListener("click", () => loadView("notifications"));
     settingsBtn?.addEventListener("click", () => loadView("settings"));
-    debugBtn?.addEventListener("click", () => loadView("profileOther"));
+    debugBtn?.addEventListener("click", () => loadView("debug"));
 
 }
 
@@ -168,6 +169,74 @@ function setupLogoutModal() {
 
         await supabase.auth.signOut();
         window.location.href = "index.html";
+
+    });
+
+}
+
+
+/* =========================================================
+   HEADER LOGIC
+========================================================= */
+
+
+function setupSearch() {
+
+    const input = document.getElementById("search-input");
+    const results = document.getElementById("search-results");
+
+    if (!input || !results) return;
+
+    let timer;
+
+    input.addEventListener("input", () => {
+
+        clearTimeout(timer);
+
+        timer = setTimeout(async () => {
+
+            const query = input.value.trim();
+
+            if (!query) {
+                results.style.display = "none";
+                results.innerHTML = "";
+                return;
+            }
+
+            const { data } = await supabase
+                .from("profiles")
+                .select("id, username, full_name")
+                .ilike("username", `%${query}%`)
+                .limit(10);
+
+            results.innerHTML = "";
+
+            data?.forEach(user => {
+
+                const div = document.createElement("div");
+                div.className = "search-result";
+
+                div.textContent =
+                user.full_name
+                ? `${user.full_name} (@${user.username})`
+                : `@${user.username}`;
+
+                div.addEventListener("click", () => {
+
+                    results.style.display = "none";
+                    input.value = "";
+
+                    loadView("profileOther", user.id);
+
+                });
+
+                results.appendChild(div);
+
+            });
+
+            results.style.display = "block";
+
+        }, 300);
 
     });
 

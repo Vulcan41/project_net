@@ -2,7 +2,10 @@ import { supabase } from "../../core/supabase.js";
 
 export async function initProfileOther(userId) {
 
-    if (!userId) return;
+    if (!userId) {
+        console.error("profileOther loaded without userId");
+        return;
+    }
 
     const { data: profile, error } = await supabase
         .from("profiles")

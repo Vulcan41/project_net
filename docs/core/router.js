@@ -12,7 +12,7 @@ const routes = {
 
 };
 
-export async function loadView(name) {
+export async function loadView(name, param = null) {
 
     const folder = routes[name];
 
@@ -35,7 +35,7 @@ export async function loadView(name) {
     document.getElementById("main-content").innerHTML = html;
 
     /* ===============================
-       LOAD CSS (if exists)
+       LOAD CSS
     =============================== */
 
     const oldCss = document.getElementById("view-css");
@@ -49,7 +49,7 @@ export async function loadView(name) {
     document.head.appendChild(link);
 
     /* ===============================
-       LOAD JS (if exists)
+       LOAD JS
     =============================== */
 
     try {
@@ -60,7 +60,7 @@ export async function loadView(name) {
         "init" + folder.charAt(0).toUpperCase() + folder.slice(1);
 
         if (module[initFunction]) {
-            module[initFunction]();
+            module[initFunction](param);   // ← FIX
         }
 
     } catch (err) {
