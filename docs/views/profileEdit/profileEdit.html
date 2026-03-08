@@ -10,18 +10,27 @@
 
         <div id="profile-main">
 
-            <!-- LEFT: AVATAR -->
-            <label id="avatar-upload">
-                <div id="avatar-image-wrapper">
-                    <img id="edit-avatar-preview" src="assets/user_icon_2.jpg">
-                    <div id="avatar-mask"></div>
-                </div>
-                <div id="avatar-overlay">Αλλαγή</div>
-                <input type="file" id="edit-avatar-input" accept="image/*">
-            </label>
+            <!-- COLUMN 1: AVATAR -->
+            <div id="avatar-section">
 
-            <!-- RIGHT: FORM FIELDS -->
-            <div id="profile-fields">
+                <label id="avatar-upload">
+
+                    <div id="avatar-image-wrapper">
+                        <img id="edit-avatar-preview" src="assets/user_icon_2.jpg">
+                        <div id="avatar-mask"></div>
+                    </div>
+
+                    <div id="avatar-overlay">Αλλαγή</div>
+
+                    <input type="file" id="edit-avatar-input" accept="image/*">
+
+                </label>
+
+            </div>
+
+
+            <!-- COLUMN 2 -->
+            <div id="profile-fields-left">
 
                 <div class="edit-field">
                     <label>Όνομα</label>
@@ -33,9 +42,15 @@
                     <input id="edit-username">
                 </div>
 
+            </div>
+
+
+            <!-- COLUMN 3 -->
+            <div id="profile-fields-right">
+
                 <div class="edit-field">
                     <label>Ιδιότητα</label>
-                    <textarea id="edit-bio"></textarea>
+                    <input id="edit-bio">
                 </div>
 
             </div>
