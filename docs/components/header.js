@@ -174,11 +174,9 @@ function setupLogoutModal() {
 
 }
 
-
 /* =========================================================
-   HEADER LOGIC
+   SEARCH LOGIC
 ========================================================= */
-
 
 function setupSearch() {
 
@@ -205,21 +203,49 @@ function setupSearch() {
 
             const { data } = await supabase
                 .from("profiles")
-                .select("id, username, full_name")
-                .ilike("username", `%${query}%`)
+                .select("id, username, full_name, avatar_url")
+                .or(`username.ilike.%${query}%,full_name.ilike.%${query}%`)
                 .limit(10);
 
             results.innerHTML = "";
 
-            data?.forEach(user => {
+            if (!data || data.length === 0) {
+
+                const div = document.createElement("div");
+                div.className = "search-result-empty";
+                div.textContent = "No results";
+
+                results.appendChild(div);
+                results.style.display = "block";
+                return;
+
+            }
+
+            data.forEach(user => {
 
                 const div = document.createElement("div");
                 div.className = "search-result";
 
-                div.textContent =
-                user.full_name
-                ? `${user.full_name} (@${user.username})`
-                : `@${user.username}`;
+                const avatar = document.createElement("img");
+                avatar.className = "search-avatar";
+                avatar.src = user.avatar_url || "/assets/user_icon_2.jpg";
+
+                const textContainer = document.createElement("div");
+                textContainer.className = "search-text";
+
+                const name = document.createElement("div");
+                name.className = "search-name";
+                name.textContent = user.full_name || "User";
+
+                const username = document.createElement("div");
+                username.className = "search-username";
+                username.textContent = "@" + user.username;
+
+                textContainer.appendChild(name);
+                textContainer.appendChild(username);
+
+                div.appendChild(avatar);
+                div.appendChild(textContainer);
 
                 div.addEventListener("click", () => {
 
@@ -240,7 +266,18 @@ function setupSearch() {
 
     });
 
+    /* CLOSE ON OUTSIDE CLICK */
+
+    document.addEventListener("click", (e) => {
+
+        if (!e.target.closest("#header-search")) {
+            results.style.display = "none";
+        }
+
+    });
+
 }
+
 
 
 
