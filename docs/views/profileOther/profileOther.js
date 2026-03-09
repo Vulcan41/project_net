@@ -1,5 +1,5 @@
 import { supabase } from "../../core/supabase.js";
-import { DEFAULT_AVATAR } from "../../state/userStore.js";
+import { DEFAULT_AVATAR, DEFAULT_FULLNAME, DEFAULT_USERNAME, DEFAULT_BIO } from "../../state/userStore.js";
 
 export async function initProfileOther(userId) {
 
@@ -41,12 +41,12 @@ function renderProfile(profile) {
     };
 
     document.getElementById("profile-fullname").textContent =
-    profile.full_name ?? "";
+    profile.full_name ?? DEFAULT_FULLNAME;
 
     document.getElementById("profile-username").textContent =
-    "@" + (profile.username ?? "");
+    "@" + (profile.username ?? DEFAULT_USERNAME);
 
     document.getElementById("profile-bio").textContent =
-    profile.bio ?? "";
+    profile.bio ?? DEFAULT_BIO;
 
 }

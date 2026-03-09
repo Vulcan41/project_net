@@ -1,5 +1,9 @@
 import { supabase } from "../core/supabase.js";
+
 export const DEFAULT_AVATAR = "assets/user_icon.png";
+export const DEFAULT_FULLNAME = "User";
+export const DEFAULT_USERNAME = "hi";
+export const DEFAULT_BIO = "New User";
 
 export const userStore = {
 

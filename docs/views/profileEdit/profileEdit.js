@@ -1,7 +1,7 @@
 import { supabase } from "../../core/supabase.js";
 import { userStore } from "../../state/userStore.js";
 import { loadView } from "../../core/router.js";
-import { DEFAULT_AVATAR } from "../../state/userStore.js";
+import { DEFAULT_AVATAR, DEFAULT_FULLNAME, DEFAULT_USERNAME, DEFAULT_BIO } from "../../state/userStore.js";
 
 export function initProfileEdit() {
 
@@ -27,9 +27,9 @@ function loadProfile() {
 
     const preview = document.getElementById("edit-avatar-preview");
 
-    if (fullname) fullname.value = profile.full_name ?? "";
-    if (username) username.value = profile.username ?? "";
-    if (bio) bio.value = profile.bio ?? "";
+    if (fullname) fullname.value = profile.full_name ?? DEFAULT_FULLNAME;
+    if (username) username.value = profile.username ?? DEFAULT_USERNAME;
+    if (bio) bio.value = profile.bio ?? DEFAULT_BIO;
 
     if (preview) {
         preview.src = profile.avatar_url || DEFAULT_AVATAR;
@@ -77,10 +77,6 @@ function setupCancel() {
    SAVE PROFILE
 ========================= */
 
-/* =========================
-   SAVE PROFILE
-========================= */
-
 function setupSave() {
 
     const btn = document.getElementById("save-edit");
@@ -91,13 +87,13 @@ function setupSave() {
         if (!user) return;
 
         const full_name =
-        document.getElementById("edit-fullname")?.value ?? "";
+        document.getElementById("edit-fullname")?.value ?? DEFAULT_FULLNAME;
 
         const username =
-        document.getElementById("edit-username")?.value ?? "";
+        document.getElementById("edit-username")?.value ?? DEFAULT_USERNAME;
 
         const bio =
-        document.getElementById("edit-bio")?.value ?? "";
+        document.getElementById("edit-bio")?.value ?? DEFAULT_BIO;
 
         let avatarUrl = userStore.getProfile()?.avatar_url ?? null;
 
@@ -163,7 +159,7 @@ function setupSave() {
 
         const headerUsername = document.getElementById("user-name");
         if (headerUsername) {
-            headerUsername.textContent = username || full_name || "User";
+            headerUsername.textContent = username || full_name || DEFAULT_USERNAME;
         }
 
         /* ---------- go back to profile ---------- */

@@ -1,7 +1,7 @@
 import { supabase } from "../core/supabase.js";
 import { loadView } from "../core/router.js";
 import { userStore } from "../state/userStore.js";
-import { DEFAULT_AVATAR } from "../state/userStore.js";
+import { DEFAULT_AVATAR, DEFAULT_FULLNAME, DEFAULT_USERNAME, DEFAULT_BIO } from "../state/userStore.js";
 
 
 /* =========================================================
@@ -68,7 +68,7 @@ function loadHeaderUser() {
     }
 
     if (nameEl) {
-        nameEl.textContent = profile.username || "Username";
+        nameEl.textContent = profile.username || DEFAULT_USERNAME;
     }
 
 }
@@ -206,7 +206,9 @@ function setupSearch() {
             const { data } = await supabase
                 .from("profiles")
                 .select("id, username, full_name, avatar_url")
-                .or(`username.ilike.%${query}%,full_name.ilike.%${query}%`)
+                .or(
+                `username.ilike.${query}%,username.ilike.%${query}%,full_name.ilike.%${query}%`
+            )
                 .limit(10);
 
             results.innerHTML = "";
