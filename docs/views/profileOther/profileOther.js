@@ -1,4 +1,5 @@
 import { supabase } from "../../core/supabase.js";
+import { DEFAULT_AVATAR } from "../../state/userStore.js";
 
 export async function initProfileOther(userId) {
 
@@ -33,10 +34,10 @@ function renderProfile(profile) {
     avatar.src =
     profile.avatar_url && profile.avatar_url.trim() !== ""
     ? profile.avatar_url
-    : "./assets/user_icon_2.jpg";
+    : DEFAULT_AVATAR;
 
     avatar.onerror = () => {
-        avatar.src = "./assets/user_icon_2.jpg";
+        avatar.src = DEFAULT_AVATAR;
     };
 
     document.getElementById("profile-fullname").textContent =

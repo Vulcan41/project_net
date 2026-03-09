@@ -1,6 +1,7 @@
 import { supabase } from "../../core/supabase.js";
 import { userStore } from "../../state/userStore.js";
 import { loadView } from "../../core/router.js";
+import { DEFAULT_AVATAR } from "../../state/userStore.js";
 
 export function initProfileEdit() {
 
@@ -31,7 +32,7 @@ function loadProfile() {
     if (bio) bio.value = profile.bio ?? "";
 
     if (preview) {
-        preview.src = profile.avatar_url || "assets/user_icon_2.jpg";
+        preview.src = profile.avatar_url || DEFAULT_AVATAR;
     }
 
 }
