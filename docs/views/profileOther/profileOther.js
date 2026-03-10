@@ -20,6 +20,7 @@ export async function initProfileOther(userId) {
     }
 
     renderProfile(profile);
+    await loadFriendCount(userId);
 
     const friendship = await checkFriendship(userId);
 
@@ -52,6 +53,31 @@ function renderProfile(profile) {
 
     document.getElementById("profile-bio").textContent =
     profile.bio ?? DEFAULT_BIO;
+
+}
+
+/* =========================
+   LOAD FRIEND COUNT
+========================= */
+
+async function loadFriendCount(userId) {
+
+    const { count, error } = await supabase
+        .from("friendships")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "accepted")
+        .or(`requester_id.eq.${userId},receiver_id.eq.${userId}`);
+
+    if (error) {
+        console.error("Failed to load friend count:", error);
+        return;
+    }
+
+    const el = document.getElementById("profile-friends-count");
+
+    if (el) {
+        el.textContent = count ?? 0;
+    }
 
 }
 
