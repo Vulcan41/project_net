@@ -130,19 +130,28 @@ async function checkFriendship(viewedUserId) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
-    const { data, error } = await supabase
+    /* check if YOU sent request */
+
+    const { data: sent } = await supabase
         .from("friendships")
         .select("*")
-        .or(
-        `and(requester_id.eq.${user.id},receiver_id.eq.${viewedUserId}),
-         and(requester_id.eq.${viewedUserId},receiver_id.eq.${user.id})`
-    );
+        .eq("requester_id", user.id)
+        .eq("receiver_id", viewedUserId)
+        .maybeSingle();
 
-    if (error) {
-        console.error("Friendship check failed:", error);
-        return null;
-    }
+    if (sent) return sent;
 
-    return data && data.length > 0 ? data[0] : null;
+    /* check if THEY sent request */
+
+    const { data: received } = await supabase
+        .from("friendships")
+        .select("*")
+        .eq("requester_id", viewedUserId)
+        .eq("receiver_id", user.id)
+        .maybeSingle();
+
+    if (received) return received;
+
+    return null;
 
 }
