@@ -52,7 +52,7 @@ async function loadRequests(userId) {
         const row = document.createElement("div");
 
         const text = document.createElement("span");
-        text.textContent = `${req.profiles?.username ?? "User"} θέλει να γίνει φίλος`;
+        text.textContent = `Ο χρήστης ${req.profiles?.username ?? "User"} σας έστειλε αίτημα σύνδεσης`;
 
         const acceptBtn = document.createElement("button");
         acceptBtn.textContent = "Αποδοχή";
@@ -86,9 +86,14 @@ async function loadRequests(userId) {
 
         });
 
+        const actions = document.createElement("div");
+        actions.className = "request-actions";
+
+        actions.appendChild(acceptBtn);
+        actions.appendChild(declineBtn);
+
         row.appendChild(text);
-        row.appendChild(acceptBtn);
-        row.appendChild(declineBtn);
+        row.appendChild(actions);
 
         container.appendChild(row);
 

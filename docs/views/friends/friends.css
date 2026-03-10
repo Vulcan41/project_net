@@ -3,11 +3,22 @@
 ========================= */
 
 #friends-page {
+    width: 100%;
+}
 
-    max-width: 700px;
-    margin: 0 auto;
+/* REQUESTS AREA */
+
+#requests-section,
+#friends-section {
+
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
 
 }
+
+/* BUTTON GROUP */
+
 
 /* =========================
    SECTION TITLES
@@ -24,8 +35,8 @@
    REQUESTS / FRIEND ROWS
 ========================= */
 
-#friend-requests div,
-#friends-list div {
+#friend-requests > div,
+#friends-list > div {
 
     display: flex;
     align-items: center;
@@ -77,13 +88,9 @@
 
 }
 
-/* spacing between buttons */
-
-#friend-requests button + button,
-#friends-list button {
-
-    margin-left: 10px;
-
+.request-actions {
+    display: flex;
+    gap: 10px;
 }
 
 /* =========================
@@ -91,17 +98,13 @@
 ========================= */
 
 #friend-requests button:first-of-type {
-
     background: #5d093f;
     border-color: #5d093f;
     color: white;
-
 }
 
 #friend-requests button:first-of-type:hover {
-
     background: #720c4d;
-
 }
 
 /* =========================
@@ -110,7 +113,5 @@
 
 #friend-requests button:last-of-type:hover,
 #friends-list button:hover {
-
     background: #f5f5f7;
-
 }
