@@ -3,7 +3,8 @@
 ========================= */
 
 #friends-page {
-    width: 100%;
+    width: calc(100% - 40px);
+    margin: 0 auto;
 }
 
 /* =========================
@@ -19,16 +20,25 @@
 
 }
 
+#friend-requests {
+
+    max-height: 320px;
+    overflow-y: auto;
+    overflow-x: hidden;   /* prevents horizontal scrollbar */
+
+}
+
 /* =========================
    SECTION TITLES
 ========================= */
 
 #friends-page h2 {
 
-    font-size: 18px;
-    font-weight: 600;
-    margin-top: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 10px;
     margin-bottom: 14px;
+    color: #4b4b4b;
 
 }
 
@@ -243,9 +253,10 @@
 .request-text .request-time {
     margin-left: 10px;
     font-size: 12px;
-    color: #ff0000;
+    color: #6b6b6b;
 }
 
 .request-dot {
     margin-right: 8px;
 }
+

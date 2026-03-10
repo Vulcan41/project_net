@@ -11,9 +11,11 @@ function formatRelativeTime(dateString) {
     if (diff < 60) return "μόλις τώρα";
 
     const minutes = Math.floor(diff / 60);
+    if (minutes === 1) return "1 λεπτό πριν";
     if (minutes < 60) return `${minutes} λεπτά πριν`;
 
     const hours = Math.floor(minutes / 60);
+    if (hours === 1) return "1 ώρα πριν";
     if (hours < 24) return `${hours} ώρες πριν`;
 
     const days = Math.floor(hours / 24);
@@ -67,6 +69,12 @@ async function loadRequests(userId) {
     if (error) {
         console.error("Failed to load friend requests:", error);
         return;
+    }
+
+    const requestsTitle = document.getElementById("requests-title");
+
+    if (requestsTitle) {
+        requestsTitle.textContent = `Αιτήματα (${requests?.length || 0})`;
     }
 
     container.innerHTML = "";
@@ -248,6 +256,12 @@ async function loadFriends(userId) {
     if (error) {
         console.error("Failed to load friends:", error);
         return;
+    }
+
+    const friendsTitle = document.getElementById("friends-title");
+
+    if (friendsTitle) {
+        friendsTitle.textContent = `Επαφές (${data?.length || 0})`;
     }
 
     container.innerHTML = "";
