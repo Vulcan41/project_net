@@ -260,6 +260,7 @@
 
     transform: translateX(-5px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    background: #f8f9fa80;
 
 }
 
@@ -279,25 +280,19 @@
 
 #friends-tabs {
 
-    position: relative;
     display: flex;
-    gap: 20px;
+    gap: 10px;
 
-    border-bottom: 1px solid #e0e0e0;
-    margin-bottom: 20px;
-
-    overflow: hidden;
+    margin-bottom: 18px;
 
 }
-
-/* TAB BUTTON */
 
 .friends-tab {
 
     background: none;
     border: none;
 
-    padding: 10px 0;
+    padding: 10px 6px;
 
     font-size: 14px;
     font-weight: 500;
@@ -306,33 +301,24 @@
 
     color: #777;
 
-    transition: color 0.2s ease;
+    border-bottom: 2px solid transparent;
+
+    transition: all 0.2s ease;
 
 }
 
-/* ACTIVE TAB */
+.friends-tab:hover {
+    color: #111;
+}
 
 .friends-tab.active {
-    color: #000;
-}
 
-/* =========================
-   SLIDING INDICATOR
-========================= */
-
-#tab-indicator {
-
-    position: absolute;
-    bottom: -1px;
-
-    height: 4px;
-    width: 0;
-
-    background: #095a5d;
-
-    transition: all 0.25s ease;
+    color: #095a5d;
+    border-bottom: 2px solid #095a5d;
+    font-weight: 500;
 
 }
+
 
 /* =========================
    TAB PANELS
@@ -355,21 +341,13 @@
    TAB BADGES
 ========================= */
 
-.tab-badge {
 
-    margin-left: 6px;
-    padding: 2px 6px;
+.friends-info {
 
-    font-size: 11px;
-    font-weight: 600;
-
-    background: #095a5d;
-    color: white;
-
-    border-radius: 999px;
-
-    min-width: 18px;
-    text-align: center;
+    font-size: 13px;
+    color: #6b6b6b;
+    margin-bottom: 14px;
+    margin-left: 10px;
 
 }
 

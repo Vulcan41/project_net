@@ -6,7 +6,7 @@ function formatRelativeTime(dateString) {
     const now = new Date();
     const past = new Date(dateString);
 
-    const diff = Math.floor((now - past) / 1000); // seconds
+    const diff = Math.floor((now - past) / 1000);
 
     if (diff < 60) return "μόλις τώρα";
 
@@ -55,15 +55,15 @@ async function loadRequests(userId) {
     const { data: requests, error } = await supabase
         .from("friendships")
         .select(`
-        id,
-        requester_id,
-        created_at,
-        profiles!friendships_requester_id_fkey(
-            username,
-            full_name,
-            avatar_url
-        )
-    `)
+            id,
+            requester_id,
+            created_at,
+            profiles!friendships_requester_id_fkey(
+                username,
+                full_name,
+                avatar_url
+            )
+        `)
         .eq("receiver_id", userId)
         .eq("status", "pending")
         .order("created_at", { ascending: false });
@@ -73,26 +73,33 @@ async function loadRequests(userId) {
         return;
     }
 
-    const tabRequests = document.getElementById("tab-requests");
+    const info = document.getElementById("requests-info");
 
-    if (tabRequests) {
-        tabRequests.textContent = `Αιτήματα (${requests?.length || 0})`;
+    if (info) {
+
+        const count = requests?.length || 0;
+
+        if (count === 0) {
+            info.textContent = "Δεν υπάρχουν αιτήματα σύνδεσης";
+        }
+        else if (count === 1) {
+            info.textContent = "1 αίτημα σύνδεσης";
+        }
+        else {
+            info.textContent = `${count} αιτήματα σύνδεσης`;
+        }
+
     }
 
     container.innerHTML = "";
 
-    if (!requests || requests.length === 0) {
-        container.textContent = "Δεν υπάρχουν αιτήματα σύνδεσης";
-        return;
-    }
+    if (!requests || requests.length === 0) return;
 
     requests.forEach(req => {
 
         const row = document.createElement("div");
 
-        /* =========================
-           USER INFO
-        ========================= */
+        /* USER INFO */
 
         const userInfo = document.createElement("div");
         userInfo.className = "request-user";
@@ -121,9 +128,7 @@ async function loadRequests(userId) {
         userInfo.appendChild(avatar);
         userInfo.appendChild(nameContainer);
 
-        /* =========================
-           TOOLTIP
-        ========================= */
+        /* TOOLTIP */
 
         const tooltip = document.createElement("div");
         tooltip.className = "request-tooltip";
@@ -131,9 +136,7 @@ async function loadRequests(userId) {
 
         userInfo.appendChild(tooltip);
 
-        /* =========================
-           PROFILE CLICK HANDLER
-        ========================= */
+        /* PROFILE CLICK */
 
         const openProfile = () => {
             loadView("profileOther", req.requester_id);
@@ -149,16 +152,12 @@ async function loadRequests(userId) {
             tooltip.classList.remove("tooltip-visible");
         });
 
-        /* =========================
-           DIVIDER
-        ========================= */
+        /* DIVIDER */
 
         const divider = document.createElement("div");
         divider.className = "request-divider";
 
-        /* =========================
-           SENTENCE + TIME
-        ========================= */
+        /* SENTENCE */
 
         const text = document.createElement("div");
         text.className = "request-text";
@@ -177,9 +176,7 @@ async function loadRequests(userId) {
         ${timeString}
         </span>`;
 
-        /* =========================
-           BUTTONS
-        ========================= */
+        /* BUTTONS */
 
         const acceptBtn = document.createElement("button");
         acceptBtn.textContent = "Αποδοχή";
@@ -219,9 +216,7 @@ async function loadRequests(userId) {
 
         });
 
-        /* =========================
-           ROW STRUCTURE
-        ========================= */
+        /* STRUCTURE */
 
         row.appendChild(userInfo);
         row.appendChild(divider);
@@ -260,18 +255,27 @@ async function loadFriends(userId) {
         return;
     }
 
-    const tabFriends = document.getElementById("tab-friends");
+    const info = document.getElementById("friends-info");
 
-    if (tabFriends) {
-        tabFriends.textContent = `Επαφές (${data?.length || 0})`;
+    if (info) {
+
+        const count = data?.length || 0;
+
+        if (count === 0) {
+            info.textContent = "Η λίστα επαφών σας είναι κενή";
+        }
+        else if (count === 1) {
+            info.textContent = "1 επαφή";
+        }
+        else {
+            info.textContent = `${count} επαφές`;
+        }
+
     }
 
     container.innerHTML = "";
 
-    if (!data || data.length === 0) {
-        container.textContent = "Η λίστα επαφών σας είναι κενή";
-        return;
-    }
+    if (!data || data.length === 0) return;
 
     data.forEach(friend => {
 
@@ -315,6 +319,10 @@ async function loadFriends(userId) {
 
 }
 
+/* =========================
+   TAB SYSTEM
+========================= */
+
 function setupTabs() {
 
     const tabRequests = document.getElementById("tab-requests");
@@ -323,34 +331,15 @@ function setupTabs() {
     const requestsSection = document.getElementById("requests-section");
     const friendsSection = document.getElementById("friends-section");
 
-    const indicator = document.getElementById("tab-indicator");
+    if (!tabRequests || !tabFriends) return;
 
-    if (!tabRequests || !tabFriends || !indicator) return;
+    /* default state */
 
-    function moveIndicator(tab) {
+    tabFriends.classList.add("active");
+    tabRequests.classList.remove("active");
 
-        indicator.style.width = tab.offsetWidth + "px";
-        indicator.style.left = tab.offsetLeft + "px";
-
-    }
-
-    /* correct initial position */
-
-    requestAnimationFrame(() => {
-        moveIndicator(tabRequests);
-    });
-
-    tabRequests.addEventListener("click", () => {
-
-        tabRequests.classList.add("active");
-        tabFriends.classList.remove("active");
-
-        requestsSection.classList.remove("hidden");
-        friendsSection.classList.add("hidden");
-
-        moveIndicator(tabRequests);
-
-    });
+    friendsSection.classList.remove("hidden");
+    requestsSection.classList.add("hidden");
 
     tabFriends.addEventListener("click", () => {
 
@@ -360,7 +349,15 @@ function setupTabs() {
         friendsSection.classList.remove("hidden");
         requestsSection.classList.add("hidden");
 
-        moveIndicator(tabFriends);
+    });
+
+    tabRequests.addEventListener("click", () => {
+
+        tabRequests.classList.add("active");
+        tabFriends.classList.remove("active");
+
+        requestsSection.classList.remove("hidden");
+        friendsSection.classList.add("hidden");
 
     });
 
