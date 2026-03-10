@@ -82,14 +82,11 @@ FRIEND REQUEST DOT
 .friends-dot {
 
     position: absolute;
-
     top: 3px;
     right: 3px;
-
     width: 8px;
     height: 8px;
-
-    background: #ff3b30;
+    background: #d51919;
     border-radius: 50%;
 
 }

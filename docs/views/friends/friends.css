@@ -6,7 +6,9 @@
     width: 100%;
 }
 
-/* REQUESTS AREA */
+/* =========================
+   SECTIONS
+========================= */
 
 #requests-section,
 #friends-section {
@@ -17,22 +19,21 @@
 
 }
 
-/* BUTTON GROUP */
-
-
 /* =========================
    SECTION TITLES
 ========================= */
 
 #friends-page h2 {
 
+    font-size: 18px;
+    font-weight: 600;
     margin-top: 30px;
     margin-bottom: 14px;
 
 }
 
 /* =========================
-   REQUESTS / FRIEND ROWS
+   ROW CONTAINERS
 ========================= */
 
 #friend-requests > div,
@@ -94,17 +95,85 @@
 }
 
 /* =========================
+   REQUEST USER INFO
+========================= */
+
+.request-user {
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+}
+
+/* AVATAR */
+
+.request-avatar {
+
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+
+}
+
+/* USER NAME STACK */
+
+.request-name {
+
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+
+}
+
+.request-handle {
+
+    font-size: 12px;
+    color: #777;
+
+}
+
+/* =========================
+   DIVIDER
+========================= */
+
+.request-divider {
+
+    width: 1px;
+    height: 26px;
+    background: #e0e0e0;
+    margin: 0 14px;
+
+}
+
+/* =========================
+   REQUEST TEXT
+========================= */
+
+.request-text {
+
+    flex: 1;
+    font-size: 14px;
+
+}
+
+/* =========================
    ACCEPT BUTTON
 ========================= */
 
 #friend-requests button:first-of-type {
-    background: #5d093f;
-    border-color: #5d093f;
+
+    background: #095a5d;
+    border-color: #095a5d;
     color: white;
+
 }
 
 #friend-requests button:first-of-type:hover {
-    background: #720c4d;
+
+    background: #127175;
+
 }
 
 /* =========================
@@ -113,5 +182,43 @@
 
 #friend-requests button:last-of-type:hover,
 #friends-list button:hover {
+
     background: #f5f5f7;
+
+}
+
+/* =========================
+   PROFILE TOOLTIP
+========================= */
+
+.request-user {
+    position: relative;
+}
+
+/* tooltip box */
+
+.request-tooltip {
+
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 10px);
+    transform: translateX(-50%);
+    background: #000000;          /* same background */
+    color: #ffffff;               /* same text color */
+    border: 1px solid #00000000;  /* same stroke */
+    font-weight: 600;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+
+}
+
+/* visible state */
+
+.tooltip-visible {
+    opacity: 1;
 }

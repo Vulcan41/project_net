@@ -1,4 +1,5 @@
 import { supabase } from "../../core/supabase.js";
+import { loadView } from "../../core/router.js";
 
 export async function initFriends() {
 
@@ -30,7 +31,11 @@ async function loadRequests(userId) {
         .select(`
             id,
             requester_id,
-            profiles!friendships_requester_id_fkey(username)
+            profiles!friendships_requester_id_fkey(
+                username,
+                full_name,
+                avatar_url
+            )
         `)
         .eq("receiver_id", userId)
         .eq("status", "pending");
@@ -43,7 +48,7 @@ async function loadRequests(userId) {
     container.innerHTML = "";
 
     if (!requests || requests.length === 0) {
-        container.textContent = "No friend requests.";
+        container.textContent = "Δεν υπάρχουν αιτήματα σύνδεσης";
         return;
     }
 
@@ -51,14 +56,102 @@ async function loadRequests(userId) {
 
         const row = document.createElement("div");
 
-        const text = document.createElement("span");
-        text.textContent = `Ο χρήστης ${req.profiles?.username ?? "User"} σας έστειλε αίτημα σύνδεσης`;
+        /* =========================
+           USER INFO
+        ========================= */
+
+        const userInfo = document.createElement("div");
+        userInfo.className = "request-user";
+        userInfo.style.cursor = "pointer";
+
+        const avatar = document.createElement("img");
+        avatar.className = "request-avatar";
+        avatar.src = req.profiles?.avatar_url || "assets/avatar.png";
+
+        const nameContainer = document.createElement("div");
+        nameContainer.className = "request-name";
+
+        const fullName = document.createElement("div");
+        fullName.textContent =
+        req.profiles?.full_name ||
+        req.profiles?.username ||
+        "User";
+
+        const handle = document.createElement("div");
+        handle.className = "request-handle";
+        handle.textContent = "@" + (req.profiles?.username ?? "user");
+
+        nameContainer.appendChild(fullName);
+        nameContainer.appendChild(handle);
+
+        userInfo.appendChild(avatar);
+        userInfo.appendChild(nameContainer);
+
+        /* =========================
+           TOOLTIP
+        ========================= */
+
+        const tooltip = document.createElement("div");
+        tooltip.className = "request-tooltip";
+        tooltip.textContent = "Προβολή προφίλ";
+
+        userInfo.appendChild(tooltip);
+
+        /* =========================
+           PROFILE CLICK HANDLER
+        ========================= */
+
+        const openProfile = () => {
+            loadView("profileOther", req.requester_id);
+        };
+
+        userInfo.addEventListener("click", openProfile);
+
+        userInfo.addEventListener("mouseenter", () => {
+            tooltip.classList.add("tooltip-visible");
+        });
+
+        userInfo.addEventListener("mouseleave", () => {
+            tooltip.classList.remove("tooltip-visible");
+        });
+
+        /* =========================
+           DIVIDER
+        ========================= */
+
+        const divider = document.createElement("div");
+        divider.className = "request-divider";
+
+        /* =========================
+           SENTENCE
+        ========================= */
+
+        const text = document.createElement("div");
+        text.className = "request-text";
+
+        const displayName =
+        req.profiles?.full_name ||
+        req.profiles?.username ||
+        "User";
+
+        text.innerHTML =
+        `Ο χρήστης <strong>${displayName}</strong> σας έστειλε αίτημα σύνδεσης`;
+
+        /* =========================
+           BUTTONS
+        ========================= */
 
         const acceptBtn = document.createElement("button");
         acceptBtn.textContent = "Αποδοχή";
 
         const declineBtn = document.createElement("button");
         declineBtn.textContent = "Απόρριψη";
+
+        const actions = document.createElement("div");
+        actions.className = "request-actions";
+
+        actions.appendChild(acceptBtn);
+        actions.appendChild(declineBtn);
 
         /* ACCEPT */
 
@@ -86,12 +179,12 @@ async function loadRequests(userId) {
 
         });
 
-        const actions = document.createElement("div");
-        actions.className = "request-actions";
+        /* =========================
+           ROW STRUCTURE
+        ========================= */
 
-        actions.appendChild(acceptBtn);
-        actions.appendChild(declineBtn);
-
+        row.appendChild(userInfo);
+        row.appendChild(divider);
         row.appendChild(text);
         row.appendChild(actions);
 
@@ -130,7 +223,7 @@ async function loadFriends(userId) {
     container.innerHTML = "";
 
     if (!data || data.length === 0) {
-        container.textContent = "No friends yet.";
+        container.textContent = "Η λίστα επαφών σας είναι κενή";
         return;
     }
 
@@ -149,8 +242,6 @@ async function loadFriends(userId) {
 
         const removeBtn = document.createElement("button");
         removeBtn.textContent = "Remove";
-
-        /* REMOVE FRIEND */
 
         removeBtn.addEventListener("click", async () => {
 
