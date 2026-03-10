@@ -133,7 +133,33 @@ async function loadFriends(userId) {
 
         const row = document.createElement("div");
 
-        row.textContent = username ?? "User";
+        const name = document.createElement("span");
+        name.textContent = username ?? "User";
+
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "Remove";
+
+        /* REMOVE FRIEND */
+
+        removeBtn.addEventListener("click", async () => {
+
+            const { error } = await supabase
+                .from("friendships")
+                .delete()
+                .eq("id", friend.id);
+
+            if (error) {
+                console.error("Remove friend failed:", error);
+                alert("Failed to remove friend");
+                return;
+            }
+
+            row.remove();
+
+        });
+
+        row.appendChild(name);
+        row.appendChild(removeBtn);
 
         container.appendChild(row);
 
