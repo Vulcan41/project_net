@@ -1,6 +1,28 @@
 import { supabase } from "../../core/supabase.js";
 import { loadView } from "../../core/router.js";
 
+function formatRelativeTime(dateString) {
+
+    const now = new Date();
+    const past = new Date(dateString);
+
+    const diff = Math.floor((now - past) / 1000); // seconds
+
+    if (diff < 60) return "μόλις τώρα";
+
+    const minutes = Math.floor(diff / 60);
+    if (minutes < 60) return `${minutes} λεπτά πριν`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} ώρες πριν`;
+
+    const days = Math.floor(hours / 24);
+    if (days === 1) return "χθες";
+
+    return `${days} ημέρες πριν`;
+
+}
+
 export async function initFriends() {
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -29,16 +51,18 @@ async function loadRequests(userId) {
     const { data: requests, error } = await supabase
         .from("friendships")
         .select(`
-            id,
-            requester_id,
-            profiles!friendships_requester_id_fkey(
-                username,
-                full_name,
-                avatar_url
-            )
-        `)
+        id,
+        requester_id,
+        created_at,
+        profiles!friendships_requester_id_fkey(
+            username,
+            full_name,
+            avatar_url
+        )
+    `)
         .eq("receiver_id", userId)
-        .eq("status", "pending");
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
 
     if (error) {
         console.error("Failed to load friend requests:", error);
@@ -123,11 +147,13 @@ async function loadRequests(userId) {
         divider.className = "request-divider";
 
         /* =========================
-           SENTENCE
+           SENTENCE + TIME
         ========================= */
 
         const text = document.createElement("div");
         text.className = "request-text";
+
+        const timeString = formatRelativeTime(req.created_at);
 
         const displayName =
         req.profiles?.full_name ||
@@ -135,7 +161,11 @@ async function loadRequests(userId) {
         "User";
 
         text.innerHTML =
-        `Ο χρήστης <strong>${displayName}</strong> σας έστειλε αίτημα σύνδεσης`;
+        `Ο χρήστης <strong>${displayName}</strong> σας έστειλε αίτημα σύνδεσης
+        <span class="request-time">
+        <span class="request-dot">•</span>
+        ${timeString}
+        </span>`;
 
         /* =========================
            BUTTONS

@@ -222,3 +222,30 @@
 .tooltip-visible {
     opacity: 1;
 }
+
+/* =========================
+   REQUEST HOVER SLIDE
+========================= */
+
+#friend-requests > div {
+
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+}
+
+#friend-requests > div:hover {
+
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+.request-text .request-time {
+    margin-left: 10px;
+    font-size: 12px;
+    color: #ff0000;
+}
+
+.request-dot {
+    margin-right: 8px;
+}
