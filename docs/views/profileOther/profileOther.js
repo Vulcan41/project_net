@@ -85,34 +85,62 @@ async function loadFriendCount(userId) {
    ADD FRIEND BUTTON
 ========================= */
 
+/* =========================
+   ADD FRIEND BUTTON
+========================= */
+
 async function setupFriendButton(viewedUserId, friendship) {
 
     const btn = document.getElementById("add-friend-btn");
+    const label = document.getElementById("friend-status-label");
+
     if (!btn) return;
+
+    btn.classList.remove("pending", "accepted");
+
+    /* hide label by default */
+
+    if (label) {
+        label.classList.add("hidden");
+    }
 
     if (friendship) {
 
         if (friendship.status === "pending") {
 
-            btn.textContent = "Friend Request Sent";
+            btn.textContent = "Αναμονή Επιβεβαίωσης";
+            btn.classList.add("pending");
+
+            if (label) {
+                label.classList.remove("hidden");
+                label.textContent = "Κατάσταση";
+            }
+
             btn.disabled = true;
-            btn.style.opacity = "0.6";
-            btn.style.cursor = "default";
+            return;
 
         }
 
         if (friendship.status === "accepted") {
 
-            btn.textContent = "Friends";
+            btn.textContent = "Επαφή";
+            btn.classList.add("accepted");
+
+            if (label) {
+                label.classList.remove("hidden");
+                label.textContent = "Κατάσταση";
+            }
+
             btn.disabled = true;
-            btn.style.opacity = "0.6";
-            btn.style.cursor = "default";
+            return;
 
         }
 
-        return;
-
     }
+
+    /* NOT FRIENDS */
+
+    btn.textContent = "Προσθήκη Φίλου";
 
     btn.addEventListener("click", async () => {
 
@@ -141,7 +169,13 @@ async function setupFriendButton(viewedUserId, friendship) {
         }
 
         btn.textContent = "Αίτημα στάλθηκε";
+        btn.classList.add("pending");
         btn.disabled = true;
+
+        if (label) {
+            label.classList.remove("hidden");
+            label.textContent = "Κατάσταση";
+        }
 
     });
 
