@@ -20,6 +20,7 @@ export async function initProfileOther(userId) {
     }
 
     renderProfile(profile);
+    setupFriendButton(userId);
 
 }
 
@@ -48,5 +49,47 @@ function renderProfile(profile) {
 
     document.getElementById("profile-bio").textContent =
     profile.bio ?? DEFAULT_BIO;
+
+}
+
+/* =========================
+   ADD FRIEND BUTTON
+========================= */
+
+async function setupFriendButton(viewedUserId) {
+
+    const btn = document.getElementById("add-friend-btn");
+    if (!btn) return;
+
+    btn.addEventListener("click", async () => {
+
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            alert("Not logged in");
+            return;
+        }
+
+        const requesterId = user.id;
+        const receiverId = viewedUserId;
+
+        const { error } = await supabase
+            .from("friendships")
+            .insert({
+            requester_id: requesterId,
+            receiver_id: receiverId,
+            status: "pending"
+        });
+
+        if (error) {
+            console.error("Friend request failed:", error);
+            alert("Friend request failed");
+            return;
+        }
+
+        btn.textContent = "Αίτημα στάλθηκε";
+        btn.disabled = true;
+
+    });
 
 }

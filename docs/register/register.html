@@ -27,35 +27,34 @@
 
         <h3 class="register-section">ΣΤΟΙΧΕΙΑ ΛΟΓΑΡΙΑΣΜΟΥ</h3>
 
-        <input
-                id="register-email"
-                type="email"
-                placeholder="Email"
-                autocomplete="off"
-        >
+        <div class="form-field">
+            <input
+                    id="register-email"
+                    type="email"
+                    placeholder="Email"
+                    autocomplete="off"
+            >
+            <div class="field-hint">
+                Θα χρησιμοποιηθεί για σύνδεση
+            </div>
+        </div>
 
-        <div class="password-wrapper">
+        <div class="form-field password-wrapper">
 
             <input
                     id="register-password"
                     type="password"
-                    placeholder="Password"
+                    placeholder="Κωδικός Πρόσβασης"
                     autocomplete="new-password"
             >
 
-            <button
-                    type="button"
-                    id="toggle-password"
-                    class="password-eye"
-            >
-
-                <img
-                        id="password-icon"
-                        src="assets/no_view.png"
-                        alt="toggle password"
-                >
-
+            <button type="button" id="toggle-password" class="password-eye">
+                <img id="password-icon" src="assets/no_view.png">
             </button>
+
+            <div class="field-hint">
+                Επιλέξτε έναν ισχυρό κωδικό
+            </div>
 
         </div>
 
@@ -63,26 +62,42 @@
 
         <h3 class="register-section">ΣΤΟΙΧΕΙΑ ΠΡΟΦΙΛ</h3>
 
-        <input
-                id="register-username"
-                type="text"
-                placeholder="Όνομα Χρήστη"
-                autocomplete="off"
-        >
+        <div class="form-field username-field">
+            <span class="username-prefix">@</span>
+            <input
+                    id="register-username"
+                    type="text"
+                    placeholder="Όνομα Χρήστη"
+                    autocomplete="off"
+            >
+            <div class="field-hint">
+                Το όνομα που θα βλέπουν οι χρήστες
+            </div>
+        </div>
 
-        <input
-                id="register-fullname"
-                type="text"
-                placeholder="Όνομα"
-                autocomplete="off"
-        >
+        <div class="form-field">
+            <input
+                    id="register-fullname"
+                    type="text"
+                    placeholder="Όνομα"
+                    autocomplete="off"
+            >
+            <div class="field-hint">
+                Το πραγματικό σας όνομα
+            </div>
+        </div>
 
-        <input
-                id="register-bio"
-                type="text"
-                placeholder="Ιδιότητα"
-                autocomplete="off"
-        >
+        <div class="form-field">
+            <input
+                    id="register-bio"
+                    type="text"
+                    placeholder="Ιδιότητα"
+                    autocomplete="off"
+            >
+            <div class="field-hint">
+                Μια σύντομη περιγραφή
+            </div>
+        </div>
 
 
 

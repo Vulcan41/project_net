@@ -132,7 +132,7 @@ input {
 }
 
 input:focus {
-    border-color: #5d093f;
+    border-color: #166a7c;
     background-color: #ffffff;
     outline: none;
     box-shadow: none;
@@ -250,6 +250,19 @@ input::placeholder {
     background: #1e2d73;
     margin-left: 40px;  /* move more right */
 }
+
+/* LEFT PANEL ITEMS */
+
+.panel-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+
+
+
+
 
 
 .keep-signed {
