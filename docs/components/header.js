@@ -256,7 +256,13 @@ function setupSearch() {
                     results.style.display = "none";
                     input.value = "";
 
-                    loadView("profileOther", user.id);
+                    const currentUser = userStore.getUser();
+
+                    if (currentUser && user.id === currentUser.id) {
+                        loadView("profile");
+                    } else {
+                        loadView("profileOther", user.id);
+                    }
 
                 });
 
