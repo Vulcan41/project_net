@@ -14,6 +14,8 @@ export async function initHeader() {
     await loadCredits();
     await checkFriendRequests();
 
+    listenFriendRequests();
+
     setupNavigation();
     setupDropdown();
     setupLogoutModal();
@@ -317,6 +319,46 @@ async function checkFriendRequests() {
     } else {
         dot.classList.add("hidden");
     }
+
+}
+
+/* =========================================================
+   REALTIME FRIEND REQUEST LISTENER
+========================================================= */
+
+function listenFriendRequests() {
+
+    supabase
+        .channel("friend-request-listener")
+
+        .on(
+        "postgres_changes",
+        {
+            event: "INSERT",
+            schema: "public",
+            table: "friendships"
+        },
+
+        async (payload) => {
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const newRequest = payload.new;
+
+            /* check if YOU are the receiver */
+
+            if (
+            newRequest.receiver_id === user.id &&
+            newRequest.status === "pending"
+            ) {
+                checkFriendRequests();
+            }
+
+        }
+
+    )
+        .subscribe();
 
 }
 
