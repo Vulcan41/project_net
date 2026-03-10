@@ -92,17 +92,9 @@ async function loadFriendCount(userId) {
 async function setupFriendButton(viewedUserId, friendship) {
 
     const btn = document.getElementById("add-friend-btn");
-    const label = document.getElementById("friend-status-label");
-
     if (!btn) return;
 
     btn.classList.remove("pending", "accepted");
-
-    /* hide label by default */
-
-    if (label) {
-        label.classList.add("hidden");
-    }
 
     if (friendship) {
 
@@ -111,11 +103,6 @@ async function setupFriendButton(viewedUserId, friendship) {
             btn.textContent = "Αναμονή Επιβεβαίωσης";
             btn.classList.add("pending");
 
-            if (label) {
-                label.classList.remove("hidden");
-                label.textContent = "Κατάσταση";
-            }
-
             btn.disabled = true;
             return;
 
@@ -123,13 +110,8 @@ async function setupFriendButton(viewedUserId, friendship) {
 
         if (friendship.status === "accepted") {
 
-            btn.textContent = "Επαφή";
+            btn.textContent = "Ανήκει στις επαφές σας";
             btn.classList.add("accepted");
-
-            if (label) {
-                label.classList.remove("hidden");
-                label.textContent = "Κατάσταση";
-            }
 
             btn.disabled = true;
             return;
@@ -171,11 +153,6 @@ async function setupFriendButton(viewedUserId, friendship) {
         btn.textContent = "Αίτημα στάλθηκε";
         btn.classList.add("pending");
         btn.disabled = true;
-
-        if (label) {
-            label.classList.remove("hidden");
-            label.textContent = "Κατάσταση";
-        }
 
     });
 

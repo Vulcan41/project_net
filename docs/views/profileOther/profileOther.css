@@ -171,19 +171,19 @@ html, body {
 
 #add-friend-btn.pending {
 
-    background: transparent;
-    border-color: #e67e22;
+    background: #d7751f;
+    border-color: #d7751f;
     border-width: 1px;
-    color: #e67e22;
+    color: #ffffff;
 
 }
 
 #add-friend-btn.accepted {
 
-    background: transparent;
+    background: #0e6b6e;
     border-color: #0e6b6e;
     border-width: 1px;
-    color: #0e6b6e;
+    color: #ffffff;
 
 }
 
@@ -205,7 +205,7 @@ FRIEND STATUS WRAPPER
 
     font-size: 13px;
     color: #7a7a7a;
-    margin-top:5px;
+    margin-top: 10px;
 
 }
 
@@ -222,7 +222,7 @@ PROFILE DIVIDER
 .profile-divider{
 
     width:1px;
-    height:55px;
+    height:60px;
     background:#e0e0e0;
 
 }
