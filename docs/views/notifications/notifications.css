@@ -202,24 +202,17 @@
 
     width: 22px;
     height: 22px;
-
     border-radius: 50%;
     border: none;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     background: transparent;
-
     font-size: 14px;
     font-weight: 500;
     line-height: 1;
-
     color: #777;
-
     cursor: pointer;
-
     transition: background 0.15s ease, color 0.15s ease;
 
 }

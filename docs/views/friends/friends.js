@@ -369,24 +369,45 @@ async function loadFriends(userId) {
 
         const removeBtn = document.createElement("button");
         removeBtn.className = "friend-remove";
-        removeBtn.textContent = "Αφαίρεση";
+        removeBtn.textContent = "×";
+        removeBtn.setAttribute("data-tooltip", "Αφαίρεση");
 
-        removeBtn.addEventListener("click", async (e) => {
+        removeBtn.addEventListener("click", (e) => {
 
             e.stopPropagation();
 
-            const { error } = await supabase
-                .from("friendships")
-                .delete()
-                .eq("id", friend.id);
+            const modal = document.getElementById("remove-friend-modal");
+            const cancelBtn = document.getElementById("cancel-remove-friend");
+            const confirmBtn = document.getElementById("confirm-remove-friend");
 
-            if (error) {
-                console.error("Remove friend failed:", error);
-                alert("Failed to remove friend");
-                return;
-            }
+            modal.classList.remove("modal-hidden");
 
-            await initFriends();
+            /* CANCEL */
+
+            cancelBtn.onclick = () => {
+                modal.classList.add("modal-hidden");
+            };
+
+            /* CONFIRM */
+
+            confirmBtn.onclick = async () => {
+
+                const { error } = await supabase
+                    .from("friendships")
+                    .delete()
+                    .eq("id", friend.id);
+
+                if (error) {
+                    console.error("Remove friend failed:", error);
+                    alert("Failed to remove friend");
+                    return;
+                }
+
+                modal.classList.add("modal-hidden");
+
+                await initFriends();
+
+            };
 
         });
 

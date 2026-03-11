@@ -303,19 +303,58 @@
 
 .friend-remove {
 
-    background: #f2f2f2;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
     border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    color: #777;
     cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    opacity: 0;
+    pointer-events: none;
+
+}
+
+#friends-list > div:hover .friend-remove {
+
+    opacity: 1;
+    pointer-events: auto;
 
 }
 
 .friend-remove:hover {
 
-    background: #e5e5e5;
+    background: #f2f2f2;
+    color: #000;
 
 }
+
+#remove-friend-dialog {
+    background: white;
+    padding: 25px 24px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    min-width: 280px;
+    text-align: center;
+}
+
+#remove-friend-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+
 
 /* =========================
    FRIEND HOVER SLIDE
@@ -402,6 +441,119 @@
     color: #6b6b6b;
     margin-bottom: 14px;
     margin-left: 10px;
+
+}
+
+/* =====================================
+   REMOVE FRIEND MODAL
+===================================== */
+
+#remove-friend-modal {
+
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    pointer-events: none;
+
+}
+
+/* dialog */
+
+#remove-friend-dialog {
+
+    background: white;
+
+    padding: 25px 24px;
+
+    border-radius: 10px;
+
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+
+    min-width: 280px;
+
+    text-align: center;
+
+    pointer-events: auto;
+
+}
+
+#remove-friend-dialog p {
+
+    margin: 0;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    color: #333;
+
+}
+
+/* buttons */
+
+.remove-friend-actions {
+
+    margin-top: 14px;
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 8px;
+
+}
+
+.remove-friend-actions button {
+
+    height: 30px;
+
+    padding: 0 12px;
+
+    border-radius: 7px;
+
+    border: 1px solid #ddd;
+
+    background: white;
+
+    color: #333;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+
+}
+
+.remove-friend-actions button:hover {
+
+    background: #f6f6f6;
+
+    border-color: #bbb;
+
+}
+
+/* cancel button */
+
+#cancel-remove-friend {
+
+    background: #095a5d;
+
+    color: white;
+
+    border-color: #095a5d;
+
+}
+
+#cancel-remove-friend:hover {
+
+    background: #095a5d;
 
 }
 
