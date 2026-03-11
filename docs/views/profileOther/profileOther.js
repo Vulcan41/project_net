@@ -34,6 +34,9 @@ export async function initProfileOther(userId) {
 
     if (messageBtn) {
         messageBtn.onclick = () => {
+
+            console.log("Message button clicked");
+
             messageUser(userId);
         };
     }
