@@ -156,7 +156,8 @@ export async function initNotifications() {
 
         const hideBtn = document.createElement("button");
         hideBtn.className = "notification-hide";
-        hideBtn.textContent = "Απόκρυψη";
+        hideBtn.textContent = "×";
+        hideBtn.setAttribute("data-tooltip", "Απόκρυψη");
 
         /* DELETE NOTIFICATION */
 
@@ -173,6 +174,21 @@ export async function initNotifications() {
             }
 
             row.remove();
+
+            /* UPDATE COUNTER */
+
+            const info = document.getElementById("notifications-info");
+            const remaining = document.querySelectorAll("#notifications-list > div").length;
+
+            if (remaining === 0) {
+                info.textContent = "Δεν υπάρχουν ειδοποιήσεις";
+            }
+            else if (remaining === 1) {
+                info.textContent = "1 ειδοποίηση";
+            }
+            else {
+                info.textContent = `${remaining} ειδοποιήσεις`;
+            }
 
         });
 
