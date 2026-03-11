@@ -30,16 +30,24 @@ export async function initProfileOther(userId) {
 
     /* MESSAGE BUTTON */
 
-    const messageBtn = document.getElementById("message-user-btn");
+    setTimeout(() => {
 
-    if (messageBtn) {
-        messageBtn.onclick = () => {
+        const messageBtn = document.getElementById("message-user-btn");
+
+        if (!messageBtn) {
+            console.log("message button not found");
+            return;
+        }
+
+        messageBtn.addEventListener("click", () => {
 
             console.log("Message button clicked");
 
             messageUser(userId);
-        };
-    }
+
+        });
+
+    }, 0);
 
 }
 
