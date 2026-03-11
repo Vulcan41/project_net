@@ -284,8 +284,11 @@ async function messageUser(targetUserId) {
        (ensures A-B = B-A)
     ========================= */
 
-    const user1 = currentUserId < targetUserId ? currentUserId : targetUserId;
-    const user2 = currentUserId < targetUserId ? targetUserId : currentUserId;
+    function normalizeUsers(a, b) {
+        return a < b ? [a, b] : [b, a];
+    }
+
+    const [user1, user2] = normalizeUsers(currentUserId, targetUserId);
 
     /* =========================
        CHECK IF CONVERSATION EXISTS

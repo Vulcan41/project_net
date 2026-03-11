@@ -14,17 +14,17 @@ let messagesInitialized = false;
 
 export async function initMessages() {
 
-    if (messagesInitialized) return;
-    messagesInitialized = true;
-
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
     currentUserId = user.id;
 
-    await loadConversations();
+    if (!messagesInitialized) {
+        setupSendMessage();
+        messagesInitialized = true;
+    }
 
-    setupSendMessage();
+    await loadConversations();
 
 }
 
