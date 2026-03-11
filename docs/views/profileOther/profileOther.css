@@ -169,6 +169,11 @@ html, body {
    FRIEND BUTTON STATES
 ============================= */
 
+#add-friend-btn.pending,
+#add-friend-btn.accepted {
+    cursor: default;
+}
+
 #add-friend-btn.pending {
 
     background: #d7751f;
@@ -199,14 +204,12 @@ FRIEND STATUS WRAPPER
 
 }
 
-/* label */
+/* mutual friends label */
 
-.friend-status-label{
-
-    font-size: 13px;
-    color: #7a7a7a;
+#profile-mutual-friends {
+    font-size: 14px;
+    color: #777;
     margin-top: 10px;
-
 }
 
 /* hidden helper */

@@ -128,7 +128,15 @@ async function loadMutualFriends(viewedUserId) {
     const el = document.getElementById("profile-mutual-friends");
 
     if (el) {
-        el.textContent = `${mutual.length} κοινές επαφές`;
+        const count = mutual.length;
+
+        if (count === 0) {
+            el.textContent = "καμία κοινή επαφή";
+        } else if (count === 1) {
+            el.textContent = "1 κοινή επαφή";
+        } else {
+            el.textContent = `${count} κοινές επαφές`;
+        }
     }
 
 }

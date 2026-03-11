@@ -244,8 +244,16 @@ async function loadFriends(userId) {
             id,
             requester_id,
             receiver_id,
-            requester:requester_id(username),
-            receiver:receiver_id(username)
+            requester:requester_id(
+                username,
+                full_name,
+                avatar_url
+            ),
+            receiver:receiver_id(
+                username,
+                full_name,
+                avatar_url
+            )
         `)
         .eq("status", "accepted")
         .or(`requester_id.eq.${userId},receiver_id.eq.${userId}`);
@@ -281,17 +289,46 @@ async function loadFriends(userId) {
 
         const isRequester = friend.requester_id === userId;
 
-        const username = isRequester
-        ? friend.receiver?.username
-        : friend.requester?.username;
+        const profile = isRequester
+        ? friend.receiver
+        : friend.requester;
+
+        const username = profile?.username;
+        const fullName = profile?.full_name;
+        const avatarUrl = profile?.avatar_url;
 
         const row = document.createElement("div");
 
-        const name = document.createElement("span");
-        name.textContent = username ?? "User";
+        /* USER INFO */
+
+        const userInfo = document.createElement("div");
+        userInfo.className = "friend-user";
+
+        const avatar = document.createElement("img");
+        avatar.className = "friend-avatar";
+        avatar.src = avatarUrl || "assets/avatar.png";
+
+        const nameContainer = document.createElement("div");
+        nameContainer.className = "friend-name";
+
+        const name = document.createElement("div");
+        name.textContent = fullName || username || "User";
+
+        const handle = document.createElement("div");
+        handle.className = "friend-handle";
+        handle.textContent = "@" + (username ?? "user");
+
+        nameContainer.appendChild(name);
+        nameContainer.appendChild(handle);
+
+        userInfo.appendChild(avatar);
+        userInfo.appendChild(nameContainer);
+
+        /* REMOVE BUTTON */
 
         const removeBtn = document.createElement("button");
-        removeBtn.textContent = "Remove";
+        removeBtn.className = "friend-remove";
+        removeBtn.textContent = "Αφαίρεση";
 
         removeBtn.addEventListener("click", async () => {
 
@@ -310,7 +347,9 @@ async function loadFriends(userId) {
 
         });
 
-        row.appendChild(name);
+        /* STRUCTURE */
+
+        row.appendChild(userInfo);
         row.appendChild(removeBtn);
 
         container.appendChild(row);
@@ -362,3 +401,4 @@ function setupTabs() {
     });
 
 }
+
