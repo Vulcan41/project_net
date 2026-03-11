@@ -12,7 +12,9 @@ export async function initHeader() {
 
     loadHeaderUser();
     await loadCredits();
+
     await checkFriendRequests();
+    await checkNotifications();
 
     listenFriendRequests();
 
@@ -44,7 +46,16 @@ function setupNavigation() {
     });
 
     messagesBtn?.addEventListener("click", () => loadView("messages"));
-    notificationsBtn?.addEventListener("click", () => loadView("notifications"));
+
+    notificationsBtn?.addEventListener("click", () => {
+
+        loadView("notifications");
+
+        const dot = document.getElementById("notifications-dot");
+        if (dot) dot.classList.add("hidden");
+
+    });
+
     settingsBtn?.addEventListener("click", () => loadView("settings"));
     debugBtn?.addEventListener("click", () => loadView("debug"));
 
@@ -316,6 +327,36 @@ async function checkFriendRequests() {
 
     if (error) {
         console.error("Friend request check failed:", error);
+        return;
+    }
+
+    if (count > 0) {
+        dot.classList.remove("hidden");
+    } else {
+        dot.classList.add("hidden");
+    }
+
+}
+
+/* =========================================================
+   NOTIFICATION INDICATOR
+========================================================= */
+
+async function checkNotifications() {
+
+    const dot = document.getElementById("notifications-dot");
+    if (!dot) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { count, error } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("receiver_id", user.id);
+
+    if (error) {
+        console.error("Notification check failed:", error);
         return;
     }
 
