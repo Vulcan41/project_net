@@ -5,6 +5,11 @@ let renderToken = 0;
 let activeConversationId = null;
 let activeConversationData = null;
 let activeMessagesChannel = null;
+let currentUserId = null;
+
+/* =========================
+   INIT
+========================= */
 
 export async function initMessages() {
 
@@ -20,6 +25,7 @@ export async function initMessages() {
 
     activeConversationId = null;
     activeConversationData = null;
+    currentUserId = null;
 
     container.innerHTML = "";
     info.textContent = "Φόρτωση συνομιλιών...";
@@ -36,6 +42,25 @@ export async function initMessages() {
         info.textContent = "Δεν βρέθηκε συνδεδεμένος χρήστης";
         return;
     }
+
+    currentUserId = user.id;
+
+    await loadConversations(currentToken);
+}
+
+/* =========================
+   LOAD CONVERSATIONS
+========================= */
+
+async function loadConversations(currentToken = renderToken) {
+
+    const container = document.getElementById("conversations-list");
+    const info = document.getElementById("messages-info");
+    const chatPanel = document.getElementById("chat-panel");
+
+    if (!container || !info || !chatPanel || !currentUserId) return;
+
+    const selectedConversationId = activeConversationId;
 
     const { data, error } = await supabase
         .from("conversations")
@@ -90,7 +115,7 @@ export async function initMessages() {
         const friendship = conversation.friendship;
         if (!friendship) return;
 
-        const isRequester = friendship.requester_id === user.id;
+        const isRequester = friendship.requester_id === currentUserId;
 
         const otherUser = isRequester
         ? friendship.receiver
@@ -132,6 +157,10 @@ export async function initMessages() {
         row.appendChild(avatar);
         row.appendChild(text);
 
+        if (conversation.id === selectedConversationId) {
+            row.classList.add("selected-conversation");
+        }
+
         row.addEventListener("click", async () => {
             document
                 .querySelectorAll("#conversations-list > div")
@@ -140,6 +169,7 @@ export async function initMessages() {
             row.classList.add("selected-conversation");
 
             activeConversationId = conversation.id;
+
             activeConversationData = {
                 conversationId: conversation.id,
                 status: friendship.status,
@@ -149,16 +179,21 @@ export async function initMessages() {
             };
 
             renderChatSkeleton(chatPanel, activeConversationData);
-            await loadMessages(conversation.id);
-            bindChatInput(user.id);
+
+            await loadMessages(conversation.id, true);
+
+            bindChatInput(currentUserId);
+
             subscribeToActiveConversation();
         });
 
         container.appendChild(row);
-
     });
-
 }
+
+/* =========================
+   CHAT SKELETON
+========================= */
 
 function renderChatSkeleton(chatPanel, conversation) {
 
@@ -168,71 +203,57 @@ function renderChatSkeleton(chatPanel, conversation) {
         <div class="chat-layout">
 
             <div class="chat-header">
-                <img
-                    class="chat-header-avatar"
-                    src="${conversation.avatarUrl}"
-                    alt="${conversation.fullName}"
-                />
+                <img class="chat-header-avatar"
+                     src="${conversation.avatarUrl}" />
 
                 <div class="chat-header-text">
                     <div class="chat-header-name">${conversation.fullName}</div>
                     <div class="chat-header-username">@${conversation.username}</div>
-                    <div class="chat-header-status">status: ${conversation.status}</div>
                 </div>
             </div>
 
-            <div id="chat-messages-area" class="chat-messages-area">
-                <div class="chat-messages-empty">Φόρτωση μηνυμάτων...</div>
-            </div>
+            <div id="chat-messages-area" class="chat-messages-area"></div>
 
             <div class="chat-input-area">
-                <input
-                    id="chat-input"
-                    type="text"
-                    placeholder="Γράψτε μήνυμα..."
-                    ${disabled ? "disabled" : ""}
-                />
-                <button
-                    id="chat-send-btn"
-                    type="button"
-                    ${disabled ? "disabled" : ""}
-                >
-                    Αποστολή
+                <input id="chat-input"
+                       type="text"
+                       placeholder="Γράψτε μήνυμα..."
+                       ${disabled ? "disabled" : ""}/>
+                <button id="chat-send-btn"
+                        ${disabled ? "disabled" : ""}>
+                        Αποστολή
                 </button>
             </div>
 
-            ${disabled ? `<div class="chat-disabled-note">Η συνομιλία είναι ανενεργή γιατί δεν είστε πλέον φίλοι.</div>` : ""}
-
+            ${disabled
+                ? `<div class="chat-disabled-note">
+                   Η συνομιλία είναι ανενεργή γιατί δεν είστε πλέον φίλοι.
+                   </div>`
+                : ""}
         </div>
     `;
-
-    const avatar = chatPanel.querySelector(".chat-header-avatar");
-    if (avatar) {
-        avatar.onerror = () => {
-            avatar.src = DEFAULT_AVATAR;
-        };
-    }
-
 }
 
-async function loadMessages(conversationId) {
+/* =========================
+   LOAD MESSAGES
+========================= */
+
+async function loadMessages(conversationId, showLoading = false) {
 
     const messagesArea = document.getElementById("chat-messages-area");
     if (!messagesArea) return;
 
-    messagesArea.innerHTML = `<div class="chat-messages-empty">Φόρτωση μηνυμάτων...</div>`;
+    if (showLoading) {
+        messagesArea.innerHTML =
+        `<div class="chat-messages-empty">Φόρτωση μηνυμάτων...</div>`;
+    }
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
     const { data, error } = await supabase
         .from("messages")
-        .select(`
-            id,
-            sender_id,
-            content,
-            created_at
-        `)
+        .select("id,sender_id,content,created_at")
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: true });
 
@@ -240,20 +261,16 @@ async function loadMessages(conversationId) {
 
     if (error) {
         console.error("Failed to load messages:", error);
-        messagesArea.innerHTML = `<div class="chat-messages-empty">Αποτυχία φόρτωσης μηνυμάτων</div>`;
-        return;
-    }
-
-    if (!data || data.length === 0) {
-        messagesArea.innerHTML = `<div class="chat-messages-empty">Δεν υπάρχουν μηνύματα ακόμη</div>`;
         return;
     }
 
     messagesArea.innerHTML = "";
 
     data.forEach(message => {
+
         const row = document.createElement("div");
-        row.className = `message-row ${message.sender_id === user.id ? "own" : "other"}`;
+        row.className =
+        `message-row ${message.sender_id === user.id ? "own" : "other"}`;
 
         const bubble = document.createElement("div");
         bubble.className = "message-bubble";
@@ -275,43 +292,48 @@ async function loadMessages(conversationId) {
     messagesArea.scrollTop = messagesArea.scrollHeight;
 }
 
+/* =========================
+   SEND MESSAGE
+========================= */
+
 function bindChatInput(currentUserId) {
 
     const input = document.getElementById("chat-input");
     const sendBtn = document.getElementById("chat-send-btn");
 
-    if (!input || !sendBtn || !activeConversationId || !activeConversationData) return;
+    if (!input || !sendBtn || !activeConversationId) return;
 
     const sendMessage = async () => {
 
         const content = input.value.trim();
         if (!content) return;
 
-        sendBtn.disabled = true;
-        input.disabled = true;
+        const conversationId = activeConversationId;
 
         const { error } = await supabase
             .from("messages")
             .insert({
-            conversation_id: activeConversationId,
+            conversation_id: conversationId,
             sender_id: currentUserId,
             content
         });
 
         if (error) {
-            console.error("Failed to send message:", error);
-            alert("Αποτυχία αποστολής μηνύματος");
-            sendBtn.disabled = false;
-            input.disabled = false;
+            console.error(error);
             return;
         }
 
-        input.value = "";
-        sendBtn.disabled = false;
-        input.disabled = false;
-        input.focus();
+        await supabase
+            .from("conversations")
+            .update({
+            last_message_at: new Date().toISOString()
+        })
+            .eq("id", conversationId);
 
-        await loadMessages(activeConversationId);
+        input.value = "";
+
+        await loadMessages(conversationId);
+        await loadConversations();
     };
 
     sendBtn.onclick = sendMessage;
@@ -324,37 +346,53 @@ function bindChatInput(currentUserId) {
     };
 }
 
+/* =========================
+   REALTIME
+========================= */
+
 function subscribeToActiveConversation() {
+
     cleanupMessagesRealtime();
 
     if (!activeConversationId) return;
 
+    const conversationId = activeConversationId;
+
     activeMessagesChannel = supabase
-        .channel(`messages-conversation-${activeConversationId}`)
+        .channel(`messages-${conversationId}`)
         .on(
         "postgres_changes",
         {
             event: "INSERT",
             schema: "public",
             table: "messages",
-            filter: `conversation_id=eq.${activeConversationId}`
+            filter: `conversation_id=eq.${conversationId}`
         },
         async () => {
-            if (!activeConversationId) return;
-            await loadMessages(activeConversationId);
+
+            if (activeConversationId !== conversationId) return;
+
+            await loadMessages(conversationId);
+            await loadConversations();
         }
     )
         .subscribe();
 }
 
 function cleanupMessagesRealtime() {
+
     if (activeMessagesChannel) {
         supabase.removeChannel(activeMessagesChannel);
         activeMessagesChannel = null;
     }
 }
 
+/* =========================
+   TIME FORMAT
+========================= */
+
 function formatMessageTime(dateString) {
+
     const date = new Date(dateString);
 
     return date.toLocaleTimeString("el-GR", {
