@@ -2,6 +2,7 @@ import { supabase } from "../core/supabase.js";
 import { loadView } from "../core/router.js";
 import { userStore } from "../state/userStore.js";
 import { DEFAULT_AVATAR, DEFAULT_FULLNAME, DEFAULT_USERNAME, DEFAULT_BIO } from "../state/userStore.js";
+import { initModal, openModal } from "../components/modal.js";
 
 
 /* =========================================================
@@ -9,6 +10,8 @@ import { DEFAULT_AVATAR, DEFAULT_FULLNAME, DEFAULT_USERNAME, DEFAULT_BIO } from 
 ========================================================= */
 
 export async function initHeader() {
+
+    await initModal();
 
     loadHeaderUser();
     await loadCredits();
@@ -24,7 +27,6 @@ export async function initHeader() {
     setupSearch();
 
 }
-
 /* =========================================================
    NAVIGATION
 ========================================================= */
@@ -128,9 +130,8 @@ function setupDropdown() {
 
     const wrapper = document.querySelector(".user-wrapper");
     const dropdown = document.getElementById("user-dropdown");
-
     const dropdownProfile = document.getElementById("dropdown-profile");
-    const dropdownLogout = document.getElementById("dropdown-logout");
+
 
     if (!wrapper || !dropdown) return;
 
@@ -155,41 +156,6 @@ function setupDropdown() {
 
         dropdown.classList.add("dropdown-hidden");
         loadView("profile");
-
-    });
-
-    dropdownLogout?.addEventListener("click", (e) => {
-
-        e.stopPropagation();
-        dropdown.classList.add("dropdown-hidden");
-
-        const modal = document.getElementById("logout-modal");
-        modal?.classList.remove("modal-hidden");
-
-    });
-
-}
-
-/* =========================================================
-   LOGOUT MODAL
-========================================================= */
-
-function setupLogoutModal() {
-
-    const modal = document.getElementById("logout-modal");
-    const cancelBtn = document.getElementById("cancel-logout");
-    const confirmBtn = document.getElementById("confirm-logout");
-
-    cancelBtn?.addEventListener("click", () => {
-
-        modal?.classList.add("modal-hidden");
-
-    });
-
-    confirmBtn?.addEventListener("click", async () => {
-
-        await supabase.auth.signOut();
-        window.location.href = "index.html";
 
     });
 
@@ -406,6 +372,35 @@ function listenFriendRequests() {
 
     )
         .subscribe();
+
+}
+
+
+/* =========================================================
+   LOGOUT MODAL
+========================================================= */
+
+
+function setupLogoutModal() {
+
+    const dropdownLogout = document.getElementById("dropdown-logout");
+
+    dropdownLogout?.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        const dropdown = document.getElementById("user-dropdown");
+        dropdown?.classList.add("dropdown-hidden");
+
+        openModal({
+            message: "Είστε σίγουροι ότι θέλετε να αποσυνδεθείτε;",
+            cancelText: "Ακύρωση",
+            confirmText: "Αποσύνδεση",
+            onConfirm: async () => {
+                await supabase.auth.signOut();
+                window.location.href = "index.html";
+            }
+        });
+    });
 
 }
 

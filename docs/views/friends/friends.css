@@ -99,7 +99,7 @@
 ========================= */
 
 #friend-requests button,
-#friends-list button {
+#friends-list button:not(.cancel-icon-btn) {
 
     padding: 6px 12px;
 
@@ -201,11 +201,10 @@
 }
 
 /* =========================
-   DECLINE / REMOVE BUTTON
+   DECLINE BUTTON
 ========================= */
 
-#friend-requests button:last-of-type:hover,
-#friends-list button:hover {
+#friend-requests button:last-of-type:hover {
 
     background: #f5f5f7;
 
@@ -302,19 +301,13 @@
 }
 
 .friend-remove {
-
-    background: #f2f2f2;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-
+    opacity: 0;
+    transform: scale(0.9);
 }
 
-.friend-remove:hover {
-
-    background: #e5e5e5;
-
+#friends-list > div:hover .friend-remove {
+    opacity: 1;
+    transform: scale(1);
 }
 
 /* =========================
@@ -390,6 +383,24 @@
 
 .hidden {
     display: none !important;
+}
+
+.friends-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d51919;
+    display: inline-block;
+    flex-shrink: 0;
+    position: relative;
+    top: -6px;
+    right: 3px
 }
 
 /* =========================

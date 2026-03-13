@@ -1,5 +1,7 @@
 import { supabase } from "../../core/supabase.js";
 import { loadView } from "../../core/router.js";
+import { initModal, openModal } from "../../components/modal.js";
+import { createCancelButton } from "../../components/cancelButton.js";
 
 function formatRelativeTime(dateString) {
 
@@ -27,6 +29,7 @@ function formatRelativeTime(dateString) {
 
 export async function initFriends() {
 
+    await initModal();
     setupTabs();
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -41,6 +44,17 @@ export async function initFriends() {
     await loadRequests(user.id);
     await loadFriends(user.id);
 
+}
+
+function updateRequestsTabDot(count) {
+    const dot = document.getElementById("tab-requests-dot");
+    if (!dot) return;
+
+    if (count > 0) {
+        dot.classList.remove("hidden");
+    } else {
+        dot.classList.add("hidden");
+    }
 }
 
 /* =========================
@@ -74,11 +88,11 @@ async function loadRequests(userId) {
     }
 
     const info = document.getElementById("requests-info");
+    const count = requests?.length || 0;
+
+    updateRequestsTabDot(count);
 
     if (info) {
-
-        const count = requests?.length || 0;
-
         if (count === 0) {
             info.textContent = "Δεν υπάρχουν αιτήματα σύνδεσης";
         }
@@ -88,7 +102,6 @@ async function loadRequests(userId) {
         else {
             info.textContent = `${count} αιτήματα σύνδεσης`;
         }
-
     }
 
     container.innerHTML = "";
@@ -171,10 +184,10 @@ async function loadRequests(userId) {
 
         text.innerHTML =
         `Ο χρήστης <strong>${displayName}</strong> σας έστειλε αίτημα σύνδεσης
-        <span class="request-time">
-        <span class="request-dot">•</span>
-        ${timeString}
-        </span>`;
+    <span class="request-time">
+    <span class="request-dot">•</span>
+    ${timeString}
+    </span>`;
 
         /* BUTTONS */
 
@@ -367,26 +380,35 @@ async function loadFriends(userId) {
            REMOVE BUTTON
         ========================= */
 
-        const removeBtn = document.createElement("button");
-        removeBtn.className = "friend-remove";
-        removeBtn.textContent = "Αφαίρεση";
+        const removeBtn = createCancelButton({
+            label: "Αφαίρεση",
+            className: "friend-remove"
+        });
 
-        removeBtn.addEventListener("click", async (e) => {
+        removeBtn.addEventListener("click", (e) => {
 
             e.stopPropagation();
 
-            const { error } = await supabase
-                .from("friendships")
-                .delete()
-                .eq("id", friend.id);
+            openModal({
+                message: "Είστε σίγουροι ότι θέλετε να αφαιρέσετε αυτή την επαφή;",
+                cancelText: "Ακύρωση",
+                confirmText: "Αφαίρεση",
+                onConfirm: async () => {
 
-            if (error) {
-                console.error("Remove friend failed:", error);
-                alert("Failed to remove friend");
-                return;
-            }
+                    const { error } = await supabase
+                        .from("friendships")
+                        .delete()
+                        .eq("id", friend.id);
 
-            await initFriends();
+                    if (error) {
+                        console.error("Remove friend failed:", error);
+                        alert("Failed to remove friend");
+                        return;
+                    }
+
+                    await initFriends();
+                }
+            });
 
         });
 
@@ -417,7 +439,7 @@ async function loadMutualFriends(friendId, textElement) {
     const { data: myFriends } = await supabase
         .from("friendships")
         .select("requester_id,receiver_id")
-        .eq("status","accepted")
+        .eq("status", "accepted")
         .or(`requester_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`);
 
     const myIds = myFriends.map(f =>
@@ -429,7 +451,7 @@ async function loadMutualFriends(friendId, textElement) {
     const { data: theirFriends } = await supabase
         .from("friendships")
         .select("requester_id,receiver_id")
-        .eq("status","accepted")
+        .eq("status", "accepted")
         .or(`requester_id.eq.${friendId},receiver_id.eq.${friendId}`);
 
     const theirIds = theirFriends.map(f =>
@@ -466,8 +488,6 @@ function setupTabs() {
 
     if (!tabRequests || !tabFriends) return;
 
-    /* default state */
-
     tabFriends.classList.add("active");
     tabRequests.classList.remove("active");
 
@@ -491,6 +511,9 @@ function setupTabs() {
 
         requestsSection.classList.remove("hidden");
         friendsSection.classList.add("hidden");
+
+        const dot = document.getElementById("tab-requests-dot");
+        if (dot) dot.classList.add("hidden");
 
     });
 

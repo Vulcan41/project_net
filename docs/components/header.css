@@ -412,14 +412,14 @@ NOTIFICATION DOT
 }
 
 #cancel-logout {
-    background: #5d093f;
+    background: #095a5d;
     color: white;
-    border-color: #5d093f;
+    border-color: #095a5d;
 }
 
 #cancel-logout:hover {
-    background: #720c4d;
-    border-color: #5d093f;
+    background: #095a5d;
+    border-color: #095a5d;
 }
 
 

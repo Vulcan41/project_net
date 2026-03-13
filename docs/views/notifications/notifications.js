@@ -1,6 +1,7 @@
 import { supabase } from "../../core/supabase.js";
 import { loadView } from "../../core/router.js";
 import { DEFAULT_AVATAR } from "../../state/userStore.js";
+import { createCancelButton } from "../../components/cancelButton.js";
 
 let renderToken = 0;
 
@@ -146,18 +147,18 @@ export async function initNotifications() {
 
         text.innerHTML =
         `Ο χρήστης <strong>${displayName}</strong> αποδέχθηκε το αίτημα σύνδεσης
-        ${timeString ? `
-        <span class="notification-time">
-            <span class="notification-dot">•</span>
-            ${timeString}
-        </span>` : ""}`;
+    ${timeString ? `
+    <span class="notification-time">
+        <span class="notification-dot">•</span>
+        ${timeString}
+    </span>` : ""}`;
 
         /* ACTION BUTTON */
 
-        const hideBtn = document.createElement("button");
-        hideBtn.className = "notification-hide";
-        hideBtn.textContent = "×";
-        hideBtn.setAttribute("data-tooltip", "Απόκρυψη");
+        const hideBtn = createCancelButton({
+            label: "Απόκρυψη",
+            className: "notification-hide"
+        });
 
         /* DELETE NOTIFICATION */
 
@@ -175,8 +176,6 @@ export async function initNotifications() {
 
             row.remove();
 
-            /* UPDATE COUNTER */
-
             const info = document.getElementById("notifications-info");
             const remaining = document.querySelectorAll("#notifications-list > div").length;
 
@@ -191,8 +190,6 @@ export async function initNotifications() {
             }
 
         });
-
-        /* STRUCTURE */
 
         row.appendChild(userBlock);
         row.appendChild(divider);
