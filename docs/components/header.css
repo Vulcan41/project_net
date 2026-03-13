@@ -105,7 +105,7 @@ FRIEND REQUEST DOT
 }
 
 /* =========================
-NOTIFICATION DOT
+NOTIFICATION AND MESSAGES DOT
 ========================= */
 
 .header-dot {
@@ -127,6 +127,10 @@ NOTIFICATION DOT
 }
 
 #notifications-btn {
+    position: relative;
+}
+
+#messages-btn {
     position: relative;
 }
 

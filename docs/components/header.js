@@ -18,8 +18,10 @@ export async function initHeader() {
 
     await checkFriendRequests();
     await checkNotifications();
+    await checkMessages();
 
     listenFriendRequests();
+    listenMessages();
 
     setupNavigation();
     setupDropdown();
@@ -47,7 +49,14 @@ function setupNavigation() {
         if (dot) dot.classList.add("hidden");
     });
 
-    messagesBtn?.addEventListener("click", () => loadView("messages"));
+    messagesBtn?.addEventListener("click", () => {
+
+        loadView("messages");
+
+        const dot = document.getElementById("messages-dot");
+        if (dot) dot.classList.add("hidden");
+
+    });
 
     notificationsBtn?.addEventListener("click", () => {
 
@@ -402,6 +411,79 @@ function setupLogoutModal() {
         });
     });
 
+}
+
+/* =========================================================
+   MESSAGE INDICATOR
+========================================================= */
+
+async function checkMessages() {
+
+    const dot = document.getElementById("messages-dot");
+    if (!dot) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+        .from("messages")
+        .select(`
+            id,
+            created_at,
+            conversation:conversation_id (
+                id,
+                last_read_at
+            )
+        `);
+
+    if (error) {
+        console.error("Message check failed:", error);
+        return;
+    }
+
+    const hasUnread = data.some(msg => {
+
+        const lastRead = msg.conversation?.last_read_at;
+
+        if (!lastRead) return true;
+
+        return new Date(msg.created_at) > new Date(lastRead);
+
+    });
+
+    if (hasUnread) {
+        dot.classList.remove("hidden");
+    } else {
+        dot.classList.add("hidden");
+    }
+
+}
+
+function listenMessages() {
+
+    supabase
+        .channel("message-listener")
+        .on(
+        "postgres_changes",
+        {
+            event: "INSERT",
+            schema: "public",
+            table: "messages"
+        },
+        async (payload) => {
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const newMessage = payload.new;
+
+            if (newMessage.sender_id !== user.id) {
+                checkMessages();
+            }
+
+        }
+    )
+        .subscribe();
 }
 
 

@@ -209,6 +209,13 @@ async function loadConversations() {
 
             activeConversationId = conversation.id;
 
+            await supabase
+                .from("conversations")
+                .update({
+                last_read_at: new Date().toISOString()
+            })
+                .eq("id", conversation.id);
+
             activeConversationData = {
                 conversationId: conversation.id,
                 status: friendship.status,
