@@ -1,5 +1,6 @@
 import { supabase } from "../../core/supabase.js";
 import { DEFAULT_AVATAR, DEFAULT_FULLNAME, DEFAULT_USERNAME, DEFAULT_BIO } from "../../state/userStore.js";
+import { loadView } from "../../core/router.js";
 
 export async function initProfileOther(userId) {
 
@@ -26,7 +27,7 @@ export async function initProfileOther(userId) {
     const friendship = await checkFriendship(userId);
 
     setupFriendButton(userId, friendship);
-
+    setupMessageButton(userId, friendship);
 }
 
 /* =========================
@@ -291,3 +292,35 @@ async function checkFriendship(viewedUserId) {
     return null;
 
 }
+
+/* =========================
+   SEND MESSAGES
+========================= */
+
+function setupMessageButton(viewedUserId, friendship) {
+
+    const btn = document.getElementById("message-user-btn");
+    if (!btn) return;
+
+    /* reset state */
+
+    btn.classList.add("hidden");
+
+    btn.replaceWith(btn.cloneNode(true));
+    const freshBtn = document.getElementById("message-user-btn");
+
+    /* show ONLY if accepted */
+
+    if (!friendship || friendship.status !== "accepted") {
+        freshBtn.classList.add("hidden");
+        return;
+    }
+
+    freshBtn.classList.remove("hidden");
+
+    freshBtn.addEventListener("click", () => {
+        loadView("messages", viewedUserId);
+    });
+
+}
+

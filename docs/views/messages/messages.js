@@ -12,7 +12,7 @@ let currentUserId = null;
    INIT
 ========================= */
 
-export async function initMessages() {
+export async function initMessages(targetUserId = null)  {
 
     cleanupMessagesRealtime();
 
@@ -33,11 +33,17 @@ export async function initMessages() {
     info.textContent = "Φόρτωση συνομιλιών...";
 
     chatPanel.innerHTML = `
-        <div class="chat-empty-state">
-            <div class="chat-empty-title">Δεν έχει επιλεγεί συνομιλία</div>
-            <div class="chat-empty-text">Επιλέξτε μια συνομιλία από τα αριστερά</div>
-        </div>
-    `;
+    <div class="chat-empty-state">
+        <div class="chat-empty-title">Δεν έχει επιλεγεί συνομιλία</div>
+        <div class="chat-empty-text">Επιλέξτε μια συνομιλία από τα αριστερά</div>
+
+        <img
+            src="assets/bubbles.png"
+            class="chat-empty-image"
+            alt="Chat bubbles"
+        >
+    </div>
+`;
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -47,7 +53,7 @@ export async function initMessages() {
 
     currentUserId = user.id;
 
-    await loadConversations();
+    await loadConversations(targetUserId);
 }
 
 /* =========================
@@ -72,7 +78,7 @@ function applyFadeIfOverflow(element) {
    LOAD CONVERSATIONS
 ========================= */
 
-async function loadConversations() {
+async function loadConversations(targetUserId = null) {
 
     const localLoadToken = ++conversationsLoadToken;
 
@@ -151,6 +157,8 @@ async function loadConversations() {
         const otherUser = isRequester
         ? friendship.receiver
         : friendship.requester;
+
+        const otherUserId = otherUser?.id;
 
         const row = document.createElement("div");
         row.dataset.conversationId = conversation.id;
@@ -282,6 +290,11 @@ async function loadConversations() {
         });
 
         container.appendChild(row);
+
+        if (targetUserId && otherUserId === targetUserId) {
+            setTimeout(() => row.click(), 0);
+        }
+
     });
 }
 
