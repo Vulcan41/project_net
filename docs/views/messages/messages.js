@@ -1,7 +1,7 @@
 import { supabase } from "../../core/supabase.js";
 import { DEFAULT_AVATAR } from "../../state/userStore.js";
 
-let renderToken = 0;
+let conversationsLoadToken = 0;
 let activeConversationId = null;
 let activeConversationData = null;
 let activeMessagesChannel = null;
@@ -13,8 +13,6 @@ let currentUserId = null;
 
 export async function initMessages() {
 
-    const currentToken = ++renderToken;
-
     cleanupMessagesRealtime();
 
     const container = document.getElementById("conversations-list");
@@ -23,6 +21,9 @@ export async function initMessages() {
 
     if (!container || !info || !chatPanel) return;
 
+    /* reset state every time view opens */
+
+    conversationsLoadToken = 0;
     activeConversationId = null;
     activeConversationData = null;
     currentUserId = null;
@@ -45,14 +46,34 @@ export async function initMessages() {
 
     currentUserId = user.id;
 
-    await loadConversations(currentToken);
+    await loadConversations();
+}
+
+/* =========================
+   FADE HELPER FUNCTION
+========================= */
+
+function applyFadeIfOverflow(element) {
+    if (!element) return;
+
+    requestAnimationFrame(() => {
+        const isOverflowing = element.scrollWidth > element.clientWidth + 1;
+
+        if (isOverflowing) {
+            element.classList.add("is-overflowing");
+        } else {
+            element.classList.remove("is-overflowing");
+        }
+    });
 }
 
 /* =========================
    LOAD CONVERSATIONS
 ========================= */
 
-async function loadConversations(currentToken = renderToken) {
+async function loadConversations() {
+
+    const localLoadToken = ++conversationsLoadToken;
 
     const container = document.getElementById("conversations-list");
     const info = document.getElementById("messages-info");
@@ -90,7 +111,9 @@ async function loadConversations(currentToken = renderToken) {
         .order("last_message_at", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false });
 
-    if (currentToken !== renderToken) return;
+    if (localLoadToken !== conversationsLoadToken) return;
+
+    if (!container.isConnected || !info.isConnected) return;
 
     container.innerHTML = "";
 
@@ -104,6 +127,13 @@ async function loadConversations(currentToken = renderToken) {
         info.textContent = "Δεν υπάρχουν συνομιλίες";
         return;
     }
+
+    const latestMessagesMap = await loadLatestMessagesMap(data.map(c => c.id));
+
+    if (localLoadToken !== conversationsLoadToken) return;
+    if (!container.isConnected || !info.isConnected) return;
+
+    container.innerHTML = "";
 
     info.textContent =
     data.length === 1
@@ -147,8 +177,17 @@ async function loadConversations(currentToken = renderToken) {
 
         const meta = document.createElement("div");
         meta.className = "conversation-meta";
-        meta.textContent =
-        `status: ${friendship.status} • conversation_id: ${conversation.id}`;
+
+        const latestMessage = latestMessagesMap.get(conversation.id);
+
+        if (latestMessage) {
+            const prefix = latestMessage.sender_id === currentUserId ? "Εσείς: " : "";
+            meta.textContent = prefix + latestMessage.content;
+        } else {
+            meta.textContent = "Δεν υπάρχουν μηνύματα ακόμη";
+        }
+
+        applyFadeIfOverflow(meta);
 
         text.appendChild(name);
         text.appendChild(username);
@@ -181,14 +220,40 @@ async function loadConversations(currentToken = renderToken) {
             renderChatSkeleton(chatPanel, activeConversationData);
 
             await loadMessages(conversation.id, true);
-
             bindChatInput(currentUserId);
-
             subscribeToActiveConversation();
         });
 
         container.appendChild(row);
     });
+}
+
+async function loadLatestMessagesMap(conversationIds) {
+
+    const map = new Map();
+
+    if (!conversationIds || conversationIds.length === 0) {
+        return map;
+    }
+
+    const { data, error } = await supabase
+        .from("messages")
+        .select("conversation_id,sender_id,content,created_at")
+        .in("conversation_id", conversationIds)
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        console.error("Failed to load latest messages:", error);
+        return map;
+    }
+
+    data.forEach(message => {
+        if (!map.has(message.conversation_id)) {
+            map.set(message.conversation_id, message);
+        }
+    });
+
+    return map;
 }
 
 /* =========================
@@ -258,6 +323,7 @@ async function loadMessages(conversationId, showLoading = false) {
         .order("created_at", { ascending: true });
 
     if (conversationId !== activeConversationId) return;
+    if (!messagesArea.isConnected) return;
 
     if (error) {
         console.error("Failed to load messages:", error);
@@ -373,7 +439,6 @@ function subscribeToActiveConversation() {
             filter: `conversation_id=eq.${conversationId}`
         },
         async () => {
-
             if (activeConversationId !== conversationId) return;
 
             await loadMessages(conversationId);
