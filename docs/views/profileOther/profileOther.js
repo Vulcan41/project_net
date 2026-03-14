@@ -162,7 +162,7 @@ async function setupFriendButton(viewedUserId, friendship) {
 
     if (friendship && friendship.status === "accepted") {
         renderFriendButton({
-            icon: "assets/send_2.png",
+            icon: "assets/send_5.png",
             tooltip: "Μήνυμα",
             stateClass: "accepted",
             onClick: () => {

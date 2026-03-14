@@ -354,10 +354,10 @@ function renderChatSkeleton(chatPanel, conversation) {
 
             <div class="chat-input-area">
 
-    <input id="chat-input"
-           type="text"
-           placeholder="Γράψτε μήνυμα..."
-           ${disabled ? "disabled" : ""}/>
+    <textarea id="chat-input"
+          rows="1"
+          placeholder="Γράψτε μήνυμα..."
+          ${disabled ? "disabled" : ""}></textarea>
 
     <button id="chat-send-btn"
             ${disabled ? "disabled" : ""}>
@@ -403,6 +403,82 @@ function renderChatSkeleton(chatPanel, conversation) {
 }
 
 /* =========================
+   HELPER FUNCTION FOR LINKS
+========================= */
+
+function renderMessageContent(container, text) {
+
+    const urlRegex = /(?:https?:\/\/|www\.)[^\s]+/g;
+
+    let lastIndex = 0;
+    let match;
+
+    while ((match = urlRegex.exec(text)) !== null) {
+
+        const url = match[0];
+        const start = match.index;
+
+        if (start > lastIndex) {
+            container.appendChild(
+                document.createTextNode(text.slice(lastIndex, start))
+            );
+        }
+
+        const link = document.createElement("a");
+        link.href = url.startsWith("http") ? url : `https://${url}`;
+        link.textContent = url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+
+        container.appendChild(link);
+
+        lastIndex = start + url.length;
+    }
+
+    if (lastIndex < text.length) {
+        container.appendChild(
+            document.createTextNode(text.slice(lastIndex))
+        );
+    }
+}
+
+
+
+/* =========================
+   HELPER FUNCTION FOR DAY DIVIDERS
+========================= */
+
+
+function getMessageDayKey(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+function formatMessageDayLabel(dateString) {
+    const date = new Date(dateString);
+
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    const dateKey = getMessageDayKey(dateString);
+    const todayKey = getMessageDayKey(today.toISOString());
+    const yesterdayKey = getMessageDayKey(yesterday.toISOString());
+
+    if (dateKey === todayKey) return "Σήμερα";
+    if (dateKey === yesterdayKey) return "Χθες";
+
+    return date.toLocaleDateString("el-GR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+    });
+}
+
+/* =========================
    LOAD MESSAGES
 ========================= */
 
@@ -435,7 +511,25 @@ async function loadMessages(conversationId, showLoading = false) {
 
     messagesArea.innerHTML = "";
 
+    let lastDayKey = null;
+
     data.forEach(message => {
+
+        const currentDayKey = getMessageDayKey(message.created_at);
+
+        if (currentDayKey !== lastDayKey) {
+            const dividerRow = document.createElement("div");
+            dividerRow.className = "chat-day-divider-row";
+
+            const divider = document.createElement("div");
+            divider.className = "chat-day-divider";
+            divider.textContent = formatMessageDayLabel(message.created_at);
+
+            dividerRow.appendChild(divider);
+            messagesArea.appendChild(dividerRow);
+
+            lastDayKey = currentDayKey;
+        }
 
         const row = document.createElement("div");
         row.className =
@@ -446,7 +540,7 @@ async function loadMessages(conversationId, showLoading = false) {
 
         const content = document.createElement("div");
         content.className = "message-content";
-        content.textContent = message.content;
+        renderMessageContent(content, message.content);
 
         const time = document.createElement("div");
         time.className = "message-time";
@@ -461,6 +555,31 @@ async function loadMessages(conversationId, showLoading = false) {
     messagesArea.scrollTop = messagesArea.scrollHeight;
 }
 
+
+/* =========================
+   HELPER FUNCTION FOR AUTO RESIZE THE TEXT AREA
+========================= */
+
+
+function setupAutoResizeTextarea(textarea) {
+    if (!textarea) return;
+
+    const resize = () => {
+        textarea.style.height = "42px";
+        textarea.style.height = `${Math.min(textarea.scrollHeight, 82)}px`;
+
+        if (textarea.scrollHeight > 82) {
+            textarea.style.overflowY = "auto";
+        } else {
+            textarea.style.overflowY = "hidden";
+        }
+    };
+
+    textarea.addEventListener("input", resize);
+
+    resize();
+}
+
 /* =========================
    SEND MESSAGE
 ========================= */
@@ -471,6 +590,8 @@ function bindChatInput(currentUserId) {
     const sendBtn = document.getElementById("chat-send-btn");
 
     if (!input || !sendBtn || !activeConversationId) return;
+
+    setupAutoResizeTextarea(input);
 
     const sendMessage = async () => {
 
@@ -504,6 +625,8 @@ function bindChatInput(currentUserId) {
         }
 
         input.value = "";
+        input.style.height = "42px";
+        input.style.overflowY = "hidden";
 
         await loadMessages(conversationId);
         await loadConversations();
@@ -512,7 +635,7 @@ function bindChatInput(currentUserId) {
     sendBtn.onclick = sendMessage;
 
     input.onkeydown = async (e) => {
-        if (e.key === "Enter") {
+        if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             await sendMessage();
         }
