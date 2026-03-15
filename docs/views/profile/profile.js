@@ -53,7 +53,8 @@ function setupEditButton() {
 
     btn?.addEventListener("click", () => {
 
-        loadView("profileEdit");
+        sessionStorage.setItem("settingsActiveTab", "profile");
+        loadView("settings");
 
     });
 
