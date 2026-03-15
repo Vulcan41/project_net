@@ -1,6 +1,7 @@
 import { supabase } from "../../core/supabase.js";
 import { DEFAULT_AVATAR } from "../../state/userStore.js";
 import { loadView } from "../../core/router.js";
+import { initTextTools } from "../../components/textTools.js";
 
 let conversationsLoadToken = 0;
 let activeConversationId = null;
@@ -21,8 +22,6 @@ export async function initMessages(targetUserId = null)  {
     const chatPanel = document.getElementById("chat-panel");
 
     if (!container || !info || !chatPanel) return;
-
-    /* reset state every time view opens */
 
     conversationsLoadToken = 0;
     activeConversationId = null;
@@ -249,8 +248,6 @@ async function loadConversations(targetUserId = null) {
 
             row.classList.add("selected-conversation");
 
-            /* instantly mark as read visually */
-
             const metaEl = row.querySelector(".conversation-meta");
             if (metaEl) metaEl.classList.remove("unread");
 
@@ -281,6 +278,13 @@ async function loadConversations(targetUserId = null) {
             };
 
             renderChatSkeleton(chatPanel, activeConversationData);
+
+            const inputArea = chatPanel.querySelector("#chat-input-area");
+            const input = chatPanel.querySelector("#chat-input");
+
+            if (inputArea && input) {
+                await initTextTools(inputArea, input);
+            }
 
             await loadMessages(conversation.id, true);
             bindChatInput(currentUserId);
@@ -352,25 +356,28 @@ function renderChatSkeleton(chatPanel, conversation) {
 
             <div id="chat-messages-area" class="chat-messages-area"></div>
 
-            <div class="chat-input-area">
+            <div class="chat-input-area" id="chat-input-area">
 
-    <textarea id="chat-input"
-          rows="1"
-          placeholder="Γράψτε μήνυμα..."
-          ${disabled ? "disabled" : ""}></textarea>
+                <div class="chat-input-row">
+                    <textarea
+                        id="chat-input"
+                        rows="1"
+                        placeholder="Γράψτε μήνυμα..."
+                        ${disabled ? "disabled" : ""}
+                    ></textarea>
 
-    <button id="chat-send-btn"
-            ${disabled ? "disabled" : ""}>
-            Αποστολή
-    </button>
+                    <button id="chat-send-btn" ${disabled ? "disabled" : ""}>
+                        Αποστολή
+                    </button>
+                </div>
 
-    ${disabled
-        ? `<div class="chat-disabled-note">
-           Η συνομιλία είναι ανενεργή γιατί δεν είστε πλέον φίλοι.
-           </div>`
-        : ""}
+                ${disabled
+                    ? `<div class="chat-disabled-note">
+                           Η συνομιλία είναι ανενεργή γιατί δεν είστε πλέον φίλοι.
+                       </div>`
+                    : ""}
 
-</div>
+            </div>
 
         </div>
     `;
@@ -407,21 +414,17 @@ function renderChatSkeleton(chatPanel, conversation) {
 ========================= */
 
 function renderMessageContent(container, text) {
-
     const urlRegex = /(?:https?:\/\/|www\.)[^\s]+/g;
 
     let lastIndex = 0;
     let match;
 
     while ((match = urlRegex.exec(text)) !== null) {
-
         const url = match[0];
         const start = match.index;
 
         if (start > lastIndex) {
-            container.appendChild(
-                document.createTextNode(text.slice(lastIndex, start))
-            );
+            appendFormattedText(container, text.slice(lastIndex, start));
         }
 
         const link = document.createElement("a");
@@ -436,18 +439,49 @@ function renderMessageContent(container, text) {
     }
 
     if (lastIndex < text.length) {
+        appendFormattedText(container, text.slice(lastIndex));
+    }
+}
+
+function appendFormattedText(container, text) {
+    const formatRegex = /(\*\*([^*]+)\*\*|\*([^*]+)\*)/g;
+
+    let lastIndex = 0;
+    let match;
+
+    while ((match = formatRegex.exec(text)) !== null) {
+        const fullMatch = match[0];
+        const start = match.index;
+
+        if (start > lastIndex) {
+            container.appendChild(
+                document.createTextNode(text.slice(lastIndex, start))
+            );
+        }
+
+        if (match[2] !== undefined) {
+            const strong = document.createElement("strong");
+            strong.textContent = match[2];
+            container.appendChild(strong);
+        } else if (match[3] !== undefined) {
+            const em = document.createElement("em");
+            em.textContent = match[3];
+            container.appendChild(em);
+        }
+
+        lastIndex = start + fullMatch.length;
+    }
+
+    if (lastIndex < text.length) {
         container.appendChild(
             document.createTextNode(text.slice(lastIndex))
         );
     }
 }
 
-
-
 /* =========================
    HELPER FUNCTION FOR DAY DIVIDERS
 ========================= */
-
 
 function getMessageDayKey(dateString) {
     const date = new Date(dateString);
@@ -555,11 +589,9 @@ async function loadMessages(conversationId, showLoading = false) {
     messagesArea.scrollTop = messagesArea.scrollHeight;
 }
 
-
 /* =========================
    HELPER FUNCTION FOR AUTO RESIZE THE TEXT AREA
 ========================= */
-
 
 function setupAutoResizeTextarea(textarea) {
     if (!textarea) return;
@@ -576,8 +608,43 @@ function setupAutoResizeTextarea(textarea) {
     };
 
     textarea.addEventListener("input", resize);
-
     resize();
+}
+
+/* =========================
+   HELPER FUNCTION FOR TOOLBAR
+========================= */
+
+function setupChatInputExpand() {
+    const inputArea = document.getElementById("chat-input-area");
+    const input = document.getElementById("chat-input");
+    const messagesArea = document.getElementById("chat-messages-area");
+
+    if (!inputArea || !input || !messagesArea) return;
+
+    const scrollToBottom = () => {
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    };
+
+    inputArea.addEventListener("focusin", () => {
+        inputArea.classList.add("expanded");
+
+        requestAnimationFrame(() => {
+            scrollToBottom();
+        });
+    });
+
+    inputArea.addEventListener("transitionend", (e) => {
+        if (e.propertyName === "padding-top" || e.propertyName === "min-height") {
+            scrollToBottom();
+        }
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!inputArea.contains(e.target)) {
+            inputArea.classList.remove("expanded");
+        }
+    });
 }
 
 /* =========================
@@ -588,6 +655,8 @@ function bindChatInput(currentUserId) {
 
     const input = document.getElementById("chat-input");
     const sendBtn = document.getElementById("chat-send-btn");
+
+    setupChatInputExpand();
 
     if (!input || !sendBtn || !activeConversationId) return;
 

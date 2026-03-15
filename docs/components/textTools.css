@@ -1,0 +1,197 @@
+/* ======================================================
+TEXT TOOLS BAR
+====================================================== */
+
+.text-tools-bar {
+
+    position: absolute;
+    top: 5px;
+    left: 14px;
+    right: 14px;
+    height: 40px;
+
+    border-radius: 10px;
+    background: #ffffff;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 10px;
+    gap: 10px;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: opacity 0.18s ease;
+
+}
+
+.chat-input-area.expanded .text-tools-bar {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ======================================================
+GROUPS
+====================================================== */
+
+.text-tools-group {
+
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+}
+
+/* ======================================================
+DIVIDER
+====================================================== */
+
+.text-tools-divider {
+
+    width: 1px;
+    height: 20px;
+
+    background: rgba(173,173,173,1);
+
+    margin: 0 6px;
+
+}
+
+/* ======================================================
+BUTTONS
+====================================================== */
+
+.text-tool-btn {
+
+    width: 25px;
+    height: 25px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: transparent;
+    color: #696969;
+
+    font-size: 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition: background 0.15s ease;
+
+    position: relative;
+
+}
+
+.text-tool-btn:hover {
+    background: rgba(239,239,239,0);
+}
+
+/* ======================================================
+FORMAT BUTTONS
+====================================================== */
+
+.text-tool-bold {
+    font-weight: 700;
+}
+
+.text-tool-italic {
+    font-style: italic;
+}
+
+/* ======================================================
+EMOJI PICKER
+====================================================== */
+
+.emoji-picker {
+    display: flex;
+    gap: 4px;
+}
+
+.emoji {
+
+    font-size: 18px;
+
+    border: none;
+    background: transparent;
+
+    cursor: pointer;
+
+    transition: transform 0.15s ease;
+
+}
+
+.emoji:hover {
+    transform: scale(1.25);
+}
+
+/* ======================================================
+ICON IMAGES
+====================================================== */
+
+.text-tool-btn img {
+
+    width: 20px;
+    height: 20px;
+
+    object-fit: contain;
+    display: block;
+
+}
+
+/* ======================================================
+TEXT TOOL TOOLTIP
+(separate from header tooltip system)
+====================================================== */
+
+.text-tool-tooltip {
+
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: #000;
+    color: #fff;
+
+    font-weight: 600;
+    font-size: 11px;
+
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+
+    z-index: 20;
+}
+
+/* default show */
+.text-tool-btn:hover .text-tool-tooltip {
+    opacity: 1;
+}
+
+/* left edge buttons */
+.text-tool-btn.tooltip-left .text-tool-tooltip {
+    left: -18px;
+    transform: none;
+}
+
+/* right edge buttons */
+.text-tool-btn.tooltip-right .text-tool-tooltip {
+    left: auto;
+    right: 0;
+    transform: none;
+}
+
+.text-tool-btn:hover .text-tool-tooltip {
+    opacity: 1;
+}
+
+
