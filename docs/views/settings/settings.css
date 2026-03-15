@@ -449,7 +449,7 @@
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 0;
+    padding-right: 20px;
 
 }
 
