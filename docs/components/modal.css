@@ -54,12 +54,12 @@
 }
 
 #app-modal-cancel {
-    background: #095a5d;
-    color: white;
-    border-color: #095a5d;
+    background: #246e9d;
+    border-color: #246e9d;
+    color: #ffffff;
 }
 
 #app-modal-cancel:hover {
-    background: #095a5d;
-    border-color: #095a5d;
+    background: #378bc0;
+    border-color: #378bc0;
 }

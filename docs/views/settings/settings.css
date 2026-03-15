@@ -3,16 +3,12 @@
 ========================= */
 
 #settings-page {
-
     width: 100%;
     height: calc(100vh - 90px);
-
     padding: 0;
     margin: 0;
-
     box-sizing: border-box;
     overflow: hidden;
-
 }
 
 /* =========================
@@ -20,15 +16,11 @@
 ========================= */
 
 #settings-shell {
-
     width: 100%;
     height: 100%;
-
     display: flex;
     gap: 0;
-
     box-sizing: border-box;
-
 }
 
 /* =========================
@@ -36,31 +28,22 @@
 ========================= */
 
 #settings-sidebar {
-
     width: 300px;
     min-width: 300px;
-
     height: 100%;
-
     display: flex;
     flex-direction: column;
-
     min-height: 0;
-
     background: #ffffff;
-
     border: 1px solid #e6e6e6;
     border-radius: 10px 0 0 10px;
     border-right: none;
-
     padding: 12px;
-
     box-sizing: border-box;
-
 }
 
 /* =========================
-MENU GROUPS
+   MENU GROUPS
 ========================= */
 
 .settings-menu-group {
@@ -68,21 +51,17 @@ MENU GROUPS
 }
 
 .settings-menu-group-title {
-
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: #afafaf;
     padding: 6px 12px 8px;
-
 }
 
 .settings-menu-group + .settings-menu-group {
-
     border-top: 1px solid #d7d7d7;
     padding-top: 16px;
-
 }
 
 /* =========================
@@ -90,30 +69,24 @@ MENU GROUPS
 ========================= */
 
 .settings-sidebar-top {
-
     padding: 6px 8px 16px;
     margin-bottom: 8px;
     border-bottom: 1px solid #f0f1f4;
-
 }
 
 .settings-title {
-
     display: flex;
     align-items: center;
     gap: 8px;
     font-size: 22px;
     font-weight: 700;
     color: #171717;
-
 }
 
 .settings-subtitle {
-
     font-size: 12px;
     line-height: 1.5;
     color: #7a7a84;
-
 }
 
 /* =========================
@@ -121,11 +94,9 @@ MENU GROUPS
 ========================= */
 
 #settings-menu {
-
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-
 }
 
 /* =========================
@@ -133,7 +104,6 @@ MENU GROUPS
 ========================= */
 
 .settings-menu-btn {
-
     display: flex;
     align-items: center;
     gap: 10px;
@@ -150,7 +120,6 @@ MENU GROUPS
     background 0.18s ease,
     box-shadow 0.18s ease,
     border-color 0.18s ease;
-
 }
 
 .settings-menu-btn:hover {
@@ -162,7 +131,6 @@ MENU GROUPS
 ========================= */
 
 .settings-menu-btn.active {
-
     background: linear-gradient(
     to left,
     rgba(36,110,157,0.10) 0%,
@@ -170,11 +138,8 @@ MENU GROUPS
     rgba(36,110,157,0.02) 60%,
     rgba(36,110,157,0.00) 100%
     );
-
     border-bottom-color: #d8e7f3;
-
     box-shadow: inset 0 0 0 1px #246e9d;
-
 }
 
 /* =========================
@@ -182,29 +147,27 @@ MENU GROUPS
 ========================= */
 
 #settings-content {
-
     position: relative;
-
     flex: 1;
     min-width: 0;
-
     height: 100%;
-
     display: flex;
     align-items: stretch;
     justify-content: stretch;
-
     border: 1px solid #e6e6e6;
     border-radius: 0 10px 10px 0;
-
     background: #ffffff;
-
     padding: 20px;
-
     box-sizing: border-box;
-
     overflow: hidden;
+}
 
+#settings-panel-host {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    display: flex;
 }
 
 /* =========================
@@ -212,10 +175,8 @@ MENU GROUPS
 ========================= */
 
 .settings-panel {
-
     width: 100%;
     display: none;
-
 }
 
 .settings-panel.active {
@@ -227,20 +188,16 @@ MENU GROUPS
 ========================= */
 
 .settings-panel h2 {
-
     font-size: 18px;
     font-weight: 600;
     color: #111;
     margin-bottom: 8px;
-
 }
 
 .settings-panel p {
-
     font-size: 13px;
     color: #6b6b6b;
     margin-bottom: 16px;
-
 }
 
 /* =========================
@@ -248,16 +205,11 @@ MENU GROUPS
 ========================= */
 
 .settings-card {
-
     border: 1px solid #ececec;
     border-radius: 8px;
-
     padding: 16px;
-
     background: #fafafa;
-
     margin-bottom: 16px;
-
 }
 
 /* =========================
@@ -265,50 +217,33 @@ MENU GROUPS
 ========================= */
 
 .settings-field {
-
     display: flex;
     flex-direction: column;
-
     gap: 6px;
-
     margin-bottom: 12px;
-
 }
 
 .settings-field span {
-
     font-size: 12px;
     font-weight: 600;
-
     color: #444;
-
 }
 
 .settings-field input,
 .settings-field textarea {
-
     width: 100%;
-
     padding: 10px 12px;
-
     border: 1px solid #e2e2e2;
     border-radius: 8px;
-
     font-size: 13px;
-
     background: #ffffff;
-
     outline: none;
-
     box-sizing: border-box;
-
 }
 
 .settings-field input:focus,
 .settings-field textarea:focus {
-
     border-color: #246e9d;
-
 }
 
 /* =========================
@@ -316,17 +251,12 @@ MENU GROUPS
 ========================= */
 
 .settings-row {
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     gap: 12px;
-
     padding: 10px 0;
-
     border-bottom: 1px solid #ececec;
-
 }
 
 .settings-row:last-child {
@@ -338,12 +268,9 @@ MENU GROUPS
 ========================= */
 
 .switch {
-
     position: relative;
-
     width: 42px;
     height: 24px;
-
 }
 
 .switch input {
@@ -351,48 +278,31 @@ MENU GROUPS
 }
 
 .switch-slider {
-
     position: absolute;
     inset: 0;
-
     background: #d8d8d8;
-
     border-radius: 20px;
-
     transition: background 0.18s ease;
-
 }
 
 .switch-slider::before {
-
     content: "";
-
     position: absolute;
-
     width: 18px;
     height: 18px;
-
     left: 3px;
     top: 3px;
-
     background: white;
-
     border-radius: 50%;
-
     transition: transform 0.18s ease;
-
 }
 
 .switch input:checked + .switch-slider {
-
     background: #246e9d;
-
 }
 
 .switch input:checked + .switch-slider::before {
-
     transform: translateX(18px);
-
 }
 
 /* =========================
@@ -400,27 +310,18 @@ MENU GROUPS
 ========================= */
 
 .settings-options {
-
     display: flex;
     gap: 10px;
-
 }
 
 .settings-choice {
-
     padding: 8px 12px;
-
     border-radius: 8px;
     border: 1px solid #e2e2e2;
-
     background: #fafafa;
-
     font-size: 12px;
-
     cursor: pointer;
-
     transition: background 0.18s ease;
-
 }
 
 .settings-choice:hover {
@@ -428,326 +329,7 @@ MENU GROUPS
 }
 
 .settings-choice.active {
-
     background: #e9f3fb;
-
     border-color: #cfe3f4;
-
     color: #246e9d;
-
-}
-
-/* =========================
-   PROFILE PANEL LAYOUT
-========================= */
-
-.settings-panel-profile {
-
-    width: 100%;
-    height: 100%;
-    display: none;
-    flex-direction: column;
-    min-height: 0;
-
-}
-
-.settings-panel-profile.active {
-    display: flex;
-}
-
-/* =========================
-   PROFILE BODY
-========================= */
-
-.settings-profile-body {
-
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-right: 20px;
-
-}
-
-/* =========================
-   PROFILE BOTTOM ACTIONS
-========================= */
-
-.settings-profile-bottom {
-
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    padding-top: 16px;
-    border-top: 1px solid #ececec;
-    background: #ffffff;
-
-}
-
-/* =========================
-   ZONES
-========================= */
-
-.settings-zone {
-    padding-bottom: 26px;
-}
-
-.settings-zone-intro {
-    padding-top: 4px;
-    padding-bottom: 10px;
-}
-
-.settings-zone-header {
-    margin-bottom: 16px;
-}
-
-.settings-zone-header h3 {
-    font-size: 16px;
-    font-weight: 600;
-    margin: 0 0 8px;
-}
-
-.settings-zone-header p {
-    font-size: 13px;
-    color: #6b6b6b;
-    margin: 0;
-}
-
-.settings-zone-intro .settings-zone-header h2 {
-    font-size: 22px;
-    font-weight: 700;
-    color: #171717;
-    margin: 0 0 8px;
-}
-
-.settings-zone-intro .settings-zone-header p {
-    font-size: 13px;
-    line-height: 1.6;
-    color: #6b6b6b;
-    margin: 0;
-}
-
-/* =========================
-   DIVIDER
-========================= */
-
-.settings-zone-divider {
-    height: 1px;
-    background: #ececec;
-    margin: 26px 0;
-}
-
-/* =========================
-   ZONE CONTENT
-========================= */
-
-.settings-zone-content-basic {
-
-    display: flex;
-    gap: 32px;
-    align-items: flex-start;
-
-}
-
-.settings-profile-main {
-    display: flex;
-    width: 100%;
-    align-items: flex-start;
-    gap: 32px;
-    box-sizing: border-box;
-}
-
-/* =========================
-   AVATAR
-========================= */
-
-.settings-avatar-section {
-
-    flex: 0 0 180px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-}
-
-#avatar-upload {
-    margin-top: 6px;
-    position: relative;
-    width: 140px;
-    height: 140px;
-    cursor: pointer;
-}
-
-#avatar-image-wrapper {
-    position: relative;
-    width: 140px;
-    height: 140px;
-    overflow: hidden;
-    border-radius: 50%;
-}
-
-#edit-avatar-preview {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: relative;
-    z-index: 1;
-}
-
-#avatar-mask {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    background:
-    radial-gradient(circle 70px at center,
-    transparent 70px,
-    rgba(255,255,255,0.55) 71px);
-}
-
-#avatar-mask::after {
-    content: "";
-    position: absolute;
-    width: 138px;
-    height: 138px;
-    border-radius: 50%;
-    border: 1px solid rgba(0,0,0,0.18);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-}
-
-#edit-avatar-input {
-    display: none;
-}
-
-#avatar-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    color: white;
-    background: rgba(0,0,0,0.55);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    z-index: 3;
-    border-radius: 50%;
-}
-
-#avatar-upload:hover #avatar-overlay {
-    opacity: 1;
-}
-
-.settings-avatar-help {
-
-    margin-top: 20px;
-    font-size: 11px;
-    line-height: 1.5;
-    color: #7a7a84;
-    text-align: center;
-    max-width: 160px;
-
-}
-
-/* =========================
-   PROFILE FIELDS
-========================= */
-
-.settings-profile-fields,
-.settings-profile-fields-left,
-.settings-profile-fields-right {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.edit-field {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 20px;
-}
-
-.edit-field label {
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 8px;
-    color: #949494;
-}
-
-.settings-panel-profile input,
-.settings-panel-profile textarea {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 12px 14px;
-    font-size: 14px;
-    border: 1px solid #d2d2d7;
-    border-radius: 12px;
-    outline: none;
-    background: #fff;
-    transition: border 0.15s ease, box-shadow 0.15s ease;
-}
-
-.settings-panel-profile input:focus,
-.settings-panel-profile textarea:focus {
-    border-color: #246e9d;
-    box-shadow: 0 0 0 3px rgba(36,110,157,0.12);
-}
-
-#edit-bio {
-    height: 44px;
-    min-height: 44px;
-    resize: none;
-}
-
-/* =========================
-   PROFILE BUTTONS
-========================= */
-
-.settings-profile-bottom button {
-    padding: 10px 18px;
-    font-size: 14px;
-    font-weight: 500;
-    background: transparent;
-    color: #1c1c1e;
-    border: 1px solid #d2d2d7;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.18s ease;
-}
-
-.settings-profile-bottom button:hover {
-    background: #f5f5f7;
-}
-
-#save-edit {
-    background: #246e9d;
-    border-color: #246e9d;
-    color: #ffffff;
-}
-
-#save-edit:hover {
-    background: #378bc0;
-    border-color: #378bc0;
-}
-
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 980px) {
-    .settings-profile-main,
-    .settings-zone-content-basic {
-        flex-direction: column;
-        gap: 24px;
-    }
-
-    .settings-avatar-section {
-        justify-content: flex-start;
-    }
 }
