@@ -13,7 +13,7 @@ const s3 = new S3Client({
 
 const supabase = createClient(
     process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY
+    process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 export default async function handler(req, res) {
@@ -47,14 +47,10 @@ export default async function handler(req, res) {
 
         const downloadUrl = await getSignedUrl(s3, command, { expiresIn: 60 });
 
-        return res.status(200).json({
-            downloadUrl
-        });
+        return res.status(200).json({ downloadUrl });
 
     } catch (err) {
-
-        console.error(err);
+        console.error("Download URL error:", err);
         return res.status(500).json({ error: "Failed to generate download URL" });
-
     }
 }
