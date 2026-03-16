@@ -130,3 +130,103 @@
         max-width: none;
     }
 }
+
+
+
+
+
+
+
+
+
+/* =========================
+   PREMIUM COLORED STYLE
+========================= */
+
+.app-info.app-info--color {
+
+    color: white;
+
+    border: none;
+
+    box-shadow:
+    0 14px 40px rgba(0,0,0,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.25);
+
+    backdrop-filter: blur(8px);
+}
+
+/* SUCCESS */
+
+.app-info.app-info--color.success {
+
+    background:
+    linear-gradient(
+    135deg,
+    #28c76f 0%,
+    #1f9d55 100%
+    );
+
+}
+
+/* ERROR */
+
+.app-info.app-info--color.error {
+
+    background:
+    linear-gradient(
+    135deg,
+    #ff5a5f 0%,
+    #e63946 100%
+    );
+
+}
+
+/* INFO */
+
+.app-info.app-info--color.info {
+
+    background:
+    linear-gradient(
+    135deg,
+    #3da5ff 0%,
+    #246e9d 100%
+    );
+
+}
+
+/* WARNING */
+
+.app-info.app-info--color.warning {
+
+    background:
+    linear-gradient(
+    135deg,
+    #ffb547 0%,
+    #e89b2e 100%
+    );
+
+}
+
+/* ICON */
+
+.app-info.app-info--color .app-info__icon {
+
+    background:
+    rgba(255,255,255,0.22);
+
+    color: white;
+
+    box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.25);
+}
+
+/* TEXT */
+
+.app-info.app-info--color .app-info__title {
+    color: white;
+}
+
+.app-info.app-info--color .app-info__message {
+    color: rgba(255,255,255,0.92);
+}
