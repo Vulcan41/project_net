@@ -129,3 +129,22 @@ export async function listMyFiles() {
 
     return data || [];
 }
+
+export async function getDownloadUrl(fileId) {
+
+    const res = await fetch("/api/storage/download-url", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fileId }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        throw new Error(data.error || "Failed to get download URL");
+    }
+
+    return data.downloadUrl;
+}
