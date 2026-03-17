@@ -109,7 +109,7 @@ export async function initCloud() {
         const storagePercent = document.getElementById("cloudStoragePercent");
         const storageRing = document.getElementById("cloudStorageRing");
 
-        const totalLimitBytes = 0.5 * 1024 * 1024 * 1024; // 0.5 GB
+        const totalLimitBytes = 1 * 1024 * 1024 * 1024; // 1 GB
 
         const usedBytes = files.reduce((sum, file) => {
             return sum + (Number(file.size_bytes) || 0);
@@ -119,7 +119,7 @@ export async function initCloud() {
         const roundedPercent = Math.round(percent);
 
         if (storageText) {
-            storageText.textContent = `${formatFileSize(usedBytes)} / 0.5 GB`;
+            storageText.textContent = `${formatFileSize(usedBytes)} / 1 GB`;
         }
 
         if (storagePercent) {
@@ -140,7 +140,12 @@ export async function initCloud() {
 
         const icon = document.createElement("div");
         icon.className = "cloud-file-icon";
-        icon.textContent = getFileIcon(file);
+        const img = document.createElement("img");
+        img.src = getFileIcon(file);
+        img.alt = "file";
+        img.className = "cloud-file-icon-img";
+
+        icon.appendChild(img);
 
         const meta = document.createElement("div");
         meta.className = "cloud-file-meta";
@@ -226,22 +231,24 @@ export async function initCloud() {
         const mime = (file.mime_type || "").toLowerCase();
         const name = (file.filename || "").toLowerCase();
 
-        if (mime.startsWith("image/")) return "🖼";
-        if (mime === "application/pdf" || name.endsWith(".pdf")) return "📄";
-        if (mime.startsWith("video/")) return "🎬";
-        if (mime.startsWith("audio/")) return "🎵";
+        if (mime.startsWith("image/")) return "assets/icon_jpg.png";
+        if (mime === "application/pdf" || name.endsWith(".pdf")) return "assets/icon_pdf.png";
+        if (mime.startsWith("video/")) return "assets/logo_5.png";
+        if (mime.startsWith("audio/")) return "assets/logo_5.png";
+
         if (
         name.endsWith(".zip") ||
         name.endsWith(".rar") ||
         name.endsWith(".7z")
-        ) return "🗜";
+        ) return "assets/logo_5.png";
+
         if (
         name.endsWith(".doc") ||
         name.endsWith(".docx") ||
         name.endsWith(".txt")
-        ) return "📝";
+        ) return "assets/logo_5.png";
 
-        return "📁";
+        return "assets/logo_5.png";
     }
 
     await refreshFiles();

@@ -74,8 +74,9 @@
 
 .cloud-upload-subtitle {
     font-size: 13px;
-    line-height: 1.6;
+    line-height: 1;
     color: #6b6b6b;
+    margin-bottom: 10px;
 }
 
 .cloud-upload-actions {
@@ -533,7 +534,7 @@
 .cloud-upload-box {
     flex: 1 1 auto;
     min-width: 0;
-    height: 40px;
+    height: 70px;
     background: transparent;
     border: 2px dotted #c7c7cc;
     border-radius: 12px;
@@ -645,4 +646,56 @@
 
 .hidden {
     display: none;
+}
+
+
+
+
+
+
+.cloud-file-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(36, 110, 157, 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cloud-file-icon-img {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+}
+
+
+
+
+
+.cloud-upload-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.cloud-upload-text {
+    text-align: center;
+}
+
+.cloud-upload-box-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0;
+}
+
+.cloud-upload-box-image img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: block;
 }
