@@ -1,0 +1,17 @@
+.members {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.members h1 {
+    margin: 0;
+    font-size: 26px;
+}
+
+#members-project-info {
+    padding: 12px;
+    background: #f3f4f6;
+    border-radius: 10px;
+    font-size: 14px;
+}

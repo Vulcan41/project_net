@@ -1,0 +1,23 @@
+.overview {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.overview h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.overview-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.overview-meta span {
+    padding: 8px 12px;
+    background: #f3f4f6;
+    border-radius: 999px;
+    font-size: 14px;
+}
