@@ -1,0 +1,162 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+#profile-page {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 90px);
+}
+
+/* =============================
+   TOP AREA
+============================= */
+
+#top-area {
+
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 40px;
+    border-bottom: 1px solid #e0e0e0;
+
+}
+
+/* LEFT SIDE */
+
+#profile-left {
+
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+}
+
+/* avatar */
+
+#profile-avatar {
+
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+
+}
+
+/* name + username */
+
+#profile-main-info {
+
+    display: flex;
+    flex-direction: column;
+
+}
+
+#profile-fullname {
+
+    font-size: 20px;
+    font-weight: 600;
+
+}
+
+#profile-username {
+
+    margin-top: 4px;
+    color: #777;
+
+}
+
+#profile-bio {
+
+    margin-top: 14px;
+    font-size: 14px;
+    color: #000000;
+    max-width: 420px;
+
+}
+
+/* =========================
+   PROFILE STATS
+========================= */
+
+#profile-stats {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.profile-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* NUMBER */
+
+.profile-stat-number {
+    font-size: 20px;
+    font-weight: 600;
+    color: #000;
+}
+
+/* LABEL */
+
+.profile-stat-label {
+    font-size: 13px;
+    color: #7a7a7a;
+    margin-top: 2px;
+}
+
+/* =============================
+   MIDDLE CONTENT (scroll area)
+============================= */
+
+#profile-content {
+
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px 40px;
+
+}
+
+/* =============================
+   BOTTOM STRIP
+============================= */
+
+#profile-actions {
+
+    flex-shrink: 0;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 30px;
+    border-radius: 0 0 10px 10px;
+    border-top: 1px solid #e0e0e0;
+    background: white;
+
+}
+
+/* BUTTON */
+
+#profile-edit-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+
+    background: transparent;
+    color: #1c1c1e;
+
+    border: 1px solid #d2d2d7;
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    transition: all 0.18s ease;
+}
+
+#profile-edit-btn:hover {
+    background: #f5f5f7;
+}

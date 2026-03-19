@@ -1,0 +1,88 @@
+<div class="cloud-panel active">
+
+    <section class="cloud-top">
+
+        <div class="cloud-upload-card">
+
+            <!-- ========================
+                 DATA STRIP
+            ========================= -->
+
+            <div class="cloud-top-data">
+
+                <div class="cloud-top-main">
+
+                    <div class="cloud-upload-box">
+                        <div class="cloud-upload-left">
+                            <div class="cloud-upload-box-image">
+                                <img src="assets/cloud_4.png" alt="Upload">
+                            </div>
+
+                            <div class="cloud-upload-text">
+                                <div class="cloud-upload-subtitle">
+                                    Επιλέξτε ένα αρχείο από τη συσκευή σας
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cloud-data-actions">
+                        <div id="uploadConfirm" class="cloud-upload-confirm hidden">
+                            <span>Ανέβασμα αρχείου;</span>
+                            <button id="confirmUploadBtn">Ναι</button>
+                            <button id="cancelUploadBtn">Όχι</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cloud-upload-actions">
+                    <input type="file" id="fileInput">
+                </div>
+
+                <div class="cloud-storage-usage">
+
+                    <div class="cloud-storage-ring-block">
+                        <div class="cloud-storage-ring" id="cloudStorageRing" style="--progress: 0%;">
+                            <div class="cloud-storage-ring-inner">
+                                <span id="cloudStoragePercent">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cloud-storage-info">
+                        <div class="cloud-storage-label">ΙΔΙΩΤΙΚΗ ΘΥΡΙΔΑ</div>
+                        <div class="cloud-storage-values" id="cloudStorageText">0 MB / 0.5 GB</div>
+                        <div class="cloud-storage-foot">
+                            Χρήση προσωπικού χώρου
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ========================
+         FILES AREA
+    ========================= -->
+
+    <section class="cloud-bottom">
+
+        <div class="cloud-files-shell">
+
+            <div class="cloud-files-toolbar">
+                <div class="cloud-files-count" id="cloudFilesCount">
+                    0 αρχεία
+                </div>
+            </div>
+
+            <div id="fileList" class="cloud-file-list"></div>
+
+        </div>
+
+    </section>
+
+</div>

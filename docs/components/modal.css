@@ -1,0 +1,65 @@
+.app-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-hidden {
+    display: none !important;
+}
+
+.app-modal-dialog {
+    background: white;
+    padding: 25px 24px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    min-width: 280px;
+    text-align: center;
+    pointer-events: auto;
+}
+
+.app-modal-dialog p {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+}
+
+.app-modal-actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.app-modal-actions button {
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 7px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #333;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.app-modal-actions button:hover {
+    background: #f6f6f6;
+    border-color: #bbb;
+}
+
+#app-modal-cancel {
+    background: #246e9d;
+    border-color: #246e9d;
+    color: #ffffff;
+}
+
+#app-modal-cancel:hover {
+    background: #378bc0;
+    border-color: #378bc0;
+}

@@ -1,0 +1,103 @@
+<header id="top-header">
+
+    <img id="header-logo" src="assets/logo_5.png" alt="Logo">
+
+    <div id="header-content">
+
+        <div id="header-search">
+            <input id="search-input" type="text" placeholder="Αναζήτηση...">
+            <div id="search-results"></div>
+        </div>
+
+        <div id="user-actions">
+
+            <button class="user-action-btn"
+                    id="home-btn"
+                    data-tooltip="Αρχική">
+                <img src="assets/home_icon.png" alt="">
+            </button>
+
+            <button class="user-action-btn"
+                    id="friends-btn"
+                    data-tooltip="Επαφές">
+                <img src="assets/friends_2.png" alt="">
+                <span id="friends-dot" class="friends-dot hidden"></span>
+            </button>
+
+            <button class="user-action-btn"
+                    id="messages-btn"
+                    data-tooltip="Μηνύματα">
+                <img src="assets/1111.png" alt="">
+                <span id="messages-dot" class="header-dot hidden"></span>
+            </button>
+
+            <button class="user-action-btn"
+                    id="notifications-btn"
+                    data-tooltip="Ειδοποιήσεις">
+                <img src="assets/2222.png" alt="">
+                <span id="notifications-dot" class="header-dot hidden"></span>
+            </button>
+
+            <button class="user-action-btn"
+                    id="settings-btn"
+                    data-tooltip="Ρυθμίσεις">
+                <img src="assets/3333.png" alt="">
+            </button>
+
+        </div>
+
+        <button class="user-action-btn"
+                id="credits-indicator"
+                data-tooltip="Credits">
+            <span id="credits-value">--</span>
+            <span class="credits-star">✦</span>
+        </button>
+
+        <div class="user-wrapper">
+
+            <div class="tooltip-wrapper">
+                <button id="user-btn">
+                    <img src="assets/user_icon_2.jpg" alt="User">
+                </button>
+            </div>
+
+            <div id="user-info">
+                <div id="user-name">Username</div>
+            </div>
+
+            <div id="user-dropdown" class="dropdown-menu dropdown-hidden">
+                <button class="dropdown-item" id="dropdown-profile">
+                    Προφίλ
+                </button>
+                <button class="dropdown-item" id="dropdown-logout">
+                    Αποσύνδεση
+                </button>
+            </div>
+
+        </div>
+
+        <button class="user-action-btn"
+                id="cloud-btn"
+                data-tooltip="cloud">
+            <img src="assets/cloud_4.png" alt="">
+        </button>
+
+        <!-- <button class="user-action-btn" id="debug-btn" data-tooltip="Debug">🐞</button> -->
+
+    </div>
+
+</header>
+
+<!-- LOGOUT MODAL -->
+
+<div id="logout-modal" class="modal-hidden">
+    <div id="logout-dialog">
+        <p>Είστε σίγουροι ότι θέλετε να αποσυνδεθείτε;</p>
+
+        <div class="modal-actions">
+            <button id="cancel-logout">Ακύρωση</button>
+            <button id="confirm-logout">Αποσύνδεση</button>
+        </div>
+
+    </div>
+</div>

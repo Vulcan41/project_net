@@ -1,0 +1,52 @@
+<div id="setup-project-modal" class="setup-project-modal hidden">
+  <div id="setup-project-backdrop" class="setup-project-backdrop"></div>
+
+  <div class="setup-project-panel" role="dialog" aria-modal="true" aria-labelledby="setup-project-title">
+    <div class="setup-project-header">
+      <h2 id="setup-project-title" class="setup-project-title">Νεο Project</h2>
+      <button id="setup-project-close-btn" class="setup-project-close-btn" type="button">×</button>
+    </div>
+
+    <div class="setup-project-body">
+      <div class="setup-project-field">
+        <label for="setup-project-name">Ονομα</label>
+        <input
+                id="setup-project-name"
+                type="text"
+                maxlength="120"
+                placeholder="Π.χ. Team Scheduler"
+        />
+      </div>
+
+      <div class="setup-project-field">
+        <label for="setup-project-description">Περιγραφη</label>
+        <textarea
+                id="setup-project-description"
+                rows="4"
+                maxlength="500"
+                placeholder="Γραψε μια μικρη περιγραφη"
+        ></textarea>
+      </div>
+
+      <div class="setup-project-field">
+        <label for="setup-project-visibility">Ορατοτητα</label>
+        <select id="setup-project-visibility">
+          <option value="private">Private</option>
+          <option value="public">Public</option>
+        </select>
+      </div>
+
+      <div id="setup-project-error" class="setup-project-error hidden"></div>
+    </div>
+
+    <div class="setup-project-footer">
+      <button id="setup-project-submit-btn" class="setup-project-submit-btn" type="button">
+        Δημιουργια
+      </button>
+
+      <button id="setup-project-cancel-btn" class="setup-project-cancel-btn" type="button">
+        Ακυρωση
+      </button>
+    </div>
+  </div>
+</div>

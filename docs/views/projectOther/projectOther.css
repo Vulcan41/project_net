@@ -1,0 +1,97 @@
+.project-other-view {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px;
+}
+
+.project-other-header {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.project-other-back-btn {
+    align-self: flex-start;
+    border: 1px solid #d0d7de;
+    background: #fff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.project-other-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.project-other-kicker {
+    margin: 0;
+    font-size: 12px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    letter-spacing: 0.08em;
+}
+
+.project-other-title {
+    margin: 0;
+    font-size: 32px;
+    line-height: 1.1;
+}
+
+.project-other-description {
+    margin: 0;
+    font-size: 15px;
+    opacity: 0.8;
+}
+
+.project-other-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.project-other-pill {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    font-size: 14px;
+}
+
+.project-other-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.project-other-section-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 18px;
+}
+
+.project-other-section-card h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.project-other-section-card p {
+    margin: 0;
+    opacity: 0.8;
+    line-height: 1.5;
+}
+
+.project-other-error {
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #fee2e2;
+    color: #991b1b;
+    font-size: 14px;
+}
+
+.hidden {
+    display: none !important;
+}

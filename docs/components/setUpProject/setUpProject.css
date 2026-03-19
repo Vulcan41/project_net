@@ -1,0 +1,115 @@
+.setup-project-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+}
+
+.setup-project-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.setup-project-panel {
+    position: relative;
+    width: min(520px, calc(100vw - 32px));
+    margin: 80px auto 0;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.16);
+    overflow: hidden;
+}
+
+.setup-project-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.setup-project-title {
+    margin: 0;
+    font-size: 20px;
+}
+
+.setup-project-close-btn {
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.setup-project-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+}
+
+.setup-project-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.setup-project-field label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.setup-project-field input,
+.setup-project-field textarea,
+.setup-project-field select {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.setup-project-field textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.setup-project-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 18px 20px 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.setup-project-submit-btn,
+.setup-project-cancel-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 12px 18px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.setup-project-submit-btn {
+    background: #111827;
+    color: #ffffff;
+}
+
+.setup-project-cancel-btn {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.setup-project-error {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #fee2e2;
+    color: #991b1b;
+    font-size: 14px;
+}
+
+.hidden {
+    display: none !important;
+}
