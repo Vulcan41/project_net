@@ -2,6 +2,7 @@ import { supabase } from "../../core/supabase.js";
 import { loadView } from "../../core/router.js";
 
 let projects = [];
+let currentUserId = null;
 
 export async function initBasic() {
     await ensureSetUpProjectComponent();
@@ -48,21 +49,38 @@ async function loadProjects() {
     if (userError) {
         console.error("Error getting user:", userError);
         projects = [];
+        currentUserId = null;
         renderProjects();
         return;
     }
 
     if (!user) {
         projects = [];
+        currentUserId = null;
         renderProjects();
         return;
     }
 
+    currentUserId = user.id;
+
     const { data, error } = await supabase
-        .from("projects")
-        .select("id, name, description, visibility, created_at")
-        .eq("owner_id", user.id)
-        .order("created_at", { ascending: false });
+        .from("project_members")
+        .select(`
+            role,
+            membership_status,
+            projects (
+                id,
+                name,
+                description,
+                visibility,
+                status,
+                created_at,
+                owner_id,
+                members_count
+            )
+        `)
+        .eq("user_id", user.id)
+        .eq("membership_status", "active");
 
     if (error) {
         console.error("Error loading projects:", error);
@@ -71,7 +89,19 @@ async function loadProjects() {
         return;
     }
 
-    projects = data ?? [];
+    projects = (data ?? [])
+        .map((row) => {
+        const project = row.projects;
+        if (!project) return null;
+
+        return {
+            ...project,
+            current_user_role: row.role
+        };
+    })
+        .filter(Boolean)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
     renderProjects();
 }
 
@@ -93,15 +123,10 @@ function setupCreateProjectButton() {
                     error: userError
                 } = await supabase.auth.getUser();
 
-                if (userError) {
-                    throw userError;
-                }
+                if (userError) throw userError;
+                if (!user) throw new Error("Δεν βρεθηκε authenticated user.");
 
-                if (!user) {
-                    throw new Error("Δεν βρεθηκε authenticated user.");
-                }
-
-                const { error } = await supabase
+                const { data: projectData, error: projectError } = await supabase
                     .from("projects")
                     .insert([
                     {
@@ -111,11 +136,24 @@ function setupCreateProjectButton() {
                         visibility,
                         status: "active"
                     }
+                ])
+                    .select()
+                    .single();
+
+                if (projectError) throw projectError;
+
+                const { error: memberError } = await supabase
+                    .from("project_members")
+                    .insert([
+                    {
+                        project_id: projectData.id,
+                        user_id: user.id,
+                        role: "owner",
+                        membership_status: "active"
+                    }
                 ]);
 
-                if (error) {
-                    throw error;
-                }
+                if (memberError) throw memberError;
 
                 await loadProjects();
             }
@@ -164,23 +202,44 @@ function renderProjects() {
 
     grid.innerHTML = projects
         .map((project) => {
+        const isOwner = project.owner_id === currentUserId;
+
+        const visibilityClass =
+        project.visibility === "public"
+        ? "basic-project-pill-visibility-public"
+        : "basic-project-pill-visibility-private";
+
+        const roleClass =
+        isOwner
+        ? "basic-project-pill-role-owner"
+        : "basic-project-pill-role-member";
+
+        const membersCount = project.members_count ?? 1;
+
         return `
                 <article
                     class="basic-project-card basic-project-open"
                     data-project-id="${project.id}"
+                    data-project-owner-id="${project.owner_id}"
                 >
                     <div class="basic-project-card-top">
                         <div class="basic-project-card-badge">
                             ${project.name.charAt(0).toUpperCase()}
                         </div>
 
-                        <button
-                            class="basic-project-delete"
-                            type="button"
-                            data-project-id="${project.id}"
-                        >
-                            Διαγραφή
-                        </button>
+                        ${
+                            isOwner
+                                ? `
+                                    <button
+                                        class="basic-project-delete"
+                                        type="button"
+                                        data-project-id="${project.id}"
+                                    >
+                                        Διαγραφή
+                                    </button>
+                                `
+                                : ""
+                        }
                     </div>
 
                     <div class="basic-project-main">
@@ -191,8 +250,17 @@ function renderProjects() {
                     </div>
 
                     <div class="basic-project-meta">
-                        <span class="basic-project-pill">${project.visibility}</span>
-                        <span class="basic-project-pill">UI + DB</span>
+                        <span class="basic-project-pill ${visibilityClass}">
+                            ${project.visibility}
+                        </span>
+
+                        <span class="basic-project-pill ${roleClass}">
+                            ${isOwner ? "owner" : "member"}
+                        </span>
+
+                        <span class="basic-project-pill basic-project-pill-neutral">
+                            ${membersCount} ${membersCount === 1 ? "member" : "members"}
+                        </span>
                     </div>
                 </article>
             `;
@@ -211,11 +279,35 @@ function bindProjectCards() {
     const cards = document.querySelectorAll(".basic-project-open");
 
     cards.forEach((card) => {
-        card.onclick = (event) => {
+        card.onclick = async (event) => {
             if (event.target.closest(".basic-project-delete")) return;
 
             const projectId = card.dataset.projectId;
-            loadView("project", projectId);
+            const ownerId = card.dataset.projectOwnerId;
+
+            if (ownerId === currentUserId) {
+                loadView("project", projectId);
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from("project_members")
+                .select("membership_status")
+                .eq("project_id", projectId)
+                .eq("user_id", currentUserId)
+                .maybeSingle();
+
+            if (error) {
+                console.error("Error checking membership:", error);
+                loadView("projectOther", projectId);
+                return;
+            }
+
+            if (data && data.membership_status === "active") {
+                loadView("projectMember", projectId);
+            } else {
+                loadView("projectOther", projectId);
+            }
         };
     });
 }

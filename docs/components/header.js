@@ -348,6 +348,29 @@ function setupSearch() {
 
                         if (currentUser && project.owner_id === currentUser.id) {
                             loadView("project", project.id);
+                            return;
+                        }
+
+                        if (!currentUser) {
+                            loadView("projectOther", project.id);
+                            return;
+                        }
+
+                        const { data, error } = await supabase
+                            .from("project_members")
+                            .select("membership_status")
+                            .eq("project_id", project.id)
+                            .eq("user_id", currentUser.id)
+                            .maybeSingle();
+
+                        if (error) {
+                            console.error("Membership check failed:", error);
+                            loadView("projectOther", project.id);
+                            return;
+                        }
+
+                        if (data && data.membership_status === "active") {
+                            loadView("projectMember", project.id);
                         } else {
                             loadView("projectOther", project.id);
                         }

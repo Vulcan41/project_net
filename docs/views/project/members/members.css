@@ -1,17 +1,93 @@
-.members {
+.members-section {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
 }
 
-.members h1 {
+.members-section-header h1 {
+    margin: 0 0 6px 0;
+    font-size: 24px;
+}
+
+.members-section-header p {
     margin: 0;
-    font-size: 26px;
+    color: #7a7a84;
+    font-size: 13px;
 }
 
-#members-project-info {
-    padding: 12px;
-    background: #f3f4f6;
+#members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.member-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding: 14px 16px;
+    border: 1px solid #e6e6e6;
     border-radius: 10px;
+    background: #ffffff;
+}
+
+.member-row-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.member-name {
     font-size: 14px;
+    font-weight: 600;
+    color: #171717;
+}
+
+.member-username {
+    font-size: 12px;
+    color: #7a7a84;
+}
+
+.member-row-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.member-pill {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    font-size: 12px;
+    color: #374151;
+}
+
+.member-empty {
+    padding: 16px;
+    border: 1px dashed #d1d5db;
+    border-radius: 10px;
+    color: #7a7a84;
+    font-size: 13px;
+    background: #fafafa;
+}
+
+.member-action-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.member-approve-btn {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.member-reject-btn {
+    background: #fee2e2;
+    color: #991b1b;
 }

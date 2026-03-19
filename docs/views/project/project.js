@@ -86,7 +86,7 @@ async function loadSection(section) {
     if (!container) return;
 
     const htmlPath = `./views/project/${section}/${section}.html`;
-    const jsPath = `../views/project/${section}/${section}.js`;
+    const jsPath = `./${section}/${section}.js`;
     const cssPath = `./views/project/${section}/${section}.css`;
 
     /* LOAD HTML */

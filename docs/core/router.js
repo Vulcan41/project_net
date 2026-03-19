@@ -12,6 +12,7 @@ const routes = {
     testCloud: "testCloud",
     cloud: "cloud",
     project: "project",
+    projectMember: "projectMember",
     projectOther: "projectOther"
 
 };

@@ -95,3 +95,37 @@
 .hidden {
     display: none !important;
 }
+
+
+
+
+.project-other-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.project-request-btn {
+    align-self: flex-start;
+    border: none;
+    background: #111827;
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font: inherit;
+}
+
+.project-request-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.project-request-message {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.hidden {
+    display: none !important;
+}
