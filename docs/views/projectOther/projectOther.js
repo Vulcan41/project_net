@@ -1,22 +1,8 @@
 import { supabase } from "../../core/supabase.js";
 import { loadView } from "../../core/router.js";
 
-let currentProject = null;
-let currentUser = null;
-
 export async function initProjectOther(projectId) {
     setupBackButton();
-
-    const {
-        data: { user },
-        error: userError
-    } = await supabase.auth.getUser();
-
-    if (userError) {
-        console.error("Error getting user:", userError);
-    }
-
-    currentUser = user;
 
     if (!projectId) {
         showError("Δεν βρέθηκε project id.");
@@ -24,8 +10,6 @@ export async function initProjectOther(projectId) {
     }
 
     await loadProject(projectId);
-    setupRequestButton();
-    await refreshRequestState();
 }
 
 function setupBackButton() {
@@ -40,7 +24,7 @@ function setupBackButton() {
 async function loadProject(projectId) {
     const { data, error } = await supabase
         .from("projects")
-        .select("id, name, description, owner_id, visibility, status, created_at")
+        .select("id, name, description, visibility, status, owner_id, created_at, avatar_url")
         .eq("id", projectId)
         .single();
 
@@ -55,170 +39,190 @@ async function loadProject(projectId) {
         return;
     }
 
-    currentProject = data;
-    renderProject(data);
+    await renderProject(data);
+    await setupRequestButton(data.id);
 }
 
-function renderProject(project) {
+async function renderProject(project) {
     const title = document.getElementById("project-other-title");
     const description = document.getElementById("project-other-description");
-    const owner = document.getElementById("project-other-owner");
-    const created = document.getElementById("project-other-created");
     const visibility = document.getElementById("project-other-visibility");
     const status = document.getElementById("project-other-status");
+    const owner = document.getElementById("project-other-owner");
+    const created = document.getElementById("project-other-created");
     const meta = document.getElementById("project-other-meta");
+    const avatar = document.getElementById("project-other-avatar");
 
-    if (title) title.textContent = project.name ?? "Untitled project";
+    if (title) {
+        title.textContent = project.name ?? "Untitled project";
+    }
 
     if (description) {
         description.textContent = project.description || "Χωρίς περιγραφή.";
     }
 
-    if (owner) owner.textContent = `Owner: ${project.owner_id}`;
-
-    if (created) {
-        const date = project.created_at
-        ? new Date(project.created_at).toLocaleString()
-        : "-";
-        created.textContent = `Created: ${date}`;
+    if (visibility) {
+        visibility.textContent = project.visibility;
+        visibility.className = `project-other-pill ${
+            project.visibility === "public"
+                ? "project-other-pill-public"
+                : "project-other-pill-private"
+        }`;
     }
 
-    if (visibility) visibility.textContent = `Visibility: ${project.visibility}`;
-    if (status) status.textContent = `Status: ${project.status}`;
+    if (status) {
+        status.textContent = project.status ?? "active";
+    }
 
-    if (meta) meta.classList.remove("hidden");
+    if (created) {
+        created.textContent = formatCreatedAt(project.created_at);
+    }
+
+    if (avatar) {
+        avatar.innerHTML = project.avatar_url
+        ? `<img src="${escapeHtml(project.avatar_url)}" alt="${escapeHtml(project.name || "Project")} avatar" />`
+        : `<span class="project-other-avatar-fallback">${escapeHtml((project.name || "P").charAt(0).toUpperCase())}</span>`;
+    }
+
+    if (owner && project.owner_id) {
+        const { data: ownerProfile, error: ownerError } = await supabase
+            .from("profiles")
+            .select("username")
+            .eq("id", project.owner_id)
+            .single();
+
+        if (ownerError) {
+            console.error("Owner load error:", ownerError);
+            owner.textContent = "by @unknown";
+        } else {
+            owner.textContent = `by @${ownerProfile?.username || "user"}`;
+        }
+    }
+
+    if (meta) {
+        meta.classList.remove("hidden");
+    }
 }
 
-function setupRequestButton() {
-    const btn = document.getElementById("project-request-btn");
-    if (!btn) return;
+async function setupRequestButton(projectId) {
+    const button = document.getElementById("project-request-btn");
+    const message = document.getElementById("project-request-message");
 
-    btn.onclick = async () => {
-        if (!currentProject?.id || !currentUser?.id) return;
+    if (!button || !message) return;
 
-        btn.disabled = true;
-        clearRequestMessage();
+    const {
+        data: { user },
+        error: userError
+    } = await supabase.auth.getUser();
 
-        try {
-            const { data: existing, error: existingError } = await supabase
+    if (userError) {
+        console.error("Error getting user:", userError);
+        button.disabled = true;
+        message.textContent = "Αποτυχία φόρτωσης χρήστη.";
+        message.classList.remove("hidden");
+        return;
+    }
+
+    if (!user) {
+        button.disabled = true;
+        message.textContent = "Πρέπει να συνδεθείτε για να ζητήσετε συμμετοχή.";
+        message.classList.remove("hidden");
+        return;
+    }
+
+    const { data: existingMembership, error: membershipError } = await supabase
+        .from("project_members")
+        .select("id, membership_status")
+        .eq("project_id", projectId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    if (membershipError) {
+        console.error("Membership check failed:", membershipError);
+        button.disabled = true;
+        message.textContent = "Αποτυχία ελέγχου συμμετοχής.";
+        message.classList.remove("hidden");
+        return;
+    }
+
+    if (existingMembership?.membership_status === "pending") {
+        button.disabled = true;
+        button.textContent = "Request pending";
+        message.textContent = "Το αίτημά σας εκκρεμεί.";
+        message.classList.remove("hidden");
+        return;
+    }
+
+    if (existingMembership?.membership_status === "active") {
+        button.disabled = true;
+        button.textContent = "Already a member";
+        message.textContent = "Είστε ήδη μέλος αυτού του project.";
+        message.classList.remove("hidden");
+        return;
+    }
+
+    button.disabled = false;
+    button.textContent = "Request to join";
+
+    button.onclick = async () => {
+        button.disabled = true;
+
+        const payload = existingMembership
+        ? { membership_status: "pending" }
+        : {
+            project_id: projectId,
+            user_id: user.id,
+            role: "member",
+            membership_status: "pending"
+        };
+
+        let error;
+
+        if (existingMembership) {
+            const response = await supabase
                 .from("project_members")
-                .select("id, membership_status")
-                .eq("project_id", currentProject.id)
-                .eq("user_id", currentUser.id)
-                .maybeSingle();
+                .update(payload)
+                .eq("id", existingMembership.id);
 
-            if (existingError) throw existingError;
-
-            if (existing) {
-                if (existing.membership_status === "active") {
-                    showRequestMessage("You are already a member.");
-                    await refreshRequestState();
-                    return;
-                }
-
-                if (existing.membership_status === "pending") {
-                    showRequestMessage("Your request is already pending.");
-                    await refreshRequestState();
-                    return;
-                }
-
-                if (existing.membership_status === "removed") {
-                    const { error: updateError } = await supabase
-                        .from("project_members")
-                        .update({ membership_status: "pending" })
-                        .eq("id", existing.id);
-
-                    if (updateError) throw updateError;
-
-                    showRequestMessage("Join request sent again.");
-                    await refreshRequestState();
-                    return;
-                }
-            }
-
-            const { error: insertError } = await supabase
+            error = response.error;
+        } else {
+            const response = await supabase
                 .from("project_members")
-                .insert([
-                {
-                    project_id: currentProject.id,
-                    user_id: currentUser.id,
-                    role: "member",
-                    membership_status: "pending"
-                }
-            ]);
+                .insert([payload]);
 
-            if (insertError) throw insertError;
-
-            showRequestMessage("Join request sent.");
-            await refreshRequestState();
-        } catch (error) {
-            console.error("Request to join failed:", error);
-            showRequestMessage("Failed to send request.");
-            await refreshRequestState();
+            error = response.error;
         }
+
+        if (error) {
+            console.error("Request to join failed:", error);
+            button.disabled = false;
+            message.textContent = "Αποτυχία αποστολής αιτήματος.";
+            message.classList.remove("hidden");
+            return;
+        }
+
+        button.textContent = "Request pending";
+        message.textContent = "Το αίτημά σας στάλθηκε.";
+        message.classList.remove("hidden");
     };
 }
 
-async function refreshRequestState() {
-    const btn = document.getElementById("project-request-btn");
-    if (!btn || !currentProject?.id || !currentUser?.id) return;
+function formatCreatedAt(dateString) {
+    if (!dateString) return "created recently";
 
-    const { data, error } = await supabase
-        .from("project_members")
-        .select("membership_status")
-        .eq("project_id", currentProject.id)
-        .eq("user_id", currentUser.id)
-        .maybeSingle();
+    const date = new Date(dateString);
 
-    if (error) {
-        console.error("Error checking request state:", error);
-        btn.textContent = "Request to join";
-        btn.disabled = false;
-        return;
+    if (Number.isNaN(date.getTime())) {
+        return "created recently";
     }
 
-    if (!data) {
-        btn.textContent = "Request to join";
-        btn.disabled = false;
-        return;
-    }
+    const formatted = date.toLocaleDateString("el-GR", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+    });
 
-    if (data.membership_status === "pending") {
-        btn.textContent = "Request pending";
-        btn.disabled = true;
-        return;
-    }
-
-    if (data.membership_status === "active") {
-        btn.textContent = "Already a member";
-        btn.disabled = true;
-        return;
-    }
-
-    if (data.membership_status === "removed") {
-        btn.textContent = "Request again";
-        btn.disabled = false;
-        return;
-    }
-
-    btn.textContent = "Request to join";
-    btn.disabled = false;
-}
-
-function showRequestMessage(message) {
-    const box = document.getElementById("project-request-message");
-    if (!box) return;
-
-    box.textContent = message;
-    box.classList.remove("hidden");
-}
-
-function clearRequestMessage() {
-    const box = document.getElementById("project-request-message");
-    if (!box) return;
-
-    box.textContent = "";
-    box.classList.add("hidden");
+    return "created " + formatted;
 }
 
 function showError(message) {
@@ -227,4 +231,15 @@ function showError(message) {
 
     errorBox.textContent = message;
     errorBox.classList.remove("hidden");
+
+
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }

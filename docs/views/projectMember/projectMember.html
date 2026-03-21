@@ -1,28 +1,50 @@
-<section class="project-member-view">
-    <div class="project-member-header">
-        <button id="project-member-back-btn" class="project-member-back-btn" type="button">
-            ← Πίσω
-        </button>
+<section class="project-member-layout">
+    <div class="project-member-sidebar">
 
-        <div class="project-member-heading">
-            <p class="project-member-kicker">Project</p>
-            <h1 id="project-member-title" class="project-member-title">Loading...</h1>
-            <p id="project-member-description" class="project-member-description"></p>
+        <div class="project-member-sidebar-top">
+            <div class="project-member-title" id="project-member-sidebar-title">Project</div>
+            <div class="project-member-subtitle" id="project-member-sidebar-subtitle"></div>
+            <div class="project-member-role-badge" id="project-member-sidebar-role"></div>
+
+            <div class="project-member-owner" id="project-member-owner">
+                <div class="project-member-owner-label">A project by:</div>
+
+                <div class="project-member-owner-row">
+                    <div class="project-member-owner-avatar"></div>
+                    <div class="project-member-owner-username">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="project-member-menu">
+            <div class="project-member-menu-label">Menu</div>
+
+            <div class="project-member-menu-group">
+                <button class="project-member-menu-btn active" data-section="overview">
+                    <img src="./assets/project_overview_2.png" class="project-member-menu-icon" />
+                    Overview
+                </button>
+
+                <button class="project-member-menu-btn" data-section="members">
+                    <img src="./assets/project_members.png" class="project-member-menu-icon" />
+                    Members
+                </button>
+            </div>
+        </div>
+
+        <div class="project-member-sidebar-actions">
+            <button
+                    id="project-member-back-btn"
+                    class="project-member-back-btn"
+                    type="button"
+            >
+                Back to dashboard
+            </button>
         </div>
     </div>
 
-    <div id="project-member-meta" class="project-member-meta hidden">
-        <span id="project-member-role" class="project-member-pill"></span>
-        <span id="project-member-visibility" class="project-member-pill"></span>
-        <span id="project-member-status" class="project-member-pill"></span>
-    </div>
-
-    <div id="project-member-error" class="project-member-error hidden"></div>
-
-    <div class="project-member-sections">
-        <article class="project-member-section-card">
-            <h2>Member view</h2>
-            <p>You are an accepted member of this project.</p>
-        </article>
-    </div>
+    <main class="project-member-body">
+        <div id="project-member-error" class="project-member-error hidden"></div>
+        <div id="project-member-body-content"></div>
+    </main>
 </section>

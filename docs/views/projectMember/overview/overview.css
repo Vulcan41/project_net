@@ -1,0 +1,28 @@
+.project-member-section-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 18px;
+    max-width: 640px;
+}
+
+.project-member-section-kicker {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9a9aa3;
+}
+
+.project-member-section-card h1 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+    color: #171717;
+}
+
+.project-member-section-card p {
+    margin: 0;
+    color: #6b7280;
+    line-height: 1.5;
+}

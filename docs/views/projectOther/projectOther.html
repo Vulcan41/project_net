@@ -1,42 +1,69 @@
 <section class="project-other-view">
-    <div class="project-other-header">
+    <div class="project-other-topbar">
         <button id="project-other-back-btn" class="project-other-back-btn" type="button">
-            ← Πίσω
+            ← Back
         </button>
-
-        <div class="project-other-actions">
-            <button id="project-request-btn" class="project-request-btn" type="button">
-                Request to join
-            </button>
-
-            <div id="project-request-message" class="project-request-message hidden"></div>
-        </div>
-
-        <div class="project-other-heading">
-            <p class="project-other-kicker">Project</p>
-            <h1 id="project-other-title" class="project-other-title">Loading...</h1>
-            <p id="project-other-description" class="project-other-description"></p>
-        </div>
-    </div>
-
-    <div id="project-other-meta" class="project-other-meta hidden">
-        <span id="project-other-owner" class="project-other-pill"></span>
-        <span id="project-other-created" class="project-other-pill"></span>
-        <span id="project-other-visibility" class="project-other-pill"></span>
-        <span id="project-other-status" class="project-other-pill"></span>
     </div>
 
     <div id="project-other-error" class="project-other-error hidden"></div>
 
+    <section class="project-other-hero">
+        <div class="project-other-hero-left">
+            <p class="project-other-kicker">Project</p>
+
+            <div class="project-other-title-row">
+                <div id="project-other-avatar" class="project-other-avatar">
+                    <span class="project-other-avatar-fallback">P</span>
+                </div>
+
+                <div class="project-other-title-block">
+                    <h1 id="project-other-title" class="project-other-title">Loading...</h1>
+                    <p id="project-other-description" class="project-other-description"></p>
+                </div>
+            </div>
+
+            <div id="project-other-meta" class="project-other-meta hidden">
+                <span id="project-other-owner" class="project-other-pill project-other-pill-neutral"></span>
+                <span id="project-other-created" class="project-other-pill project-other-pill-neutral"></span>
+                <span id="project-other-visibility" class="project-other-pill"></span>
+                <span id="project-other-status" class="project-other-pill project-other-pill-neutral"></span>
+            </div>
+        </div>
+
+        <div class="project-other-hero-right">
+            <div class="project-other-action-card">
+                <p class="project-other-action-kicker">Access</p>
+                <h2 class="project-other-action-title">Interested in joining?</h2>
+                <p class="project-other-action-text">
+                    Request access to become a member of this project.
+                </p>
+
+                <button id="project-request-btn" class="project-request-btn" type="button">
+                    Request to join
+                </button>
+
+                <div id="project-request-message" class="project-request-message hidden"></div>
+            </div>
+        </div>
+    </section>
+
     <div class="project-other-sections">
         <article class="project-other-section-card">
-            <h2>Overview</h2>
-            <p>Αυτη ειναι η view για μη-owner χρηστες.</p>
+            <p class="project-other-section-kicker">Overview</p>
+            <h2>About this project</h2>
+            <p>
+                You are viewing this project as a non-member. Project details are visible here,
+                while access and collaboration require membership.
+            </p>
         </article>
 
         <article class="project-other-section-card">
-            <h2>Access</h2>
-            <p>Εδω αργοτερα θα μπουν join request / invite actions.</p>
+            <p class="project-other-section-kicker">Membership</p>
+            <h2>How access works</h2>
+            <p>
+                If the project is public, you can request to join. Once accepted, you will be
+                able to access the member view and collaborate inside the project.
+            </p>
         </article>
     </div>
 </section>
