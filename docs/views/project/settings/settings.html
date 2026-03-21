@@ -1,0 +1,89 @@
+<section class="project-settings-page">
+  <div class="project-settings-shell">
+    <div class="project-settings-header">
+      <div class="project-settings-header-text">
+        <p class="project-settings-kicker">Project settings</p>
+        <h1 class="project-settings-title">Edit project</h1>
+        <p class="project-settings-subtitle">
+          Update the basic project details. You can change the avatar, name and description here.
+        </p>
+      </div>
+    </div>
+
+    <form id="project-settings-form" class="project-settings-form">
+      <div class="project-settings-section">
+        <div class="project-settings-section-head">
+          <h2>General</h2>
+          <p>Basic information visible across the project.</p>
+        </div>
+
+        <div class="project-settings-avatar-section">
+          <label class="project-settings-label">Project avatar</label>
+
+          <div class="project-settings-avatar-row">
+            <div id="project-settings-avatar-preview" class="project-settings-avatar-preview">
+              <span class="project-settings-avatar-fallback">P</span>
+            </div>
+
+            <div class="project-settings-avatar-actions">
+              <button
+                      id="project-settings-avatar-btn"
+                      class="project-settings-avatar-btn"
+                      type="button"
+              >
+                Change avatar
+              </button>
+
+              <p class="project-settings-avatar-hint">
+                PNG, JPG or WEBP
+              </p>
+            </div>
+          </div>
+
+          <input
+                  id="project-settings-avatar-input"
+                  class="project-settings-avatar-input"
+                  type="file"
+                  accept="image/*"
+          />
+        </div>
+
+        <div class="project-settings-field">
+          <label class="project-settings-label" for="project-settings-name">Project name</label>
+          <input
+                  id="project-settings-name"
+                  class="project-settings-input"
+                  type="text"
+                  maxlength="80"
+                  placeholder="Project name"
+                  required
+          />
+        </div>
+
+        <div class="project-settings-field">
+          <label class="project-settings-label" for="project-settings-description">Description</label>
+          <textarea
+                  id="project-settings-description"
+                  class="project-settings-textarea"
+                  rows="4"
+                  maxlength="280"
+                  placeholder="Short summary of the project..."
+          ></textarea>
+        </div>
+      </div>
+
+      <div id="project-settings-error" class="project-settings-error hidden"></div>
+      <div id="project-settings-success" class="project-settings-success hidden"></div>
+
+      <div class="project-settings-footer">
+        <button
+                id="project-settings-submit-btn"
+                class="project-settings-submit-btn"
+                type="submit"
+        >
+          Αποθήκευση
+        </button>
+      </div>
+    </form>
+  </div>
+</section>

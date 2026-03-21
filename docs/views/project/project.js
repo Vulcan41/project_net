@@ -22,19 +22,38 @@ export async function initProject(projectId) {
 
     currentProject = loaded.project;
 
-    console.log("PROJECT INIT currentProject:", currentProject);
-    console.log("PROJECT INIT currentProject.id:", currentProject?.id);
-
     renderSidebar();
     await loadOwnerInfo();
     setupSidebar();
     setupDeleteProject();
-    setupAvatarUpload();
+    setupProjectUpdateListener();
     loadSection("overview");
 }
 
+function setupProjectUpdateListener() {
+    window.removeEventListener("project-updated", handleProjectUpdated);
+    window.addEventListener("project-updated", handleProjectUpdated);
+}
 
+async function handleProjectUpdated(event) {
+    if (!event?.detail) return;
 
+    currentProject = {
+        ...currentProject,
+        ...event.detail
+    };
+
+    if (typeof projectStore.setProject === "function") {
+        projectStore.setProject(currentProject);
+    }
+
+    renderSidebar();
+    await loadOwnerInfo();
+}
+
+/* =========================
+   DELETE PROJECT
+========================= */
 
 function setupDeleteProject() {
     const deleteBtn = document.getElementById("project-delete-btn");
@@ -56,7 +75,10 @@ function setupDeleteProject() {
                     return;
                 }
 
-                projectStore.clear();
+                if (typeof projectStore.clear === "function") {
+                    projectStore.clear();
+                }
+
                 loadView("basic");
             }
         });
@@ -88,41 +110,41 @@ function renderSidebar() {
             `;
 
         title.innerHTML = `
-    <div class="project-sidebar-title-row">
-        <div class="project-sidebar-avatar">
-            ${avatarMarkup}
-        </div>
+            <div class="project-sidebar-title-row">
+                <div class="project-sidebar-avatar">
+                    ${avatarMarkup}
+                </div>
 
-        <div class="project-sidebar-title-block">
-            <div class="project-sidebar-title-text">
-                ${escapeHtml(currentProject.name)}
+                <div class="project-sidebar-title-block">
+                    <div class="project-sidebar-title-text">
+                        ${escapeHtml(currentProject.name)}
+                    </div>
+
+                    <div class="project-sidebar-meta">
+                        <span class="project-sidebar-pill ${
+                            currentProject.visibility === "public"
+                                ? "project-sidebar-pill-public"
+                                : "project-sidebar-pill-private"
+                        }">
+                            ${escapeHtml(currentProject.visibility)}
+                        </span>
+
+                        <span class="project-sidebar-pill project-sidebar-pill-owner">
+                            owner
+                        </span>
+                    </div>
+                </div>
             </div>
 
-            <div class="project-sidebar-meta">
-                <span class="project-sidebar-pill ${
-                    currentProject.visibility === "public"
-                        ? "project-sidebar-pill-public"
-                        : "project-sidebar-pill-private"
-                }">
-                    ${escapeHtml(currentProject.visibility)}
-                </span>
+            <div class="project-sidebar-owner" id="project-sidebar-owner">
+                <div class="project-sidebar-owner-label">A project by:</div>
 
-                <span class="project-sidebar-pill project-sidebar-pill-owner">
-                    owner
-                </span>
+                <div class="project-sidebar-owner-row">
+                    <div class="project-sidebar-owner-avatar"></div>
+                    <div class="project-sidebar-owner-username">Loading...</div>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <div class="project-sidebar-owner" id="project-sidebar-owner">
-    <div class="project-sidebar-owner-label">A project by:</div>
-
-    <div class="project-sidebar-owner-row">
-        <div class="project-sidebar-owner-avatar"></div>
-        <div class="project-sidebar-owner-username">Loading...</div>
-    </div>
-</div>
-`;
+        `;
     }
 
     if (subtitle) {
@@ -153,7 +175,7 @@ async function loadOwnerInfo() {
     }
 
     const avatar = data.avatar_url
-    ? `<img src="${data.avatar_url}" />`
+    ? `<img src="${escapeHtml(data.avatar_url)}" alt="${escapeHtml(data.username || "owner")} avatar" />`
     : `<span>${escapeHtml((data.username || "U")[0].toUpperCase())}</span>`;
 
     avatarEl.innerHTML = avatar;
@@ -181,95 +203,7 @@ function setActiveButton(activeBtn) {
 }
 
 /* =========================
-   AVATAR UPLOAD
-========================= */
-
-function setupAvatarUpload() {
-    const uploadBtn = document.getElementById("project-upload-avatar-btn");
-    const fileInput = document.getElementById("project-avatar-input");
-
-    console.log("AVATAR SETUP uploadBtn exists:", !!uploadBtn);
-    console.log("AVATAR SETUP fileInput exists:", !!fileInput);
-    console.log("AVATAR SETUP currentProject:", currentProject);
-    console.log("AVATAR SETUP currentProject.id:", currentProject?.id);
-
-    if (!uploadBtn || !fileInput || !currentProject?.id) return;
-
-    uploadBtn.onclick = () => {
-        console.log("UPLOAD BUTTON clicked");
-        fileInput.click();
-    };
-
-    fileInput.onchange = async () => {
-        const file = fileInput.files?.[0];
-        if (!file) return;
-
-        try {
-            const {
-                data: { user },
-                error: userError
-            } = await supabase.auth.getUser();
-
-            console.log("UPLOAD AUTH user:", user);
-            console.log("UPLOAD AUTH userError:", userError);
-
-            const ext = file.name.split(".").pop()?.toLowerCase() || "png";
-            const filePath = `${currentProject.id}/avatar.${ext}`;
-
-            console.log("UPLOAD FILE name:", file.name);
-            console.log("UPLOAD FILE ext:", ext);
-            console.log("UPLOAD PROJECT ID:", currentProject.id);
-            console.log("UPLOAD PATH:", filePath);
-
-            const { error: uploadError, data: uploadData } = await supabase.storage
-                .from("project-avatars")
-                .upload(filePath, file, {
-                upsert: true
-            });
-
-            console.log("UPLOAD RESULT data:", uploadData);
-            console.log("UPLOAD RESULT error:", uploadError);
-
-            if (uploadError) throw uploadError;
-
-            const { data: publicData } = supabase.storage
-                .from("project-avatars")
-                .getPublicUrl(filePath);
-
-            console.log("PUBLIC URL data:", publicData);
-
-            const publicUrl = publicData?.publicUrl;
-            if (!publicUrl) {
-                throw new Error("Could not get public URL.");
-            }
-
-            const cacheBustedUrl = `${publicUrl}?t=${Date.now()}`;
-
-            console.log("CACHE BUSTED URL:", cacheBustedUrl);
-
-            const { error: updateError, data: updateData } = await supabase
-                .from("projects")
-                .update({ avatar_url: cacheBustedUrl })
-                .eq("id", currentProject.id);
-
-            console.log("PROJECT UPDATE data:", updateData);
-            console.log("PROJECT UPDATE error:", updateError);
-
-            if (updateError) throw updateError;
-
-            projectStore.setAvatarUrl(cacheBustedUrl);
-            currentProject.avatar_url = cacheBustedUrl;
-            renderSidebar();
-
-            fileInput.value = "";
-        } catch (error) {
-            console.error("Project avatar upload failed:", error);
-        }
-    };
-}
-
-/* =========================
-   LOAD SECTION (INTERNAL VIEW)
+   LOAD SECTION
 ========================= */
 
 async function loadSection(section) {

@@ -1,0 +1,51 @@
+.change-project-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+}
+
+.change-project-modal.hidden {
+    display: none;
+}
+
+.change-project-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.change-project-dialog {
+    position: relative;
+    width: 420px;
+    max-width: calc(100% - 40px);
+
+    margin: 120px auto;
+
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.change-project-header h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.change-project-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.change-project-footer button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #f6f6f6;
+    cursor: pointer;
+}

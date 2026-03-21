@@ -374,3 +374,25 @@
     background: #feecec;
     border-color: #efb8b8;
 }
+
+
+
+
+
+
+
+/* =========================
+   CLICKABLE HEADER
+========================= */
+
+.project-sidebar-header {
+    cursor: pointer;
+    border-radius: 12px;
+    padding: 8px;
+    transition: background 0.15s ease;
+}
+
+.project-sidebar-header:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
