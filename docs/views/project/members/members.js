@@ -1,11 +1,14 @@
 import { supabase } from "../../../core/supabase.js";
 
+let currentProject = null;
+
 export async function initMembers(project) {
     if (!project?.id) {
         console.error("No project provided to members view.");
         return;
     }
 
+    currentProject = project;
     await loadMembers(project.id);
 }
 
@@ -19,6 +22,7 @@ async function loadMembers(projectId) {
         .from("project_members")
         .select(`
             id,
+            user_id,
             role,
             membership_status,
             created_at,
@@ -54,6 +58,8 @@ async function loadMembers(projectId) {
         .map((member) => {
         const username = member.profiles?.username ?? "Unknown user";
         const isPending = member.membership_status === "pending";
+        const isOwner = member.role === "owner";
+        const canRemove = member.membership_status === "active" && !isOwner;
 
         return `
                 <div class="member-row" data-member-id="${member.id}">
@@ -86,6 +92,20 @@ async function loadMembers(projectId) {
                                 `
                                 : ""
                         }
+
+                        ${
+                            canRemove
+                                ? `
+                                    <button
+                                        class="member-action-btn member-remove-btn"
+                                        type="button"
+                                        data-member-id="${member.id}"
+                                    >
+                                        Remove
+                                    </button>
+                                `
+                                : ""
+                        }
                     </div>
                 </div>
             `;
@@ -98,6 +118,7 @@ async function loadMembers(projectId) {
 function bindMemberActions(projectId) {
     const approveButtons = document.querySelectorAll(".member-approve-btn");
     const rejectButtons = document.querySelectorAll(".member-reject-btn");
+    const removeButtons = document.querySelectorAll(".member-remove-btn");
 
     approveButtons.forEach((button) => {
         button.onclick = async () => {
@@ -107,6 +128,13 @@ function bindMemberActions(projectId) {
     });
 
     rejectButtons.forEach((button) => {
+        button.onclick = async () => {
+            const memberId = button.dataset.memberId;
+            await updateMembershipStatus(memberId, "removed", projectId);
+        };
+    });
+
+    removeButtons.forEach((button) => {
         button.onclick = async () => {
             const memberId = button.dataset.memberId;
             await updateMembershipStatus(memberId, "removed", projectId);

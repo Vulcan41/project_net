@@ -76,6 +76,7 @@
     transition: all 0.15s ease;
 }
 
+
 .basic-create-btn:hover,
 .basic-delete-btn:hover {
     background: #222222;
@@ -384,4 +385,34 @@
     background: #fff7ed;
     color: #c56a17;
     border-color: #fde2c4;
+}
+
+
+
+
+
+.basic-project-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #ececec;
+    background: #f6f6f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.basic-project-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.basic-project-avatar-fallback {
+    font-size: 14px;
+    font-weight: 700;
+    color: #444444;
 }

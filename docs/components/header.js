@@ -210,7 +210,7 @@ function setupSearch() {
 
                 supabase
                     .from("projects")
-                    .select("id, name, description, visibility, owner_id")
+                    .select("id, name, description, visibility, owner_id, avatar_url")
                     .eq("visibility", "public")
                     .or(
                     `name.ilike.${query}%,name.ilike.%${query}%,description.ilike.%${query}%`
@@ -319,9 +319,30 @@ function setupSearch() {
                     const div = document.createElement("div");
                     div.className = "search-result";
 
-                    const badge = document.createElement("div");
-                    badge.className = "search-project-badge";
-                    badge.textContent = (project.name || "P").charAt(0).toUpperCase();
+                    const avatarWrap = document.createElement("div");
+                    avatarWrap.className = "search-project-avatar";
+
+                    if (project.avatar_url && project.avatar_url.trim() !== "") {
+                        const img = document.createElement("img");
+                        img.className = "search-project-avatar-image";
+                        img.src = project.avatar_url;
+                        img.alt = (project.name || "Project") + " avatar";
+
+                        img.onerror = () => {
+                            avatarWrap.innerHTML = "";
+                            const fallback = document.createElement("div");
+                            fallback.className = "search-project-badge";
+                            fallback.textContent = (project.name || "P").charAt(0).toUpperCase();
+                            avatarWrap.appendChild(fallback);
+                        };
+
+                        avatarWrap.appendChild(img);
+                    } else {
+                        const fallback = document.createElement("div");
+                        fallback.className = "search-project-badge";
+                        fallback.textContent = (project.name || "P").charAt(0).toUpperCase();
+                        avatarWrap.appendChild(fallback);
+                    }
 
                     const textContainer = document.createElement("div");
                     textContainer.className = "search-text";
@@ -337,7 +358,7 @@ function setupSearch() {
                     textContainer.appendChild(name);
                     textContainer.appendChild(subtitle);
 
-                    div.appendChild(badge);
+                    div.appendChild(avatarWrap);
                     div.appendChild(textContainer);
 
                     div.addEventListener("click", async () => {

@@ -201,8 +201,11 @@
 }
 
 .setup-project-textarea {
-    resize: vertical;
+    resize: none;
+    height: 110px;
     min-height: 110px;
+    max-height: 110px;
+    overflow-y: auto;
 }
 
 /* =========================================================
@@ -212,7 +215,7 @@
 .setup-project-visibility-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    gap: 16px;
 }
 
 .setup-project-option {
@@ -233,21 +236,32 @@
     border: 1px solid #e8e8e8;
     border-radius: 16px;
     background: #ffffff;
+    box-sizing: border-box;
+    transform: scale(1);
+    transform-origin: center;
     transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease,
     transform 0.15s ease;
-    box-sizing: border-box;
 }
 
+/* Hover grows in place */
 .setup-project-option:hover .setup-project-option-card {
-    border-color: #d8d8d8;
-    transform: translateY(-1px);
+    transform: scale(1.03);
 }
 
-.setup-project-option input:checked + .setup-project-option-card {
-    border-color: #111111;
-    box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.06);
+/* Public selected */
+.setup-project-option-public input:checked + .setup-project-option-card {
+    border-color: #246bce;
+    box-shadow: 0 0 0 2px rgba(36, 107, 206, 0.15);
+    transform: scale(1.05);
+}
+
+/* Private selected */
+.setup-project-option-private input:checked + .setup-project-option-card {
+    border-color: #6d28d9;
+    box-shadow: 0 0 0 2px rgba(109, 40, 217, 0.15);
+    transform: scale(1.05);
 }
 
 .setup-project-option-badge {

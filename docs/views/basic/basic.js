@@ -76,7 +76,8 @@ async function loadProjects() {
                 status,
                 created_at,
                 owner_id,
-                members_count
+                members_count,
+                avatar_url
             )
         `)
         .eq("user_id", user.id)
@@ -215,6 +216,19 @@ function renderProjects() {
         : "basic-project-pill-role-member";
 
         const membersCount = project.members_count ?? 1;
+        const avatarMarkup = project.avatar_url
+        ? `
+                    <img
+                        src="${project.avatar_url}"
+                        alt="${escapeHtml(project.name)} avatar"
+                        class="basic-project-avatar-image"
+                    />
+                `
+        : `
+                    <span class="basic-project-avatar-fallback">
+                        ${escapeHtml(project.name.charAt(0).toUpperCase())}
+                    </span>
+                `;
 
         return `
                 <article
@@ -223,8 +237,8 @@ function renderProjects() {
                     data-project-owner-id="${project.owner_id}"
                 >
                     <div class="basic-project-card-top">
-                        <div class="basic-project-card-badge">
-                            ${project.name.charAt(0).toUpperCase()}
+                        <div class="basic-project-avatar">
+                            ${avatarMarkup}
                         </div>
 
                         ${
@@ -243,15 +257,15 @@ function renderProjects() {
                     </div>
 
                     <div class="basic-project-main">
-                        <h3 class="basic-project-title">${project.name}</h3>
+                        <h3 class="basic-project-title">${escapeHtml(project.name)}</h3>
                         <p class="basic-project-subtitle">
-                            ${project.description ?? ""}
+                            ${escapeHtml(project.description ?? "")}
                         </p>
                     </div>
 
                     <div class="basic-project-meta">
                         <span class="basic-project-pill ${visibilityClass}">
-                            ${project.visibility}
+                            ${escapeHtml(project.visibility)}
                         </span>
 
                         <span class="basic-project-pill ${roleClass}">
@@ -325,4 +339,13 @@ function bindDeleteButtons() {
             await deleteProject(projectId);
         };
     });
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
