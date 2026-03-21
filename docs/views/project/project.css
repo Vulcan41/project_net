@@ -5,11 +5,11 @@
 .project-layout {
     display: flex;
     height: 100%;
-    min-height: calc(100vh - 80px); /* adjust if header height differs */
+    min-height: calc(100vh - 80px);
 }
 
 /* =========================
-   SIDEBAR (SETTINGS STYLE)
+   SIDEBAR
 ========================= */
 
 .project-sidebar {
@@ -30,10 +30,9 @@
 .project-sidebar-top {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 6px 8px 16px;
-    margin-bottom: 8px;
-    margin-bottom: 12px;
+    gap: 4px;
+    padding: 6px 8px 6px;
+    margin-bottom: 0;
 }
 
 .project-title {
@@ -43,18 +42,99 @@
 }
 
 .project-subtitle {
-    font-size: 12px;
-    color: #7a7a84;
+    display: none;
 }
 
 .project-role-badge {
-    align-self: flex-start;
-    padding: 6px 12px;
-    border-radius: 999px;
+    display: none;
+}
+
+/* =========================
+   SIDEBAR HEADER (NEW STYLE)
+========================= */
+
+.project-sidebar-title-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.project-sidebar-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    overflow: hidden;
     background: #f3f4f6;
-    color: #374151;
-    font-size: 12px;
-    font-weight: 600;
+    border: 1px solid #e5e7eb;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.project-sidebar-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.project-sidebar-avatar-fallback {
+    font-size: 18px;
+    font-weight: 700;
+    color: #555;
+}
+
+.project-sidebar-title-block {
+    min-width: 0;
+}
+
+.project-sidebar-title-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+.project-sidebar-meta {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
+.project-sidebar-pill {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    line-height: 1;
+}
+
+.project-sidebar-pill-public {
+    background: #eef6ff;
+    color: #246bce;
+    border-color: #d7e7ff;
+}
+
+.project-sidebar-pill-private {
+    background: #f5f3ff;
+    color: #6d28d9;
+    border-color: #e9d5ff;
+}
+
+.project-sidebar-pill-owner {
+    background: #ecfdf3;
+    color: #16794b;
+    border-color: #cfeedd;
+}
+
+.project-sidebar-pill-member {
+    background: #fff7ed;
+    color: #c56a17;
+    border-color: #fde2c4;
 }
 
 /* MENU */
@@ -63,8 +143,6 @@
     flex: 1;
     overflow-y: auto;
 }
-
-/* GROUP */
 
 .project-menu-group {
     margin-bottom: 8px;
@@ -86,22 +164,17 @@
     opacity: 0.8;
 }
 
-/* BUTTON */
-
 .project-menu-btn {
     display: flex;
     align-items: center;
     gap: 10px;
-
     width: 100%;
     padding: 12px;
     background: #ffffff;
     border: none;
-
     font-size: 13px;
     color: #1c1c1c;
     cursor: pointer;
-
     transition:
     background 0.18s ease,
     box-shadow 0.18s ease;
@@ -110,8 +183,6 @@
 .project-menu-btn:hover {
     background: #f7fafc;
 }
-
-/* ACTIVE (MATCH SETTINGS STYLE) */
 
 .project-menu-btn.active {
     background: linear-gradient(
@@ -122,6 +193,35 @@
     rgba(36,110,157,0.00) 100%
     );
     box-shadow: inset 0 0 0 1px #246e9d;
+}
+
+/* SIDEBAR ACTIONS */
+
+.project-sidebar-actions {
+    padding: 12px;
+    margin-top: auto;
+}
+
+.project-upload-avatar-btn {
+    width: 100%;
+    height: 40px;
+    border: 1px solid #e6e6e6;
+    background: #ffffff;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1c1c1c;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.project-upload-avatar-btn:hover {
+    background: #f7fafc;
+    border-color: #d7dbe2;
+}
+
+.project-avatar-input {
+    display: none;
 }
 
 /* ======================
@@ -169,72 +269,83 @@
 
 
 
+/* =========================
+   OWNER BLOCK
+========================= */
 
+.project-sidebar-owner {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 20px;
+}
 
-.project-sidebar-title-row {
-    display: inline-flex;
+/* Label */
+
+.project-sidebar-owner-label {
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #9a9aa3;
+}
+
+/* Row */
+
+.project-sidebar-owner-row {
+    display: flex;
     align-items: center;
     gap: 10px;
+
 }
 
-.project-sidebar-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+/* Avatar */
+
+.project-sidebar-owner-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
     overflow: hidden;
-    border: 1px solid #ececec;
-    background: #f6f6f6;
-    display: inline-flex;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+
+    display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
 }
 
-.project-sidebar-avatar-image {
+.project-sidebar-owner-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
 }
 
-.project-sidebar-avatar-fallback {
-    font-size: 13px;
+.project-sidebar-owner-avatar span {
+    font-size: 12px;
     font-weight: 700;
-    color: #444444;
+    color: #555;
 }
 
-.project-sidebar-title-text {
-    display: inline-block;
-}
+/* Username */
 
-
-
-
-
-
-.project-sidebar-actions {
-    padding: 12px;
-    margin-top: auto;
-}
-
-.project-upload-avatar-btn {
-    width: 100%;
-    height: 40px;
-    border: 1px solid #e6e6e6;
-    background: #ffffff;
-    border-radius: 10px;
+.project-sidebar-owner-username {
     font-size: 13px;
-    font-weight: 600;
-    color: #1c1c1c;
-    cursor: pointer;
-    transition: background 0.18s ease, border-color 0.18s ease;
+    font-weight: 500;
+    color: #444;
 }
 
-.project-upload-avatar-btn:hover {
-    background: #f7fafc;
-    border-color: #d7dbe2;
-}
 
-.project-avatar-input {
-    display: none;
+
+/* =========================
+   MENU LABEL
+========================= */
+
+.project-menu-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #9a9aa3;
+    padding: 8px 12px 10px;
 }

@@ -23,6 +23,7 @@ export async function initProject(projectId) {
     console.log("PROJECT INIT currentProject.id:", currentProject?.id);
 
     renderSidebar();
+    await loadOwnerInfo();
     setupSidebar();
     setupAvatarUpload();
     loadSection("overview");
@@ -53,27 +54,76 @@ function renderSidebar() {
             `;
 
         title.innerHTML = `
-            <span class="project-sidebar-title-row">
-                <span class="project-sidebar-avatar">
-                    ${avatarMarkup}
+    <div class="project-sidebar-title-row">
+        <div class="project-sidebar-avatar">
+            ${avatarMarkup}
+        </div>
+
+        <div class="project-sidebar-title-block">
+            <div class="project-sidebar-title-text">
+                ${escapeHtml(currentProject.name)}
+            </div>
+
+            <div class="project-sidebar-meta">
+                <span class="project-sidebar-pill ${
+                    currentProject.visibility === "public"
+                        ? "project-sidebar-pill-public"
+                        : "project-sidebar-pill-private"
+                }">
+                    ${escapeHtml(currentProject.visibility)}
                 </span>
-                <span class="project-sidebar-title-text">
-                    ${escapeHtml(currentProject.name)}
+
+                <span class="project-sidebar-pill project-sidebar-pill-owner">
+                    owner
                 </span>
-            </span>
-        `;
+            </div>
+        </div>
+    </div>
+
+    <div class="project-sidebar-owner" id="project-sidebar-owner">
+    <div class="project-sidebar-owner-label">A project by:</div>
+
+    <div class="project-sidebar-owner-row">
+        <div class="project-sidebar-owner-avatar"></div>
+        <div class="project-sidebar-owner-username">Loading...</div>
+    </div>
+</div>
+`;
     }
 
     if (subtitle) {
-        subtitle.textContent =
-        currentProject.visibility === "public"
-        ? "Public project"
-        : "Private project";
+        subtitle.textContent = "";
     }
 
     if (role) {
-        role.textContent = "Owner";
+        role.textContent = "";
     }
+}
+
+async function loadOwnerInfo() {
+    const avatarEl = document.querySelector(".project-sidebar-owner-avatar");
+    const usernameEl = document.querySelector(".project-sidebar-owner-username");
+
+    if (!avatarEl || !usernameEl || !currentProject?.owner_id) return;
+
+    const { data, error } = await supabase
+        .from("profiles")
+        .select("username, avatar_url")
+        .eq("id", currentProject.owner_id)
+        .single();
+
+    if (error) {
+        console.error("Owner load error:", error);
+        usernameEl.textContent = "Unknown";
+        return;
+    }
+
+    const avatar = data.avatar_url
+    ? `<img src="${data.avatar_url}" />`
+    : `<span>${escapeHtml((data.username || "U")[0].toUpperCase())}</span>`;
+
+    avatarEl.innerHTML = avatar;
+    usernameEl.textContent = data.username || "User";
 }
 
 function setupSidebar() {
