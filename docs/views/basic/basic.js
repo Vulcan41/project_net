@@ -7,9 +7,17 @@ let currentUserId = null;
 export async function initBasic() {
     await ensureSetUpProjectComponent();
     setupCreateProjectButton();
+
+    const emptyState = document.getElementById("basic-empty-state");
+    const projectsWrap = document.getElementById("basic-projects-wrap");
+    const grid = document.getElementById("basic-projects-grid");
+
+    if (emptyState) emptyState.classList.add("hidden");
+    if (projectsWrap) projectsWrap.classList.remove("active");
+    if (grid) grid.innerHTML = "";
+
     await loadProjects();
 }
-
 /* =========================
    COMPONENT SETUP
 ========================= */
