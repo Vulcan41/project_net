@@ -1,6 +1,7 @@
 import { supabase } from "../../core/supabase.js";
 import { loadView } from "../../core/router.js";
 import { projectStore } from "../../state/projectStore.js";
+import { initModal, openModal } from "../../components/modal.js";
 
 let currentProject = null;
 
@@ -9,6 +10,8 @@ export async function initProject(projectId) {
         console.error("No project id");
         return;
     }
+
+    await initModal();
 
     const loaded = await projectStore.load(projectId);
 
@@ -25,8 +28,39 @@ export async function initProject(projectId) {
     renderSidebar();
     await loadOwnerInfo();
     setupSidebar();
+    setupDeleteProject();
     setupAvatarUpload();
     loadSection("overview");
+}
+
+
+
+
+function setupDeleteProject() {
+    const deleteBtn = document.getElementById("project-delete-btn");
+    if (!deleteBtn || !currentProject?.id) return;
+
+    deleteBtn.onclick = () => {
+        openModal({
+            message: "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το project;",
+            cancelText: "Ακύρωση",
+            confirmText: "Διαγραφή",
+            onConfirm: async () => {
+                const { error } = await supabase
+                    .from("projects")
+                    .delete()
+                    .eq("id", currentProject.id);
+
+                if (error) {
+                    console.error("Project delete failed:", error);
+                    return;
+                }
+
+                projectStore.clear();
+                loadView("basic");
+            }
+        });
+    };
 }
 
 /* =========================

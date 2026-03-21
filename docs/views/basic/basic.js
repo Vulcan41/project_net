@@ -231,58 +231,51 @@ function renderProjects() {
                 `;
 
         return `
-                <article
-                    class="basic-project-card basic-project-open"
-                    data-project-id="${project.id}"
-                    data-project-owner-id="${project.owner_id}"
-                >
-                    <div class="basic-project-card-top">
-                        <div class="basic-project-avatar">
-                            ${avatarMarkup}
-                        </div>
+    <article
+        class="basic-project-card basic-project-open"
+        data-project-id="${project.id}"
+        data-project-owner-id="${project.owner_id}"
+    >
+        <div class="basic-project-card-left">
+            <div class="basic-project-avatar">
+                ${
+                    project.avatar_url
+                        ? `<img src="${project.avatar_url}" alt="${project.name}" />`
+                        : `<span>${project.name.charAt(0).toUpperCase()}</span>`
+                }
+            </div>
+        </div>
 
-                        ${
-                            isOwner
-                                ? `
-                                    <button
-                                        class="basic-project-delete"
-                                        type="button"
-                                        data-project-id="${project.id}"
-                                    >
-                                        Διαγραφή
-                                    </button>
-                                `
-                                : ""
-                        }
-                    </div>
+        <div class="basic-project-card-right">
 
-                    <div class="basic-project-main">
-                        <h3 class="basic-project-title">${escapeHtml(project.name)}</h3>
-                        <p class="basic-project-subtitle">
-                            ${escapeHtml(project.description ?? "")}
-                        </p>
-                    </div>
+            <div class="basic-project-main">
+                <h3 class="basic-project-title">${project.name}</h3>
+                <p class="basic-project-subtitle">
+                    ${project.description ?? ""}
+                </p>
+            </div>
 
-                    <div class="basic-project-meta">
-                        <span class="basic-project-pill ${visibilityClass}">
-                            ${escapeHtml(project.visibility)}
-                        </span>
+            <div class="basic-project-meta">
+                <span class="basic-project-pill ${visibilityClass}">
+                    ${project.visibility}
+                </span>
 
-                        <span class="basic-project-pill ${roleClass}">
-                            ${isOwner ? "owner" : "member"}
-                        </span>
+                <span class="basic-project-pill ${roleClass}">
+                    ${isOwner ? "owner" : "member"}
+                </span>
 
-                        <span class="basic-project-pill basic-project-pill-neutral">
-                            ${membersCount} ${membersCount === 1 ? "member" : "members"}
-                        </span>
-                    </div>
-                </article>
-            `;
+                <span class="basic-project-pill basic-project-pill-neutral">
+                    ${membersCount} ${membersCount === 1 ? "member" : "members"}
+                </span>
+            </div>
+
+        </div>
+    </article>
+`;
     })
         .join("");
 
     bindProjectCards();
-    bindDeleteButtons();
 }
 
 /* =========================

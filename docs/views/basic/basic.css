@@ -19,14 +19,6 @@
    HEADER
 ========================================================= */
 
-.basic-header-right {
-    margin-left: auto;
-    margin-right: 24px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-}
-
 .basic-header {
     display: flex;
     align-items: center;
@@ -37,6 +29,14 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+
+.basic-header-right {
+    margin-left: auto;
+    margin-right: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
 }
 
 .basic-title {
@@ -59,26 +59,19 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-
     height: 38px;
     padding: 0 14px;
-
     border-radius: 10px;
     border: 1px solid #111111;
-
     background: #111111;
     color: #ffffff;
-
     font-size: 13px;
     font-weight: 600;
-
     cursor: pointer;
     transition: all 0.15s ease;
 }
 
-
-.basic-create-btn:hover,
-.basic-delete-btn:hover {
+.basic-create-btn:hover {
     background: #222222;
     border-color: #222222;
 }
@@ -102,49 +95,27 @@
 .basic-empty-state {
     width: 100%;
     min-height: 420px;
-    background: transparent;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
     padding: 48px 24px;
-    box-sizing: border-box;
+    text-align: center;
 }
 
 .basic-empty-state.hidden {
     display: none;
 }
 
-.basic-empty-icon {
-    width: 72px;
-    height: 72px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-.basic-empty-image {
-    width: 56px;
-    height: 56px;
-    object-fit: contain;
-}
-
 .basic-empty-title {
-    margin: 0 0 10px 0;
     font-size: 24px;
     font-weight: 700;
-    line-height: 1.2;
-    color: #111111;
+    margin-bottom: 10px;
 }
 
 .basic-empty-text {
-    max-width: 560px;
-    margin: 0;
     font-size: 15px;
-    line-height: 1.6;
-    color: #666666;
+    color: #666;
 }
 
 /* =========================================================
@@ -154,12 +125,9 @@
 .basic-projects-wrap {
     width: 100%;
     height: 100%;
-    min-height: 0;
     display: none;
     overflow-y: auto;
-    overflow-x: hidden;
-    box-sizing: border-box;
-    padding: 8px 24px 0 0;
+    padding: 16px 24px 0 0;
 }
 
 .basic-projects-wrap.active {
@@ -170,22 +138,22 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px;
-    align-content: start;
 }
+
+/* =========================================================
+   PROJECT CARD
+========================================================= */
 
 .basic-project-card {
     background: #ffffff;
     border: 1px solid #e8e8e8;
-    padding: 18px 18px 16px 18px;
+    padding: 18px;
     box-sizing: border-box;
-    min-height: 170px;
+    height: 156px;
     display: flex;
-    flex-direction: column;
-    gap: 14px;
-    transition:
-    transform 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.18s ease;
 }
 
 .basic-project-card:hover {
@@ -194,174 +162,111 @@
     border-color: #d0d0d0;
 }
 
-.basic-project-card-top {
+/* LEFT SIDE (AVATAR) */
+
+.basic-project-card-left {
+    flex-shrink: 0;
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
+    align-items: center;
 }
 
-.basic-project-card-badge {
-    width: 36px;
-    height: 36px;
+/* BIG AVATAR */
+
+.basic-project-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    overflow: hidden;
     border: 1px solid #ececec;
     background: #f6f6f6;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
-    font-weight: 700;
-    color: #444444;
     flex-shrink: 0;
 }
 
-.basic-project-delete {
-    border: 1px solid #ececec;
-    background: #ffffff;
-    color: #555555;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 6px 10px;
-    cursor: pointer;
-    box-sizing: border-box;
+.basic-project-avatar img,
+.basic-project-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
-.basic-project-delete:hover {
-    background: #f7f7f7;
-    color: #111111;
+.basic-project-avatar-fallback {
+    font-size: 20px;
+    font-weight: 700;
+    color: #444;
+}
+
+/* RIGHT SIDE */
+
+.basic-project-card-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    min-width: 0;
 }
 
 .basic-project-main {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 2px;
 }
+
+/* TEXT */
 
 .basic-project-title {
     margin: 0;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
-    line-height: 1.25;
-    color: #111111;
-    word-break: break-word;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 8px;
 }
 
 .basic-project-subtitle {
     margin: 0;
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 13px;
+    line-height: 1.35;
     color: #6a6a6a;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 8px;
 }
 
+/* META */
+
 .basic-project-meta {
-    margin-top: auto;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    align-items: center;
-}
-
-.basic-project-pill {
-    display: inline-flex;
-    align-items: center;
-    height: 28px;
-    padding: 0 10px;
-    border: 1px solid #ebebeb;
-    background: #f7f7f7;
-    font-size: 12px;
-    font-weight: 600;
-    color: #444444;
-    box-sizing: border-box;
+    margin-top: 4px;
 }
 
 /* =========================================================
-   RESPONSIVE
+   PILLS
 ========================================================= */
-
-@media (max-width: 1200px) {
-    .basic-projects-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 900px) {
-    .basic-page {
-        padding: 24px;
-    }
-
-    .basic-header-right {
-        margin-right: 12px;
-    }
-
-    .basic-projects-wrap {
-        padding-right: 12px;
-    }
-}
-
-@media (max-width: 640px) {
-    .basic-page {
-        padding: 16px;
-        gap: 16px;
-    }
-
-    .basic-header-right {
-        margin-right: 0;
-    }
-
-    .basic-empty-state {
-        padding: 36px 18px;
-        min-height: 360px;
-    }
-
-    .basic-empty-title {
-        font-size: 21px;
-    }
-
-    .basic-projects-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
-    .basic-project-card {
-        min-height: 156px;
-    }
-}
-
-.basic-project-open {
-    cursor: pointer;
-}
-
-.basic-project-delete {
-    cursor: pointer;
-}
-
-
-.basic-project-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 14px;
-}
 
 .basic-project-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 28px;
+    height: 28px;
     padding: 0 10px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.01em;
     border: 1px solid transparent;
-    white-space: nowrap;
 }
 
-.basic-project-pill-neutral {
-    background: #f8f8f8;
-    color: #5f6673;
-    border-color: #ececec;
-}
+/* COLORS */
 
 .basic-project-pill-visibility-public {
     background: #eef6ff;
@@ -387,32 +292,42 @@
     border-color: #fde2c4;
 }
 
-
-
-
-
-.basic-project-avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid #ececec;
-    background: #f6f6f6;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+.basic-project-pill-neutral {
+    background: #f8f8f8;
+    color: #5f6673;
+    border-color: #ececec;
 }
 
-.basic-project-avatar-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+/* =========================================================
+   UTIL
+========================================================= */
+
+.basic-project-open {
+    cursor: pointer;
 }
 
-.basic-project-avatar-fallback {
-    font-size: 14px;
-    font-weight: 700;
-    color: #444444;
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1200px) {
+    .basic-projects-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .basic-projects-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .basic-project-card {
+        height: auto;
+        min-height: 156px;
+    }
+
+    .basic-project-avatar {
+        width: 88px;
+        height: 88px;
+    }
 }
