@@ -207,6 +207,17 @@ function renderProjects() {
         data-project-owner-id="${project.owner_id}"
         data-project-role="${escapeHtml(project.current_user_role || "")}"
     >
+        <div class="basic-project-card-members-badge">
+    <span class="basic-project-card-members-count">
+        ${membersCount}
+    </span>
+    <img
+        src="assets/friends_2.png"
+        alt="members"
+        class="basic-project-card-members-icon"
+    />
+</div>
+
         <div class="basic-project-card-left">
             <div class="basic-project-avatar">
                 ${
@@ -219,28 +230,23 @@ function renderProjects() {
 
         <div class="basic-project-card-right">
 
-            <div class="basic-project-main">
-                <h3 class="basic-project-title">${escapeHtml(project.name)}</h3>
-                <p class="basic-project-subtitle">
-                    ${escapeHtml(project.description ?? "")}
-                </p>
-            </div>
+    <h3 class="basic-project-title">${escapeHtml(project.name)}</h3>
 
-            <div class="basic-project-meta">
-                <span class="basic-project-pill ${visibilityClass}">
-                    ${escapeHtml(project.visibility)}
-                </span>
+    <p class="basic-project-subtitle">
+        ${escapeHtml(project.description ?? "")}
+    </p>
 
-                <span class="basic-project-pill ${roleClass}">
-                    ${isOwner ? "owner" : "member"}
-                </span>
+    <div class="basic-project-meta">
+        <span class="basic-project-pill ${visibilityClass}">
+            ${escapeHtml(project.visibility)}
+        </span>
 
-                <span class="basic-project-pill basic-project-pill-neutral">
-                    ${membersCount} ${membersCount === 1 ? "member" : "members"}
-                </span>
-            </div>
+        <span class="basic-project-pill ${roleClass}">
+            ${isOwner ? "owner" : "member"}
+        </span>
+    </div>
 
-        </div>
+</div>
     </article>
 `;
     })
