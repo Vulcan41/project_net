@@ -6,10 +6,8 @@ import { createCancelButton } from "../../components/cancelButton.js";
 let renderToken = 0;
 
 function formatRelativeTime(dateString) {
-
     const now = new Date();
     const past = new Date(dateString);
-
     const diff = Math.floor((now - past) / 1000);
 
     if (diff < 60) return "μόλις τώρα";
@@ -29,7 +27,6 @@ function formatRelativeTime(dateString) {
 }
 
 export async function initNotifications() {
-
     const currentToken = ++renderToken;
 
     const container = document.getElementById("notifications-list");
@@ -37,19 +34,31 @@ export async function initNotifications() {
 
     if (!container) return;
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user }
+    } = await supabase.auth.getUser();
+
     if (!user) return;
 
     const { data, error } = await supabase
         .from("notifications")
         .select(`
             id,
+            type,
             created_at,
+            project_id,
+            friendship_id,
             sender:sender_id(
                 id,
                 username,
                 full_name,
                 avatar_url
+            ),
+            project:project_id(
+                id,
+                name,
+                avatar_url,
+                visibility
             )
         `)
         .eq("receiver_id", user.id)
@@ -65,139 +74,245 @@ export async function initNotifications() {
     }
 
     if (!data || data.length === 0) {
-
         if (info) {
             info.textContent = "Δεν υπάρχουν ειδοποιήσεις";
         }
-
         return;
     }
 
-    if (info) {
-        info.textContent =
-        data.length === 1
-        ? "1 ειδοποίηση"
-        : `${data.length} ειδοποιήσεις`;
-    }
+    updateNotificationsInfo(data.length);
 
-    data.forEach(n => {
-
+    data.forEach((n) => {
         const row = document.createElement("div");
 
-        const userBlock = document.createElement("div");
-        userBlock.className = "notification-user";
-        userBlock.style.cursor = "pointer";
-
-        const avatar = document.createElement("img");
-        avatar.className = "notification-avatar";
-        avatar.src = n.sender?.avatar_url || DEFAULT_AVATAR;
-
-        const nameContainer = document.createElement("div");
-        nameContainer.className = "notification-name";
-
-        const name = document.createElement("div");
-        name.textContent =
-        n.sender?.full_name ||
-        n.sender?.username ||
-        "User";
-
-        const handle = document.createElement("div");
-        handle.className = "notification-handle";
-        handle.textContent =
-        "@" + (n.sender?.username ?? "user");
-
-        nameContainer.appendChild(name);
-        nameContainer.appendChild(handle);
-
-        userBlock.appendChild(avatar);
-        userBlock.appendChild(nameContainer);
-
-        const tooltip = document.createElement("div");
-        tooltip.className = "notification-tooltip";
-        tooltip.textContent = "Προβολή προφίλ";
-
-        userBlock.appendChild(tooltip);
-
-        userBlock.addEventListener("click", () => {
-            loadView("profileOther", n.sender.id);
-        });
-
-        userBlock.addEventListener("mouseenter", () => {
-            tooltip.classList.add("tooltip-visible");
-        });
-
-        userBlock.addEventListener("mouseleave", () => {
-            tooltip.classList.remove("tooltip-visible");
-        });
-
+        const userBlock = createUserBlock(n);
         const divider = document.createElement("div");
         divider.className = "notification-divider";
 
         const text = document.createElement("div");
         text.className = "notification-text";
 
-        const displayName =
-        n.sender?.full_name ||
-        n.sender?.username ||
-        "User";
-
-        const timeString = n.created_at
-        ? formatRelativeTime(n.created_at)
-        : "";
-
-        text.innerHTML =
-        `Ο χρήστης <strong>${displayName}</strong> αποδέχθηκε το αίτημα σύνδεσης
-    ${timeString ? `
-    <span class="notification-time">
-        <span class="notification-dot">•</span>
-        ${timeString}
-    </span>` : ""}`;
-
-        /* ACTION BUTTON */
+        const actions = document.createElement("div");
+        actions.className = "notification-actions";
 
         const hideBtn = createCancelButton({
             label: "Απόκρυψη",
             className: "notification-hide"
         });
 
-        /* DELETE NOTIFICATION */
+        const timeString = n.created_at ? formatRelativeTime(n.created_at) : "";
+
+        if (n.type === "project_invite") {
+            const displayName =
+            n.sender?.full_name ||
+            n.sender?.username ||
+            "User";
+
+            const projectName = n.project?.name || "project";
+
+            text.innerHTML = `
+                Ο χρήστης <strong>${escapeHtml(displayName)}</strong> σας προσκάλεσε να συμμετάσχετε στο
+                <span class="notification-project-name">${escapeHtml(projectName)}</span>
+                ${timeString ? `
+                <span class="notification-time">
+                    <span class="notification-dot">•</span>
+                    ${timeString}
+                </span>` : ""}
+            `;
+
+            const acceptBtn = document.createElement("button");
+            acceptBtn.className = "notification-action-btn notification-accept-btn";
+            acceptBtn.type = "button";
+            acceptBtn.textContent = "Αποδοχή";
+
+            const rejectBtn = document.createElement("button");
+            rejectBtn.className = "notification-action-btn notification-reject-btn";
+            rejectBtn.type = "button";
+            rejectBtn.textContent = "Απόρριψη";
+
+            acceptBtn.onclick = async () => {
+                acceptBtn.disabled = true;
+                rejectBtn.disabled = true;
+
+                const { data, error } = await supabase.rpc("accept_project_invite", {
+                    p_project_id: n.project_id
+                });
+
+                if (error) {
+                    console.error("Accept project invite failed:", error);
+                    acceptBtn.disabled = false;
+                    rejectBtn.disabled = false;
+                    return;
+                }
+
+                if (data === "accepted") {
+                    await deleteNotification(n.id);
+                    row.remove();
+                    updateNotificationsInfoFromDom();
+
+                    if (n.project_id) {
+                        loadView("projectMember", n.project_id);
+                    }
+                } else {
+                    acceptBtn.disabled = false;
+                    rejectBtn.disabled = false;
+                }
+            };
+
+            rejectBtn.onclick = async () => {
+                acceptBtn.disabled = true;
+                rejectBtn.disabled = true;
+
+                const { data, error } = await supabase.rpc("decline_project_invite", {
+                    p_project_id: n.project_id
+                });
+
+                if (error) {
+                    console.error("Decline project invite failed:", error);
+                    acceptBtn.disabled = false;
+                    rejectBtn.disabled = false;
+                    return;
+                }
+
+                if (data === "declined") {
+                    await deleteNotification(n.id);
+                    row.remove();
+                    updateNotificationsInfoFromDom();
+                } else {
+                    acceptBtn.disabled = false;
+                    rejectBtn.disabled = false;
+                }
+            };
+
+            actions.appendChild(acceptBtn);
+            actions.appendChild(rejectBtn);
+            actions.appendChild(hideBtn);
+        } else {
+            const displayName =
+            n.sender?.full_name ||
+            n.sender?.username ||
+            "User";
+
+            text.innerHTML = `
+                Ο χρήστης <strong>${escapeHtml(displayName)}</strong> αποδέχθηκε το αίτημα σύνδεσης
+                ${timeString ? `
+                <span class="notification-time">
+                    <span class="notification-dot">•</span>
+                    ${timeString}
+                </span>` : ""}
+            `;
+
+            actions.appendChild(hideBtn);
+        }
 
         hideBtn.addEventListener("click", async () => {
-
-            const { error } = await supabase
-                .from("notifications")
-                .delete()
-                .eq("id", n.id);
-
-            if (error) {
-                console.error("Failed to delete notification:", error);
-                return;
-            }
+            const deleted = await deleteNotification(n.id);
+            if (!deleted) return;
 
             row.remove();
-
-            const info = document.getElementById("notifications-info");
-            const remaining = document.querySelectorAll("#notifications-list > div").length;
-
-            if (remaining === 0) {
-                info.textContent = "Δεν υπάρχουν ειδοποιήσεις";
-            }
-            else if (remaining === 1) {
-                info.textContent = "1 ειδοποίηση";
-            }
-            else {
-                info.textContent = `${remaining} ειδοποιήσεις`;
-            }
-
+            updateNotificationsInfoFromDom();
         });
 
         row.appendChild(userBlock);
         row.appendChild(divider);
         row.appendChild(text);
-        row.appendChild(hideBtn);
+        row.appendChild(actions);
 
         container.appendChild(row);
+    });
+}
 
+function createUserBlock(notification) {
+    const userBlock = document.createElement("div");
+    userBlock.className = "notification-user";
+
+    const avatar = document.createElement("img");
+    avatar.className = "notification-avatar";
+    avatar.src = notification.sender?.avatar_url || DEFAULT_AVATAR;
+
+    avatar.onerror = () => {
+        avatar.src = DEFAULT_AVATAR;
+    };
+
+    const nameContainer = document.createElement("div");
+    nameContainer.className = "notification-name";
+
+    const name = document.createElement("div");
+    name.textContent =
+    notification.sender?.full_name ||
+    notification.sender?.username ||
+    "User";
+
+    const handle = document.createElement("div");
+    handle.className = "notification-handle";
+    handle.textContent = "@" + (notification.sender?.username ?? "user");
+
+    nameContainer.appendChild(name);
+    nameContainer.appendChild(handle);
+
+    userBlock.appendChild(avatar);
+    userBlock.appendChild(nameContainer);
+
+    const tooltip = document.createElement("div");
+    tooltip.className = "notification-tooltip";
+    tooltip.textContent = "Προβολή προφίλ";
+
+    userBlock.appendChild(tooltip);
+
+    if (notification.sender?.id) {
+        userBlock.addEventListener("click", () => {
+            loadView("profileOther", notification.sender.id);
+        });
+    }
+
+    userBlock.addEventListener("mouseenter", () => {
+        tooltip.classList.add("tooltip-visible");
     });
 
+    userBlock.addEventListener("mouseleave", () => {
+        tooltip.classList.remove("tooltip-visible");
+    });
+
+    return userBlock;
+}
+
+async function deleteNotification(notificationId) {
+    const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", notificationId);
+
+    if (error) {
+        console.error("Failed to delete notification:", error);
+        return false;
+    }
+
+    return true;
+}
+
+function updateNotificationsInfo(count) {
+    const info = document.getElementById("notifications-info");
+    if (!info) return;
+
+    if (count === 0) {
+        info.textContent = "Δεν υπάρχουν ειδοποιήσεις";
+    } else if (count === 1) {
+        info.textContent = "1 ειδοποίηση";
+    } else {
+        info.textContent = `${count} ειδοποιήσεις`;
+    }
+}
+
+function updateNotificationsInfoFromDom() {
+    const remaining = document.querySelectorAll("#notifications-list > div").length;
+    updateNotificationsInfo(remaining);
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }

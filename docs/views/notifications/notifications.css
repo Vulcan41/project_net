@@ -3,15 +3,11 @@
 ========================= */
 
 #notifications-page {
-
     width: calc(100% - 40px);
     margin: 0 auto;
-
     display: flex;
     flex-direction: column;
-
     height: calc(100vh - 140px);
-
 }
 
 /* =========================
@@ -19,12 +15,9 @@
 ========================= */
 
 #notifications-list {
-
     flex: 1;
-
     overflow-y: auto;
     overflow-x: hidden;
-
 }
 
 /* =========================
@@ -32,15 +25,11 @@
 ========================= */
 
 #notifications-page h2 {
-
     font-size: 14px;
     font-weight: 500;
-
     margin-top: 10px;
     margin-bottom: 14px;
-
     color: #4b4b4b;
-
 }
 
 /* =========================
@@ -48,12 +37,10 @@
 ========================= */
 
 .notifications-info {
-
     font-size: 13px;
     color: #6b6b6b;
     margin-bottom: 14px;
     margin-left: 10px;
-
 }
 
 /* =========================
@@ -61,33 +48,24 @@
 ========================= */
 
 #notifications-list > div {
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     width: calc(100% - 20px);
-
     box-sizing: border-box;
-
     padding: 10px 14px;
-
     background: #ffffff;
     border: 1px solid #e6e6e6;
     border-radius: 8px;
-
     margin: 0 auto 10px auto;
-
     transition: transform 0.18s ease, box-shadow 0.18s ease;
-
+    gap: 12px;
 }
 
 #notifications-list > div:hover {
-
     transform: translateX(-5px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     background: #f8f9fa80;
-
 }
 
 /* =========================
@@ -95,38 +73,29 @@
 ========================= */
 
 .notification-user {
-
     display: flex;
     align-items: center;
     gap: 10px;
-
     position: relative;
-
+    cursor: pointer;
 }
 
 .notification-avatar {
-
     width: 36px;
     height: 36px;
-
     border-radius: 50%;
     object-fit: cover;
-
 }
 
 .notification-name {
-
     display: flex;
     flex-direction: column;
     font-size: 14px;
-
 }
 
 .notification-handle {
-
     font-size: 12px;
     color: #777;
-
 }
 
 /* =========================
@@ -134,14 +103,11 @@
 ========================= */
 
 .notification-divider {
-
     width: 1px;
     height: 26px;
-
     background: #e0e0e0;
-
-    margin: 0 14px;
-
+    margin: 0 4px;
+    flex-shrink: 0;
 }
 
 /* =========================
@@ -149,10 +115,23 @@
 ========================= */
 
 .notification-text {
-
     flex: 1;
     font-size: 14px;
+    min-width: 0;
+}
 
+.notification-project-name {
+    font-weight: 700;
+}
+
+.notification-text .notification-time {
+    margin-left: 10px;
+    font-size: 12px;
+    color: #6b6b6b;
+}
+
+.notification-dot {
+    margin-right: 8px;
 }
 
 /* =========================
@@ -160,38 +139,52 @@
 ========================= */
 
 .notification-tooltip {
-
     position: absolute;
-
     left: 0;
     top: calc(100% + 6px);
-
     background: #000;
     color: #fff;
-
     font-size: 11px;
     font-weight: 600;
-
     padding: 4px 8px;
     border-radius: 6px;
-
     opacity: 0;
     pointer-events: none;
-
     transition: opacity 0.15s ease;
-
 }
 
 .tooltip-visible {
     opacity: 1;
 }
 
-.notification-text .notification-time {
+/* =========================
+   ACTIONS
+========================= */
 
-    margin-left: 10px;
+.notification-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.notification-action-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 7px 12px;
     font-size: 12px;
-    color: #6b6b6b;
+    cursor: pointer;
+    font-weight: 600;
+}
 
+.notification-accept-btn {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.notification-reject-btn {
+    background: #fee2e2;
+    color: #991b1b;
 }
 
 /* =========================
@@ -203,18 +196,27 @@
     transform: scale(1);
 }
 
-.notification-text .notification-time {
+/* =========================
+   RESPONSIVE
+========================= */
 
-    margin-left: 10px;
-    font-size: 12px;
-    color: #6b6b6b;
+@media (max-width: 900px) {
+    #notifications-list > div {
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
 
+    .notification-divider {
+        display: none;
+    }
+
+    .notification-text {
+        width: 100%;
+        flex: 1 1 100%;
+    }
+
+    .notification-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
 }
-
-.notification-dot {
-
-    margin-right: 8px;
-
-}
-
-
