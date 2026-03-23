@@ -132,7 +132,8 @@ function setupCreateProjectButton() {
                         project_id: projectData.id,
                         user_id: user.id,
                         role: "owner",
-                        membership_status: "active"
+                        membership_status: "active",
+                        membership_source: "invite"
                     }
                 ]);
 
