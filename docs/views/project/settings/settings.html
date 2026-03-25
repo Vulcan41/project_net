@@ -3,16 +3,18 @@
 
     <div class="project-settings-header">
       <div class="project-settings-header-text">
-        <p class="project-settings-kicker">Project settings</p>
-        <h1 class="project-settings-title">Edit project</h1>
+        <h1 class="project-settings-title">Settings</h1>
         <p class="project-settings-subtitle">
-          Update the basic project details, avatar, visibility and description of your project.
+          Update the project details, visibility and member options.
         </p>
       </div>
     </div>
 
     <form id="project-settings-form" class="project-settings-form">
 
+      <!-- =========================
+           GENERAL
+      ========================= -->
       <section class="project-settings-zone">
         <div class="project-settings-zone-header">
           <h2>General</h2>
@@ -21,8 +23,8 @@
 
         <div class="project-settings-zone-content project-settings-zone-content-basic">
 
+          <!-- Avatar -->
           <div class="project-settings-avatar-section">
-
             <label id="project-avatar-upload">
 
               <div id="project-avatar-image-wrapper">
@@ -46,118 +48,142 @@
               PNG, JPG or WEBP<br>
               Recommended: square image
             </div>
-
           </div>
 
-          <div class="project-settings-fields">
+          <!-- Main content -->
+          <div class="project-settings-main-content">
 
-            <div class="project-settings-field">
-              <label class="project-settings-label" for="project-settings-name">
-                Project name
-              </label>
-              <input
-                      id="project-settings-name"
-                      class="project-settings-input"
-                      type="text"
-                      maxlength="80"
-                      placeholder="Project name"
-                      required
-              />
-            </div>
+            <div class="project-settings-main-layout">
 
-            <div class="project-settings-field">
-              <label class="project-settings-label" for="project-settings-description">
-                Description
-              </label>
-              <textarea
-                      id="project-settings-description"
-                      class="project-settings-textarea"
-                      rows="4"
-                      maxlength="280"
-                      placeholder="Short summary of the project..."
-              ></textarea>
-            </div>
-
-            <div class="project-settings-field">
-              <label class="project-settings-label">Visibility</label>
-
-              <div class="project-settings-visibility-grid">
-
-                <label class="project-settings-option project-settings-option-public">
+              <!-- Text fields -->
+              <div class="project-settings-main-fields">
+                <div class="project-settings-field">
+                  <label class="project-settings-label">Project name</label>
                   <input
-                          type="radio"
-                          name="project-settings-visibility"
-                          value="public"
+                          id="project-settings-name"
+                          class="project-settings-input"
+                          type="text"
+                          maxlength="80"
+                          placeholder="Project name"
+                          required
                   />
-                  <span class="project-settings-option-card">
-                    <span class="project-settings-option-top">
-                      <span class="project-settings-option-badge project-settings-option-badge-public">
-                        Public
-                      </span>
-                    </span>
+                </div>
 
+                <div class="project-settings-field">
+                  <label class="project-settings-label">Description</label>
+                  <textarea
+                          id="project-settings-description"
+                          class="project-settings-textarea"
+                          maxlength="280"
+                          placeholder="Short summary of the project..."
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- Visibility cards -->
+              <div class="project-settings-visibility-side">
+                <div class="project-settings-field">
+                  <label class="project-settings-label">Visibility</label>
+
+                  <div class="project-settings-visibility-stack">
+
+                    <label class="project-settings-option project-settings-option-public">
+                      <input type="radio" name="project-settings-visibility" value="public" />
+
+                      <span class="project-settings-option-card">
+                  <span class="project-settings-option-header">
                     <span class="project-settings-option-title">
                       Public project
                     </span>
 
-                    <span class="project-settings-option-text">
-                      Visible in search. Other users can request to join.
+                    <span class="project-settings-option-badge project-settings-option-badge-public">
+                      Public
                     </span>
                   </span>
-                </label>
 
-                <label class="project-settings-option project-settings-option-private">
-                  <input
-                          type="radio"
-                          name="project-settings-visibility"
-                          value="private"
-                  />
-                  <span class="project-settings-option-card">
-                    <span class="project-settings-option-top">
-                      <span class="project-settings-option-badge project-settings-option-badge-private">
-                        Private
-                      </span>
-                    </span>
+                  <span class="project-settings-option-text">
+                    Visible in search. Other users can request to join.
+                  </span>
+                </span>
+                    </label>
 
+                    <label class="project-settings-option project-settings-option-private">
+                      <input type="radio" name="project-settings-visibility" value="private" />
+
+                      <span class="project-settings-option-card">
+                  <span class="project-settings-option-header">
                     <span class="project-settings-option-title">
                       Private project
                     </span>
 
-                    <span class="project-settings-option-text">
-                      Hidden from search. Access is controlled by the owner.
+                    <span class="project-settings-option-badge project-settings-option-badge-private">
+                      Private
                     </span>
                   </span>
-                </label>
 
-              </div>
-            </div>
-
-            <div class="project-settings-field">
-              <label class="project-settings-label">Members list visibility</label>
-
-              <label class="project-settings-switch-row">
-                <input
-                        id="project-settings-members-can-view-members"
-                        class="project-settings-switch-input"
-                        type="checkbox"
-                />
-                <span class="project-settings-switch-ui"></span>
-
-                <span class="project-settings-switch-text">
-                  Allow members to view the members list
+                  <span class="project-settings-option-text">
+                    Hidden from search. Access is controlled by the owner.
+                  </span>
                 </span>
-              </label>
+                    </label>
 
-              <p class="project-settings-field-hint">
-                When disabled, only the owner can view the full members list.
-              </p>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
+            <div class="project-settings-section-actions">
+              <button
+                      id="project-settings-submit-btn"
+                      class="project-settings-submit-btn"
+                      type="submit"
+              >
+                Save changes
+              </button>
+            </div>
           </div>
 
         </div>
+
+        <div class="project-settings-divider"></div>
       </section>
 
+      <!-- =========================
+           MEMBER OPTIONS
+      ========================= -->
+      <section class="project-settings-zone">
+        <div class="project-settings-zone-header">
+          <h2>Member options</h2>
+          <p>Control what members are allowed to see inside the project.</p>
+        </div>
+
+        <div class="project-settings-options-stack">
+          <div class="project-settings-option-block">
+            <div class="project-settings-option-block-main">
+              <div class="project-settings-option-block-title">
+                Members list visibility
+              </div>
+              <div class="project-settings-option-block-text">
+                Allow members to open the members tab and view the active members list.
+              </div>
+            </div>
+
+            <label class="project-settings-switch-row">
+              <input
+                      id="project-settings-members-can-view-members"
+                      class="project-settings-switch-input"
+                      type="checkbox"
+              />
+              <span class="project-settings-switch-ui"></span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================
+           DANGER ZONE
+      ========================= -->
       <section class="project-settings-zone project-settings-zone-danger">
         <div class="project-settings-zone-header">
           <h2>Danger zone</h2>
@@ -174,16 +200,6 @@
           </button>
         </div>
       </section>
-
-      <div class="project-settings-bottom">
-        <button
-                id="project-settings-submit-btn"
-                class="project-settings-submit-btn"
-                type="submit"
-        >
-          Αποθήκευση
-        </button>
-      </div>
 
     </form>
   </div>

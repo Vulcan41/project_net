@@ -16,10 +16,9 @@ export function initSettings(project) {
 
     fillProjectSettingsForm(project);
     setupAvatarInput();
+    setupInstantOptions();
     setupFormSubmit();
     setupDeleteButton();
-
-    console.log("project in settings:", project);
 }
 
 /* =========================
@@ -83,6 +82,64 @@ function setupAvatarInput() {
     };
 }
 
+function setupInstantOptions() {
+    const membersCanViewMembersInput = document.getElementById(
+        "project-settings-members-can-view-members"
+    );
+
+    if (!membersCanViewMembersInput) return;
+
+    membersCanViewMembersInput.onchange = async () => {
+        if (!currentProject?.id) return;
+
+        const nextValue = membersCanViewMembersInput.checked;
+
+        membersCanViewMembersInput.disabled = true;
+
+        try {
+            const { error } = await supabase
+                .from("projects")
+                .update({
+                members_can_view_members: nextValue
+            })
+                .eq("id", currentProject.id);
+
+            if (error) {
+                throw error;
+            }
+
+            currentProject = {
+                ...currentProject,
+                members_can_view_members: nextValue
+            };
+
+            window.dispatchEvent(
+                new CustomEvent("project-updated", {
+                    detail: {
+                        members_can_view_members: nextValue
+                    }
+                })
+            );
+
+            await showInfo({
+                type: "success",
+                message: "Member option updated."
+            });
+        } catch (error) {
+            console.error("Instant member option update failed:", error);
+
+            membersCanViewMembersInput.checked = !nextValue;
+
+            await showInfo({
+                type: "error",
+                message: error?.message || "Failed to update member option."
+            });
+        } finally {
+            membersCanViewMembersInput.disabled = false;
+        }
+    };
+}
+
 function renderAvatarPreview(imageUrl, projectName) {
     const preview = document.getElementById("project-settings-avatar-preview");
     if (!preview) return;
@@ -126,8 +183,6 @@ function setupFormSubmit() {
             const visibility =
             document.querySelector('input[name="project-settings-visibility"]:checked')?.value ||
             "public";
-            const membersCanViewMembers =
-            document.getElementById("project-settings-members-can-view-members")?.checked ?? true;
 
             if (!name) {
                 await showInfo({
@@ -150,8 +205,7 @@ function setupFormSubmit() {
                 name,
                 description: description || null,
                 visibility,
-                avatar_url: avatarUrl,
-                members_can_view_members: membersCanViewMembers
+                avatar_url: avatarUrl
             })
                 .eq("id", currentProject.id);
 
@@ -164,8 +218,7 @@ function setupFormSubmit() {
                 name,
                 description,
                 visibility,
-                avatar_url: avatarUrl,
-                members_can_view_members: membersCanViewMembers
+                avatar_url: avatarUrl
             };
 
             window.dispatchEvent(
@@ -174,8 +227,7 @@ function setupFormSubmit() {
                         name,
                         description,
                         visibility,
-                        avatar_url: avatarUrl,
-                        members_can_view_members: membersCanViewMembers
+                        avatar_url: avatarUrl
                     }
                 })
             );

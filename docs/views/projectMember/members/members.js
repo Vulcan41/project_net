@@ -3,6 +3,9 @@ import { loadView } from "../../../core/router.js";
 import { DEFAULT_AVATAR } from "../../../state/userStore.js";
 
 let currentProject = null;
+let currentMembers = [];
+let currentSort = "newest_desc";
+let currentSearch = "";
 
 export async function initMembers(project) {
     if (!project?.id) {
@@ -11,19 +14,6 @@ export async function initMembers(project) {
     }
 
     currentProject = project;
-
-    const list = document.getElementById("members-list");
-    if (!list) return;
-
-    if (project.members_can_view_members === false) {
-        list.innerHTML = `
-            <div class="member-empty">
-                The owner has hidden the members list for this project.
-            </div>
-        `;
-        return;
-    }
-
     await loadMembers(project.id);
 }
 
@@ -62,24 +52,78 @@ async function loadMembers(projectId) {
         return;
     }
 
-    if (!data || data.length === 0) {
+    currentMembers = data ?? [];
+    renderMembersView();
+}
+
+function renderMembersView() {
+    const list = document.getElementById("members-list");
+    if (!list) return;
+
+    const filteredMembers = getFilteredMembers();
+
+    const toolbar = `
+        <div class="members-toolbar">
+            <div class="members-toolbar-left">
+                <div class="members-group-title">
+                    Members (${filteredMembers.length})
+                </div>
+
+                <select id="members-sort-select" class="members-sort-select">
+                    <option value="newest_desc">Newest first</option>
+                    <option value="newest_asc">Newest last</option>
+                    <option value="alpha_asc">A → Z</option>
+                    <option value="alpha_desc">Z → A</option>
+                </select>
+
+                <input
+                    id="members-search-input"
+                    class="members-search-input"
+                    type="text"
+                    placeholder="Search members..."
+                    value="${escapeHtml(currentSearch)}"
+                />
+            </div>
+        </div>
+    `;
+
+    if (!currentMembers.length) {
         list.innerHTML = `
+            ${toolbar}
             <div class="member-empty">
                 No members found.
             </div>
         `;
+        setupSort();
+        setupSearch();
+        return;
+    }
+
+    if (!filteredMembers.length) {
+        list.innerHTML = `
+            <div class="members-group">
+                ${toolbar}
+                <div class="member-empty">
+                    No matching members found.
+                </div>
+            </div>
+        `;
+        setupSort();
+        setupSearch();
         return;
     }
 
     list.innerHTML = `
         <div class="members-group">
-            <div class="members-group-title">Members</div>
+            ${toolbar}
             <div class="members-group-list">
-                ${data.map(renderMemberRow).join("")}
+                ${filteredMembers.map(renderMemberRow).join("")}
             </div>
         </div>
     `;
 
+    setupSort();
+    setupSearch();
     bindMemberAvatarFallbacks();
     bindMemberProfileLinks();
 }
@@ -108,20 +152,96 @@ function renderMemberRow(member) {
                     <div class="member-username">@${escapeHtml(username)}</div>
                 </div>
 
-                <div class="member-tooltip">Προβολή προφίλ</div>
+                <div class="member-tooltip">View profile</div>
             </div>
 
             <div class="member-row-right">
-                <span class="member-pill member-pill-role">
+                <span class="member-pill ${
+                    member.role === "owner"
+                        ? "member-pill-role-owner"
+                        : "member-pill-role-member"
+                }">
                     ${escapeHtml(member.role)}
-                </span>
-
-                <span class="member-pill member-pill-status">
-                    active
                 </span>
             </div>
         </div>
     `;
+}
+
+function getFilteredMembers() {
+    return sortMembers(
+        currentMembers.filter((member) => {
+            const search = currentSearch.trim().toLowerCase();
+            if (!search) return true;
+
+            const fullName = (member.profiles?.full_name || "").toLowerCase();
+            const username = (member.profiles?.username || "").toLowerCase();
+
+            return fullName.includes(search) || username.includes(search);
+        })
+    );
+}
+
+function sortMembers(list) {
+    const sorted = [...list];
+
+    switch (currentSort) {
+        case "newest_desc":
+            return sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        case "newest_asc":
+            return sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+        case "alpha_asc":
+            return sorted.sort((a, b) => {
+                const aName = (a.profiles?.full_name || a.profiles?.username || "").toLowerCase();
+                const bName = (b.profiles?.full_name || b.profiles?.username || "").toLowerCase();
+                return aName.localeCompare(bName);
+            });
+
+        case "alpha_desc":
+            return sorted.sort((a, b) => {
+                const aName = (a.profiles?.full_name || a.profiles?.username || "").toLowerCase();
+                const bName = (b.profiles?.full_name || b.profiles?.username || "").toLowerCase();
+                return bName.localeCompare(aName);
+            });
+
+        default:
+            return sorted;
+    }
+}
+
+function setupSort() {
+    const select = document.getElementById("members-sort-select");
+    if (!select) return;
+
+    select.value = currentSort;
+
+    select.onchange = () => {
+        currentSort = select.value;
+        renderMembersView();
+    };
+}
+
+function setupSearch() {
+    const input = document.getElementById("members-search-input");
+    if (!input) return;
+
+    input.value = currentSearch;
+
+    input.oninput = () => {
+        const cursorPos = input.selectionStart; // save cursor
+        currentSearch = input.value;
+
+        renderMembersView();
+
+        // restore focus AFTER re-render
+        const newInput = document.getElementById("members-search-input");
+        if (newInput) {
+            newInput.focus();
+            newInput.setSelectionRange(cursorPos, cursorPos);
+        }
+    };
 }
 
 function bindMemberAvatarFallbacks() {

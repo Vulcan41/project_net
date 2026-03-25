@@ -4,6 +4,17 @@
     gap: 18px;
 }
 
+.members-section-header h1 {
+    margin: 0 0 6px 0;
+    font-size: 24px;
+}
+
+.members-section-header p {
+    margin: 0;
+    color: #7a7a84;
+    font-size: 13px;
+}
+
 #members-list {
     display: flex;
     flex-direction: column;
@@ -22,6 +33,56 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: #8b8b95;
+}
+
+.members-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 2px 0 2px;
+}
+
+.members-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.members-sort-select {
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #333;
+}
+
+.members-sort-select:hover {
+    background: #f9fafb;
+}
+
+.members-search-input {
+    height: 32px;
+    min-width: 220px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 0 10px;
+    font-size: 12px;
+    color: #333;
+    outline: none;
+}
+
+.members-search-input::placeholder {
+    color: #9aa0a6;
+}
+
+.members-search-input:focus {
+    border-color: #d1d5db;
+    background: #fff;
 }
 
 .members-group-list {
@@ -113,16 +174,16 @@
     border: 1px solid transparent;
 }
 
-.member-pill-role {
+.member-pill-role-owner {
     background: #ecfdf3;
     color: #16794b;
     border-color: #cfeedd;
 }
 
-.member-pill-status {
-    background: #f3f4f6;
-    color: #374151;
-    border-color: #e5e7eb;
+.member-pill-role-member {
+    background: #ecfdf3;
+    color: #16794b;
+    border-color: #cfeedd;
 }
 
 .member-empty {
@@ -164,5 +225,15 @@
     .member-row-right {
         width: 100%;
         justify-content: flex-start;
+    }
+
+    .members-toolbar-left {
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .members-search-input {
+        width: 100%;
+        min-width: 0;
     }
 }

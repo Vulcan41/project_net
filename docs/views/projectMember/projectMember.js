@@ -22,8 +22,10 @@ export async function initProjectMember(projectId) {
     currentProject = loaded.project;
 
     renderSidebar();
+    applyMemberMenuVisibility();
     await loadOwnerInfo();
     setupSidebar();
+    finalizeSidebarVisibility();
     loadSection("overview");
 }
 
@@ -102,6 +104,19 @@ function renderSidebar() {
     }
 }
 
+function applyMemberMenuVisibility() {
+    const membersBtn = document.getElementById("project-member-members-btn");
+    if (!membersBtn) return;
+
+    const canViewMembers = currentProject?.members_can_view_members !== false;
+
+    if (canViewMembers) {
+        membersBtn.classList.remove("hidden");
+    } else {
+        membersBtn.classList.add("hidden");
+    }
+}
+
 function setupSidebar() {
     const buttons = document.querySelectorAll(".project-member-menu-btn");
 
@@ -153,6 +168,14 @@ async function loadOwnerInfo() {
 ========================= */
 
 async function loadSection(section) {
+
+    if (
+    section === "members" &&
+    currentProject?.members_can_view_members === false
+    ) {
+        return;
+    }
+
     const container = document.getElementById("project-member-body-content");
     if (!container) return;
 
@@ -185,6 +208,13 @@ async function loadSection(section) {
     } catch (err) {
         console.error("ProjectMember section load error:", err);
     }
+}
+
+function finalizeSidebarVisibility() {
+    const menu = document.getElementById("project-member-menu");
+    if (!menu) return;
+
+    menu.classList.remove("hidden");
 }
 
 function showError(message) {
