@@ -25,6 +25,7 @@ export async function initProject(projectId) {
     renderSidebar();
     await loadOwnerInfo();
     setupSidebar();
+    setupBackButton();
     setupProjectUpdateListener();
     loadSection("overview");
 }
@@ -204,6 +205,15 @@ async function loadSection(section) {
     } catch (err) {
         console.error("Section load error:", err);
     }
+}
+
+function setupBackButton() {
+    const backBtn = document.getElementById("project-back-btn");
+    if (!backBtn) return;
+
+    backBtn.onclick = () => {
+        loadView("basic");
+    };
 }
 
 function escapeHtml(value) {
