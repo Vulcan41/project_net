@@ -258,7 +258,7 @@ function createFolderRow(folder) {
     icon.className = "file-icon";
 
     const img = document.createElement("img");
-    img.src = "assets/folder.png";
+    img.src = "assets/menu_files.png";
     img.alt = "folder";
     img.className = "file-icon-img";
     icon.appendChild(img);
