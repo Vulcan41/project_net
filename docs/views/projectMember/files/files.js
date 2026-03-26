@@ -13,7 +13,6 @@ export async function initFiles(project) {
     const ready = await loadDefaultFolder();
     if (!ready) return;
 
-    renderCurrentFolderLabel();
     setupBackFolderButton();
     await loadFolderContent();
 }
@@ -66,11 +65,56 @@ async function loadFolderMeta(folderId) {
     return data;
 }
 
-function renderCurrentFolderLabel() {
-    const el = document.getElementById("files-current-folder");
-    if (!el) return;
+async function buildBreadcrumbPath(folderId) {
+    const path = [];
+    let cursor = folderId;
 
-    el.textContent = `Folder: ${currentFolderName}`;
+    while (cursor) {
+        const folder = await loadFolderMeta(cursor);
+        if (!folder) break;
+
+        path.unshift(folder);
+
+        if (!folder.parent_folder_id) break;
+        cursor = folder.parent_folder_id;
+    }
+
+    return path;
+}
+
+async function renderBreadcrumbs() {
+    const container = document.getElementById("files-breadcrumbs");
+    if (!container || !currentFolderId) return;
+
+    const path = await buildBreadcrumbPath(currentFolderId);
+
+    container.innerHTML = "";
+
+    path.forEach((folder, index) => {
+        const isLast = index === path.length - 1;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `files-breadcrumb-btn${isLast ? " active" : ""}`;
+        btn.textContent = folder.name;
+
+        if (!isLast) {
+            btn.onclick = async () => {
+                currentFolderId = folder.id;
+                currentFolderName = folder.name;
+                await loadFolderContent();
+            };
+        }
+
+        container.appendChild(btn);
+
+        if (!isLast) {
+            const sep = document.createElement("span");
+            sep.className = "files-breadcrumb-separator";
+            sep.textContent = "/";
+            container.appendChild(sep);
+        }
+    });
 }
 
 function updateBackButtonVisibility() {
@@ -90,7 +134,7 @@ async function loadFolderContent() {
 
     if (!list || !currentFolderId) return;
 
-    renderCurrentFolderLabel();
+    await renderBreadcrumbs();
     updateBackButtonVisibility();
 
     list.innerHTML = `<div class="files-empty">Loading files...</div>`;

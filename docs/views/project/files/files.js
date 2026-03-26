@@ -13,7 +13,6 @@ export async function initFiles(project) {
     const ready = await loadDefaultFolder();
     if (!ready) return;
 
-    renderCurrentFolderLabel();
     setupUpload();
     setupCreateFolderButton();
     setupBackFolderButton();
@@ -55,7 +54,7 @@ async function loadDefaultFolder() {
 async function loadFolderMeta(folderId) {
     const { data, error } = await supabase
         .from("project_folders")
-        .select("id, name, parent_folder_id")
+        .select("id, name, parent_folder_id, is_default")
         .eq("id", folderId)
         .eq("project_id", currentProject.id)
         .single();
@@ -68,11 +67,56 @@ async function loadFolderMeta(folderId) {
     return data;
 }
 
-function renderCurrentFolderLabel() {
-    const el = document.getElementById("files-current-folder");
-    if (!el) return;
+async function buildBreadcrumbPath(folderId) {
+    const path = [];
+    let cursor = folderId;
 
-    el.textContent = `Folder: ${currentFolderName}`;
+    while (cursor) {
+        const folder = await loadFolderMeta(cursor);
+        if (!folder) break;
+
+        path.unshift(folder);
+
+        if (!folder.parent_folder_id) break;
+        cursor = folder.parent_folder_id;
+    }
+
+    return path;
+}
+
+async function renderBreadcrumbs() {
+    const container = document.getElementById("files-breadcrumbs");
+    if (!container || !currentFolderId) return;
+
+    const path = await buildBreadcrumbPath(currentFolderId);
+
+    container.innerHTML = "";
+
+    path.forEach((folder, index) => {
+        const isLast = index === path.length - 1;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `files-breadcrumb-btn${isLast ? " active" : ""}`;
+        btn.textContent = folder.name;
+
+        if (!isLast) {
+            btn.onclick = async () => {
+                currentFolderId = folder.id;
+                currentFolderName = folder.name;
+                await loadFolderContent();
+            };
+        }
+
+        container.appendChild(btn);
+
+        if (!isLast) {
+            const sep = document.createElement("span");
+            sep.className = "files-breadcrumb-separator";
+            sep.textContent = "/";
+            container.appendChild(sep);
+        }
+    });
 }
 
 function updateBackButtonVisibility() {
@@ -92,7 +136,7 @@ async function loadFolderContent() {
 
     if (!list || !currentFolderId) return;
 
-    renderCurrentFolderLabel();
+    await renderBreadcrumbs();
     updateBackButtonVisibility();
 
     list.innerHTML = `<div class="files-empty">Loading files...</div>`;
@@ -188,7 +232,7 @@ function setupBackFolderButton() {
 }
 
 /* =========================
-   CREATE FOLDER
+   CREATE / RENAME / DELETE FOLDER
 ========================= */
 
 function setupCreateFolderButton() {
@@ -224,6 +268,58 @@ function setupCreateFolderButton() {
             alert("Failed to create folder");
         }
     };
+}
+
+async function renameFolder(folder) {
+    const nextName = window.prompt("Rename folder:", folder.name);
+    if (!nextName || !nextName.trim()) return;
+
+    try {
+        const { error } = await supabase
+            .from("project_folders")
+            .update({
+            name: nextName.trim()
+        })
+            .eq("id", folder.id);
+
+        if (error) throw error;
+
+        if (folder.id === currentFolderId) {
+            currentFolderName = nextName.trim();
+        }
+
+        await loadFolderContent();
+    } catch (err) {
+        console.error("Rename folder failed:", err);
+        alert("Failed to rename folder");
+    }
+}
+
+async function deleteFolder(folder) {
+    if (folder.is_default) {
+        alert("Default folder cannot be deleted");
+        return;
+    }
+
+    const confirmed = window.confirm(
+        `Delete folder "${folder.name}"?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+        const { error } = await supabase
+            .from("project_folders")
+            .delete()
+            .eq("id", folder.id);
+
+        if (error) throw error;
+
+        await loadFolderContent();
+    } catch (err) {
+        console.error("Delete folder failed:", err);
+        alert("Failed to delete folder");
+    }
 }
 
 /* =========================
@@ -333,7 +429,7 @@ function createFolderRow(folder) {
 
     const sub = document.createElement("div");
     sub.className = "file-sub";
-    sub.textContent = "Folder";
+    sub.textContent = folder.is_default ? "Default folder" : "Folder";
 
     metaWrap.appendChild(name);
     metaWrap.appendChild(sub);
@@ -341,7 +437,35 @@ function createFolderRow(folder) {
     main.appendChild(icon);
     main.appendChild(metaWrap);
 
+    const actions = document.createElement("div");
+    actions.className = "file-actions";
+
+    const renameBtn = document.createElement("button");
+    renameBtn.className = "file-btn file-btn-download";
+    renameBtn.textContent = "Rename";
+
+    renameBtn.onclick = async (event) => {
+        event.stopPropagation();
+        await renameFolder(folder);
+    };
+
+    actions.appendChild(renameBtn);
+
+    if (!folder.is_default) {
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "file-btn file-btn-delete";
+        deleteBtn.textContent = "Delete";
+
+        deleteBtn.onclick = async (event) => {
+            event.stopPropagation();
+            await deleteFolder(folder);
+        };
+
+        actions.appendChild(deleteBtn);
+    }
+
     row.appendChild(main);
+    row.appendChild(actions);
 
     row.onclick = async () => {
         currentFolderId = folder.id;

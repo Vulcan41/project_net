@@ -148,8 +148,8 @@
 }
 
 .file-icon-img {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     object-fit: contain;
 }
 
@@ -282,4 +282,38 @@
 
 .file-row-folder:hover {
     background: #f6f8fb;
+}
+
+
+
+.files-breadcrumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.files-breadcrumb-btn {
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+}
+
+.files-breadcrumb-btn:hover {
+    color: #111111;
+}
+
+.files-breadcrumb-btn.active {
+    color: #111111;
+    cursor: default;
+}
+
+.files-breadcrumb-separator {
+    font-size: 13px;
+    color: #9ca3af;
 }
