@@ -40,18 +40,20 @@ async function loadProject(projectId) {
     }
 
     await renderProject(data);
+    await renderFriendMembersPreview(data.id);
     await setupRequestButton(data.id, data.visibility);
 }
 
 async function renderProject(project) {
     const title = document.getElementById("project-other-title");
     const description = document.getElementById("project-other-description");
-    const visibility = document.getElementById("project-other-visibility");
-    const status = document.getElementById("project-other-status");
-    const owner = document.getElementById("project-other-owner");
     const meta = document.getElementById("project-other-meta");
     const avatar = document.getElementById("project-other-avatar");
-    const created = document.getElementById("project-other-created");
+
+    const ownerBlock = document.getElementById("project-other-owner-block");
+    const ownerName = document.getElementById("project-other-owner-name");
+    const ownerUsername = document.getElementById("project-other-owner-username");
+    const ownerAvatar = document.getElementById("project-other-owner-avatar");
 
     if (title) {
         title.textContent = project.name ?? "Untitled project";
@@ -61,47 +63,149 @@ async function renderProject(project) {
         description.textContent = project.description || "Χωρίς περιγραφή.";
     }
 
-    if (visibility) {
-        visibility.textContent = project.visibility;
-        visibility.className = `project-other-pill ${
-            project.visibility === "public"
-                ? "project-other-pill-public"
-                : "project-other-pill-private"
-        }`;
-    }
-
-    if (status) {
-        status.textContent = project.status ?? "active";
-    }
-
-    if (created) {
-        created.textContent = formatCreatedAt(project.created_at);
-    }
-
     if (avatar) {
         avatar.innerHTML = project.avatar_url
         ? `<img src="${escapeHtml(project.avatar_url)}" alt="${escapeHtml(project.name || "Project")} avatar" />`
         : `<span class="project-other-avatar-fallback">${escapeHtml((project.name || "P").charAt(0).toUpperCase())}</span>`;
     }
 
-    if (owner && project.owner_id) {
+    if (project.owner_id && ownerName && ownerUsername && ownerAvatar) {
         const { data: ownerProfile, error: ownerError } = await supabase
             .from("profiles")
-            .select("username")
+            .select("username, full_name, avatar_url")
             .eq("id", project.owner_id)
             .single();
 
         if (ownerError) {
             console.error("Owner load error:", ownerError);
-            owner.textContent = "by @unknown";
+            ownerName.textContent = "Unknown user";
+            ownerUsername.textContent = "@unknown";
+            ownerAvatar.src = "assets/avatar.png";
         } else {
-            owner.textContent = `by @${ownerProfile?.username || "user"}`;
+            ownerName.textContent =
+            ownerProfile.full_name || ownerProfile.username || "User";
+
+            ownerUsername.textContent =
+            "@" + (ownerProfile.username || "user");
+
+            ownerAvatar.src =
+            ownerProfile.avatar_url || "assets/avatar.png";
+        }
+
+        if (ownerBlock) {
+            ownerBlock.onclick = () => {
+                loadView("profileOther", project.owner_id);
+            };
         }
     }
 
     if (meta) {
         meta.classList.remove("hidden");
     }
+}
+
+async function renderFriendMembersPreview(projectId) {
+    const wrapper = document.getElementById("project-other-friends-members");
+    const avatarsEl = document.getElementById("project-other-friends-members-avatars");
+    const textEl = document.getElementById("project-other-friends-members-text");
+    const divider = document.getElementById("project-other-friends-divider");
+
+    if (!wrapper || !avatarsEl || !textEl) return;
+
+    const {
+        data: { user }
+    } = await supabase.auth.getUser();
+
+    const hidePreview = () => {
+        wrapper.classList.add("hidden");
+        if (divider) divider.classList.add("hidden");
+    };
+
+    if (!user) {
+        hidePreview();
+        return;
+    }
+
+    const { data: friendships, error: friendshipsError } = await supabase
+        .from("friendships")
+        .select(`
+            requester_id,
+            receiver_id,
+            status
+        `)
+        .eq("status", "accepted")
+        .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`);
+
+    if (friendshipsError) {
+        console.error("Failed to load friendships:", friendshipsError);
+        hidePreview();
+        return;
+    }
+
+    const friendIds = (friendships ?? [])
+        .map((row) => row.requester_id === user.id ? row.receiver_id : row.requester_id)
+        .filter(Boolean);
+
+    if (!friendIds.length) {
+        hidePreview();
+        return;
+    }
+
+    const { data: memberRows, error: membersError } = await supabase
+        .from("project_members")
+        .select(`
+            user_id,
+            profiles (
+                username,
+                full_name,
+                avatar_url
+            )
+        `)
+        .eq("project_id", projectId)
+        .eq("membership_status", "active")
+        .in("user_id", friendIds);
+
+    if (membersError) {
+        console.error("Failed to load project member friends:", membersError);
+        hidePreview();
+        return;
+    }
+
+    const friendMembers = memberRows ?? [];
+
+    if (!friendMembers.length) {
+        hidePreview();
+        return;
+    }
+
+    const previewMembers = friendMembers.slice(0, 5);
+
+    avatarsEl.innerHTML = previewMembers.map((member, index) => {
+        const profile = member.profiles || {};
+        const avatarUrl = profile.avatar_url?.trim();
+        const fallbackLetter = escapeHtml(
+            (profile.full_name || profile.username || "U").charAt(0).toUpperCase()
+        );
+
+        return `
+            <div
+                class="project-other-friend-member-avatar"
+                style="z-index: ${previewMembers.length - index};"
+                title="${escapeHtml(profile.full_name || profile.username || "User")}"
+            >
+                ${
+                    avatarUrl
+                        ? `<img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(profile.username || "member")} avatar" />`
+                        : `<div class="project-other-friend-member-avatar-fallback">${fallbackLetter}</div>`
+                }
+            </div>
+        `;
+    }).join("");
+
+    textEl.textContent = `${friendMembers.length} members including`;
+
+    wrapper.classList.remove("hidden");
+    if (divider) divider.classList.remove("hidden");
 }
 
 async function setupRequestButton(projectId, projectVisibility) {
@@ -196,24 +300,6 @@ async function setupRequestButton(projectId, projectVisibility) {
         message.textContent = "Απρόβλεπτη απάντηση από τον server.";
         message.classList.remove("hidden");
     };
-}
-
-function formatCreatedAt(dateString) {
-    if (!dateString) return "created recently";
-
-    const date = new Date(dateString);
-
-    if (Number.isNaN(date.getTime())) {
-        return "created recently";
-    }
-
-    const formatted = date.toLocaleDateString("el-GR", {
-        day: "numeric",
-        month: "short",
-        year: "numeric"
-    });
-
-    return "created " + formatted;
 }
 
 function showError(message) {

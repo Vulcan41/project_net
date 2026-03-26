@@ -7,63 +7,66 @@
 
     <div id="project-other-error" class="project-other-error hidden"></div>
 
-    <section class="project-other-hero">
-        <div class="project-other-hero-left">
-            <p class="project-other-kicker">Project</p>
+    <section class="project-other-shell">
+        <div class="project-other-hero-card">
+            <div class="project-other-hero-main">
+                <div class="project-other-title-row">
+                    <div id="project-other-avatar" class="project-other-avatar">
+                        <span class="project-other-avatar-fallback">P</span>
+                    </div>
 
-            <div class="project-other-title-row">
-                <div id="project-other-avatar" class="project-other-avatar">
-                    <span class="project-other-avatar-fallback">P</span>
+                    <div class="project-other-title-block">
+                        <h1 id="project-other-title" class="project-other-title">Loading...</h1>
+                        <p id="project-other-description" class="project-other-description"></p>
+                    </div>
                 </div>
 
-                <div class="project-other-title-block">
-                    <h1 id="project-other-title" class="project-other-title">Loading...</h1>
-                    <p id="project-other-description" class="project-other-description"></p>
+                <aside class="project-other-sidepanel">
+                    <div class="project-other-action-card">
+                        <button id="project-request-btn" class="project-request-btn" type="button">
+                            Request to join
+                        </button>
+
+                        <div id="project-request-message" class="project-request-message hidden"></div>
+                    </div>
+                </aside>
+
+                <div class="project-other-bottom-row">
+                    <div id="project-other-meta" class="project-other-meta hidden">
+
+                        <div
+                                id="project-other-friends-members"
+                                class="project-other-friends-members hidden"
+                        >
+                            <div class="project-other-friends-members-text" id="project-other-friends-members-text"></div>
+                            <div class="project-other-friends-members-avatars" id="project-other-friends-members-avatars"></div>
+                        </div>
+
+                        <div
+                                id="project-other-friends-divider"
+                                class="project-other-meta-divider hidden"
+                        ></div>
+
+                        <div class="project-other-meta-group">
+                            <p class="project-other-by-label">A PROJECT BY</p>
+
+                            <div id="project-other-owner-block" class="project-other-owner-block">
+                                <div class="project-other-owner-avatar">
+                                    <img id="project-other-owner-avatar" src="" alt="owner avatar" />
+                                </div>
+
+                                <div class="project-other-owner-info">
+                                    <div id="project-other-owner-name" class="project-other-owner-name"></div>
+                                    <div id="project-other-owner-username" class="project-other-owner-username"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
                 </div>
-            </div>
 
-            <div id="project-other-meta" class="project-other-meta hidden">
-                <span id="project-other-owner" class="project-other-pill project-other-pill-neutral"></span>
-                <span id="project-other-created" class="project-other-pill project-other-pill-neutral"></span>
-                <span id="project-other-visibility" class="project-other-pill"></span>
-                <span id="project-other-status" class="project-other-pill project-other-pill-neutral"></span>
-            </div>
-        </div>
-
-        <div class="project-other-hero-right">
-            <div class="project-other-action-card">
-                <p class="project-other-action-kicker">Access</p>
-                <h2 class="project-other-action-title">Interested in joining?</h2>
-                <p class="project-other-action-text">
-                    Request access to become a member of this project.
-                </p>
-
-                <button id="project-request-btn" class="project-request-btn" type="button">
-                    Request to join
-                </button>
-
-                <div id="project-request-message" class="project-request-message hidden"></div>
             </div>
         </div>
     </section>
-
-    <div class="project-other-sections">
-        <article class="project-other-section-card">
-            <p class="project-other-section-kicker">Overview</p>
-            <h2>About this project</h2>
-            <p>
-                You are viewing this project as a non-member. Project details are visible here,
-                while access and collaboration require membership.
-            </p>
-        </article>
-
-        <article class="project-other-section-card">
-            <p class="project-other-section-kicker">Membership</p>
-            <h2>How access works</h2>
-            <p>
-                If the project is public, you can request to join. Once accepted, you will be
-                able to access the member view and collaborate inside the project.
-            </p>
-        </article>
-    </div>
 </section>

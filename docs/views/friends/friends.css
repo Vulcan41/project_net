@@ -1,221 +1,363 @@
-/* =========================
-   PAGE LAYOUT
-========================= */
-
-#friends-page {
-
-    width: calc(100% - 40px);
-    margin: 0 auto;
-
-    display: flex;
-    flex-direction: column;
-
-    height: calc(100vh - 140px);
-
-}
-
-/* =========================
-   SECTIONS
-========================= */
-
-#requests-section,
-#friends-section {
-
+.friends-page {
     width: 100%;
-    padding: 0px 20px 0px 20px;
     box-sizing: border-box;
+}
 
+.friends-page-shell {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 24px 24px;
+    box-sizing: border-box;
+}
+
+.friends-section {
     display: flex;
     flex-direction: column;
-
-    flex: 1;
-    min-height: 0;
-
+    gap: 18px;
 }
 
-#friend-requests,
-#friends-list {
+.friends-section {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
 
-    flex: 1;
+.friends-section-header h1 {
+    margin: 0 0 6px 0;
+    font-size: 24px;
+}
 
-    overflow-y: auto;
-    overflow-x: hidden;
+.friends-section-header p {
+    margin: 0;
+    color: #7a7a84;
+    font-size: 13px;
+}
 
+#friends-page-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#friends-page-content.no-requests {
+    gap: 8px;
 }
 
 /* =========================
-   SECTION TITLES
+   GROUPS
 ========================= */
 
-#friends-page h2 {
+.friends-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
 
-    font-size: 14px;
-    font-weight: 500;
-    margin-top: 10px;
-    margin-bottom: 14px;
-    color: #4b4b4b;
+.friends-group-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #8b8b95;
+}
 
+.friends-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.friends-group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid #e6e6e6;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.friend-empty {
+    padding: 16px;
+    border: 1px dashed #d1d5db;
+    border-radius: 10px;
+    color: #7a7a84;
+    font-size: 13px;
+    background: #fafafa;
 }
 
 /* =========================
-   ROW CONTAINERS
+   TOOLBAR
 ========================= */
 
-#friend-requests > div,
-#friends-list > div {
+.friends-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 2px 0 2px;
+}
 
+.friends-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.friends-sort-select {
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #333;
+}
+
+.friends-sort-select:hover {
+    background: #f9fafb;
+}
+
+.friends-search-input {
+    height: 32px;
+    min-width: 220px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 0 10px;
+    font-size: 12px;
+    color: #333;
+    outline: none;
+}
+
+.friends-search-input::placeholder {
+    color: #9aa0a6;
+}
+
+.friends-search-input:focus {
+    border-color: #d1d5db;
+    background: #fff;
+}
+
+.friends-toolbar-btn {
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: #ffffff;
+    color: #333;
+}
+
+.friends-toolbar-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.friends-toolbar-btn-secondary {
+    border-color: #e5e7eb;
+    background: #ffffff;
+    color: #333;
+}
+
+.friends-toolbar-btn-secondary:hover:not(:disabled) {
+    background: #f9fafb;
+}
+
+.friends-toolbar-btn-danger {
+    border-color: #fecaca;
+    background: #fff1f2;
+    color: #b42318;
+}
+
+.friends-toolbar-btn-danger:hover:not(:disabled) {
+    background: #ffe4e6;
+}
+
+.friends-group-toggle-btn {
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #444;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.friends-group-toggle-btn:hover {
+    background: #f9fafb;
+}
+
+/* =========================
+   ROWS
+========================= */
+
+.request-row,
+.friend-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-
-    width: calc(100% - 10px);
-
-    box-sizing: border-box;
-
-    padding: 10px 14px;
-
+    gap: 12px;
+    padding: 12px 16px;
     background: #ffffff;
-    border: 1px solid #e6e6e6;
-    border-radius: 8px;
-
-    margin: 0 auto 10px auto;
-
+    border-bottom: 1px solid #eeeeee;
 }
 
-/* =========================
-   TEXT
-========================= */
-
-#friend-requests span,
-#friends-list span {
-
-    font-weight: 500;
-    color: #1c1c1e;
-
+.request-row:last-child,
+.friend-row:last-child {
+    border-bottom: none;
 }
 
-/* =========================
-   BUTTONS
-========================= */
-
-#friend-requests button,
-#friends-list button:not(.cancel-icon-btn) {
-
-    padding: 6px 12px;
-
-    border-radius: 6px;
-    border: 1px solid #d0d0d0;
-
-    background: white;
-
-    font-size: 13px;
-    cursor: pointer;
-
-    transition: background 0.18s ease, border-color 0.18s ease;
-
-}
-
-.request-actions {
-    display: flex;
-    gap: 10px;
-}
-
-/* =========================
-   REQUEST USER INFO
-========================= */
-
-.request-user {
-
+.request-row-left,
+.friend-row-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    min-width: 0;
+}
 
+.request-profile-link,
+.friend-profile-link {
     position: relative;
-
+    cursor: pointer;
 }
 
-.request-avatar {
-
-    width: 36px;
-    height: 36px;
+.request-avatar,
+.friend-avatar {
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    object-fit: cover;
-
+    overflow: hidden;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    flex-shrink: 0;
 }
 
-.request-name {
+.request-avatar-image,
+.friend-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
 
+.request-info,
+.friend-info {
     display: flex;
     flex-direction: column;
-    font-size: 14px;
-
+    gap: 2px;
+    min-width: 0;
 }
 
-.request-handle {
+.request-name,
+.friend-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #171717;
+    line-height: 1.2;
+}
 
+.request-username,
+.friend-username {
     font-size: 12px;
     color: #777;
-
+    line-height: 1.2;
 }
 
-/* =========================
-   DIVIDER
-========================= */
+.request-row-right,
+.friend-row-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
 
-.request-divider {
+.request-meta,
+.friend-meta {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+}
 
+.request-time {
+    color: #8a8f98;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+.request-dot {
+    margin-right: 6px;
+}
+
+.request-action-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.request-row-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+/* Vertical divider */
+.request-divider-vertical {
     width: 1px;
-    height: 26px;
-    background: #e0e0e0;
-    margin: 0 14px;
+    height: 28px;
+    background: #e5e7eb;
+    flex-shrink: 0;
+}
 
+/* Make profile block horizontal */
+.request-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    cursor: pointer;
+}
+
+.request-accept-btn {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.request-reject-btn {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.friend-pill {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    line-height: 1;
+    border: 1px solid transparent;
+    background: #f8f8f8;
+    color: #5f6673;
+    border-color: #ececec;
 }
 
 /* =========================
-   REQUEST TEXT
+   TOOLTIP
 ========================= */
 
-.request-text {
-
-    flex: 1;
-    font-size: 14px;
-
-}
-
-/* =========================
-   ACCEPT BUTTON
-========================= */
-
-#friend-requests button:first-of-type {
-
-    background: #095a5d;
-    border-color: #095a5d;
-    color: white;
-
-}
-
-#friend-requests button:first-of-type:hover {
-
-    background: #127175;
-
-}
-
-/* =========================
-   DECLINE BUTTON
-========================= */
-
-#friend-requests button:last-of-type:hover {
-
-    background: #f5f5f7;
-
-}
-
-/* =========================
-   PROFILE TOOLTIP
-========================= */
-
-.request-tooltip {
-
+.request-tooltip,
+.friend-tooltip {
     position: absolute;
     left: 50%;
     top: calc(100% + 10px);
@@ -230,7 +372,6 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.15s ease;
-
 }
 
 .tooltip-visible {
@@ -238,183 +379,98 @@
 }
 
 /* =========================
-   REQUEST HOVER SLIDE
+   FRIENDS SELECTABLE LAYOUT
 ========================= */
 
-#friend-requests > div {
-
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
-
-}
-
-#friend-requests > div:hover {
-
-    transform: translateX(-5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    background: #f8f9fa80;
-
-}
-
-.request-text .request-time {
-    margin-left: 10px;
-    font-size: 12px;
-    color: #6b6b6b;
-}
-
-.request-dot {
-    margin-right: 8px;
-}
-
-/* =========================
-   FRIEND LIST STYLING
-========================= */
-
-.friend-user {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    position: relative;
-}
-
-.friend-avatar {
-
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-
-}
-
-.friend-name {
-
-    display: flex;
-    flex-direction: column;
-    font-size: 14px;
-
-}
-
-.friend-handle {
-
-    font-size: 12px;
-    color: #777;
-
-}
-
-.friend-remove {
-    opacity: 0;
-    transform: scale(0.9);
-}
-
-#friends-list > div:hover .friend-remove {
-    opacity: 1;
-    transform: scale(1);
-}
-
-/* =========================
-   FRIEND HOVER SLIDE
-========================= */
-
-#friends-list > div {
-
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
-
-}
-
-#friends-list > div:hover {
-
-    transform: translateX(-5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    background: #f8f9fa80;
-
-}
-
-/* =========================
-   TABS
-========================= */
-
-#friends-tabs {
-
-    display: flex;
-    gap: 10px;
-
-    margin-bottom: 18px;
-
-}
-
-.friends-tab {
-
-    background: none;
+#friends-active-list {
     border: none;
-    margin-top: 8px;
-    padding: 10px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    color: #939393;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s ease;
-
+    background: transparent;
+    overflow: visible;
+    padding: 0;
 }
 
-.friends-tab:hover {
-    color: #111;
+.friends-active-layout {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    column-gap: 10px;
+    align-items: stretch;
 }
 
-.friends-tab.active {
-
-    color: #095a5d;
-    border-bottom: 2px solid #095a5d;
-    font-weight: 500;
-
-}
-
-/* =========================
-   TAB PANELS
-========================= */
-
-.friends-panel {
-
-    width: 100%;
-
+.friends-active-checkboxes {
     display: flex;
     flex-direction: column;
-
 }
 
-.hidden {
-    display: none !important;
+.friends-active-box {
+    border: 1px solid #e6e6e6;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
 }
 
-.friends-tab {
-    display: inline-flex;
+.friend-row-checkbox {
+    display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    min-height: 63px;
+    box-sizing: border-box;
+    border-bottom: 1px solid transparent;
 }
 
-.tab-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #d51919;
-    display: inline-block;
+.friend-row-checkbox:last-child {
+    border-bottom: none;
+}
+
+.friend-row-inside-box {
+    min-height: 63px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.friend-row-inside-box:last-child {
+    border-bottom: none;
+}
+
+.friend-select-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
     flex-shrink: 0;
-    position: relative;
-    top: -6px;
-    right: 3px
+    accent-color: #111111;
+    transform: translateY(1px);
 }
 
 /* =========================
-   TAB BADGES
+   RESPONSIVE
 ========================= */
 
-.friends-info {
+@media (max-width: 760px) {
+    .request-row,
+    .friend-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 
-    font-size: 13px;
-    color: #6b6b6b;
-    margin-bottom: 14px;
-    margin-left: 10px;
+    .request-row-right,
+    .friend-row-right {
+        width: 100%;
+        justify-content: flex-start;
+    }
 
+    .friends-toolbar-left {
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .friends-search-input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .friends-active-layout {
+        grid-template-columns: 24px minmax(0, 1fr);
+        column-gap: 8px;
+    }
 }
-
-
-
