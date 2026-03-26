@@ -44,6 +44,21 @@ async function loadFiles() {
 }
 
 /* =========================
+   GET AUTH HEADERS
+========================= */
+
+async function getAuthHeaders() {
+    const {
+        data: { session }
+    } = await supabase.auth.getSession();
+
+    return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session?.access_token || ""}`
+    };
+}
+
+/* =========================
    UPLOAD
 ========================= */
 
@@ -60,10 +75,12 @@ function setupUpload() {
         if (!file) return;
 
         try {
+            const headers = await getAuthHeaders();
+
             // 1. request upload URL
             const res = await fetch("/api/project-files/upload-url", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers,
                 body: JSON.stringify({
                     projectId: currentProject.id,
                     fileName: file.name,
@@ -77,7 +94,7 @@ function setupUpload() {
 
             const { uploadUrl, objectKey, fileId } = await res.json();
 
-            // 2. upload file to R2
+            // 2. upload to R2
             const uploadRes = await fetch(uploadUrl, {
                 method: "PUT",
                 body: file
@@ -87,7 +104,7 @@ function setupUpload() {
                 throw new Error("Upload to storage failed");
             }
 
-            // 3. insert into DB
+            // 3. insert DB record
             const {
                 data: { user }
             } = await supabase.auth.getUser();
@@ -144,15 +161,19 @@ function createRow(file) {
     const actions = document.createElement("div");
     actions.className = "file-actions";
 
+    /* DOWNLOAD */
+
     const downloadBtn = document.createElement("button");
     downloadBtn.className = "file-btn file-btn-download";
     downloadBtn.textContent = "Download";
 
     downloadBtn.onclick = async () => {
         try {
+            const headers = await getAuthHeaders();
+
             const res = await fetch("/api/project-files/download-url", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers,
                 body: JSON.stringify({ fileId: file.id })
             });
 
@@ -164,10 +185,12 @@ function createRow(file) {
             window.open(downloadUrl, "_blank");
 
         } catch (err) {
-            console.error(err);
+            console.error("Download error:", err);
             alert("Download failed");
         }
     };
+
+    /* DELETE */
 
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "file-btn file-btn-delete";
@@ -177,9 +200,11 @@ function createRow(file) {
         if (!confirm(`Delete "${file.filename}"?`)) return;
 
         try {
+            const headers = await getAuthHeaders();
+
             const res = await fetch("/api/project-files/delete-file", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers,
                 body: JSON.stringify({ fileId: file.id })
             });
 
@@ -190,7 +215,7 @@ function createRow(file) {
             await loadFiles();
 
         } catch (err) {
-            console.error(err);
+            console.error("Delete error:", err);
             alert("Delete failed");
         }
     };
