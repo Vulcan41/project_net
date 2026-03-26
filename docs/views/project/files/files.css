@@ -321,3 +321,73 @@
 .file-row {
     cursor: pointer;
 }
+
+
+
+
+
+
+.file-actions-menu {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.file-menu-trigger {
+    width: 34px;
+    height: 34px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #444444;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.file-menu-trigger:hover {
+    background: #f9fafb;
+}
+
+.file-menu-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 140px;
+    padding: 6px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    z-index: 50;
+    display: none;
+}
+
+.file-menu-dropdown.open {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.file-menu-item {
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: left;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #222222;
+    cursor: pointer;
+}
+
+.file-menu-item:hover {
+    background: #f3f4f6;
+}
+
+.file-menu-item-danger {
+    color: #b42318;
+}
+
+.file-menu-item-danger:hover {
+    background: #fff1f2;
+}

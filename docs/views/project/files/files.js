@@ -16,6 +16,7 @@ export async function initFiles(project) {
     setupUpload();
     setupCreateFolderButton();
     setupBackFolderButton();
+    setupGlobalMenuCloser();
     await loadFolderContent();
 }
 
@@ -406,6 +407,62 @@ function setupUpload() {
 }
 
 /* =========================
+   MENUS
+========================= */
+
+function setupGlobalMenuCloser() {
+    document.addEventListener("click", closeAllMenus);
+}
+
+function closeAllMenus() {
+    document.querySelectorAll(".file-menu-dropdown.open").forEach((menu) => {
+        menu.classList.remove("open");
+    });
+}
+
+function createActionMenu(items) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "file-actions-menu";
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "file-menu-trigger";
+    trigger.textContent = "⋯";
+
+    const dropdown = document.createElement("div");
+    dropdown.className = "file-menu-dropdown";
+
+    items.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `file-menu-item${item.danger ? " file-menu-item-danger" : ""}`;
+        btn.textContent = item.label;
+
+        btn.onclick = async (event) => {
+            event.stopPropagation();
+            dropdown.classList.remove("open");
+            await item.onClick();
+        };
+
+        dropdown.appendChild(btn);
+    });
+
+    trigger.onclick = (event) => {
+        event.stopPropagation();
+        const isOpen = dropdown.classList.contains("open");
+        closeAllMenus();
+        if (!isOpen) {
+            dropdown.classList.add("open");
+        }
+    };
+
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(dropdown);
+
+    return wrapper;
+}
+
+/* =========================
    ROWS
 ========================= */
 
@@ -443,32 +500,21 @@ function createFolderRow(folder) {
     main.appendChild(icon);
     main.appendChild(metaWrap);
 
-    const actions = document.createElement("div");
-    actions.className = "file-actions";
-
-    const renameBtn = document.createElement("button");
-    renameBtn.className = "file-btn file-btn-download";
-    renameBtn.textContent = "Rename";
-
-    renameBtn.onclick = async (event) => {
-        event.stopPropagation();
-        await renameFolder(folder);
-    };
-
-    actions.appendChild(renameBtn);
-
-    if (!folder.is_default) {
-        const deleteBtn = document.createElement("button");
-        deleteBtn.className = "file-btn file-btn-delete";
-        deleteBtn.textContent = "Delete";
-
-        deleteBtn.onclick = async (event) => {
-            event.stopPropagation();
-            await deleteFolder(folder);
-        };
-
-        actions.appendChild(deleteBtn);
-    }
+    const actions = createActionMenu([
+        {
+            label: "Rename",
+            onClick: async () => {
+                await renameFolder(folder);
+            }
+        },
+        ...(!folder.is_default ? [{
+            label: "Delete",
+            danger: true,
+            onClick: async () => {
+                await deleteFolder(folder);
+            }
+        }] : [])
+    ]);
 
     row.appendChild(main);
     row.appendChild(actions);
@@ -516,46 +562,37 @@ function createFileRow(file) {
     main.appendChild(icon);
     main.appendChild(metaWrap);
 
-    const actions = document.createElement("div");
-    actions.className = "file-actions";
+    const actions = createActionMenu([
+        {
+            label: "Delete",
+            danger: true,
+            onClick: async () => {
+                if (!confirm(`Delete "${file.filename}"?`)) return;
 
-    const deleteBtn = document.createElement("button");
-    deleteBtn.className = "file-btn file-btn-delete";
-    deleteBtn.textContent = "Delete";
+                try {
+                    const headers = await getAuthHeaders();
 
-    deleteBtn.onclick = async (event) => {
-        event.stopPropagation(); // IMPORTANT
+                    const res = await fetch("/api/project-files/delete-file", {
+                        method: "POST",
+                        headers,
+                        body: JSON.stringify({ fileId: file.id })
+                    });
 
-        if (!confirm(`Delete "${file.filename}"?`)) return;
+                    if (!res.ok) {
+                        throw new Error("Delete failed");
+                    }
 
-        try {
-            const headers = await getAuthHeaders();
-
-            const res = await fetch("/api/project-files/delete-file", {
-                method: "POST",
-                headers,
-                body: JSON.stringify({ fileId: file.id })
-            });
-
-            if (!res.ok) {
-                throw new Error("Delete failed");
+                    await loadFolderContent();
+                } catch (err) {
+                    console.error("Delete error:", err);
+                    alert("Delete failed");
+                }
             }
-
-            await loadFolderContent();
-        } catch (err) {
-            console.error("Delete error:", err);
-            alert("Delete failed");
         }
-    };
-
-    actions.appendChild(deleteBtn);
+    ]);
 
     row.appendChild(main);
     row.appendChild(actions);
-
-    /* =========================
-       ROW CLICK = DOWNLOAD
-    ========================= */
 
     row.onclick = async () => {
         try {
