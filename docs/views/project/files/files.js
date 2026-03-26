@@ -61,7 +61,7 @@ function setupUpload() {
 
         try {
             // 1. request upload URL
-            const res = await fetch("/docs/api/project-files/upload-url", {
+            const res = await fetch("/api/project-files/upload-url", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -150,7 +150,7 @@ function createRow(file) {
 
     downloadBtn.onclick = async () => {
         try {
-            const res = await fetch("/docs/api/project-files/download-url", {
+            const res = await fetch("/api/project-files/download-url", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ fileId: file.id })
@@ -169,7 +169,34 @@ function createRow(file) {
         }
     };
 
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "file-btn file-btn-delete";
+    deleteBtn.textContent = "Delete";
+
+    deleteBtn.onclick = async () => {
+        if (!confirm(`Delete "${file.filename}"?`)) return;
+
+        try {
+            const res = await fetch("/api/project-files/delete-file", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ fileId: file.id })
+            });
+
+            if (!res.ok) {
+                throw new Error("Delete failed");
+            }
+
+            await loadFiles();
+
+        } catch (err) {
+            console.error(err);
+            alert("Delete failed");
+        }
+    };
+
     actions.appendChild(downloadBtn);
+    actions.appendChild(deleteBtn);
 
     row.appendChild(left);
     row.appendChild(actions);
