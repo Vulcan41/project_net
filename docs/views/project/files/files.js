@@ -1,4 +1,5 @@
 import { supabase } from "../../../core/supabase.js";
+import { showInfo } from "../../../components/info.js";
 import {
 ensureFolderModal,
 openFolderModal,
@@ -364,10 +365,17 @@ function setupCreateFolderButton() {
                     if (error) throw error;
 
                     closeFolderModal();
+                    await showInfo({
+                        type: "success",
+                        message: "Folder created successfully."
+                    });
                     await loadFolderContent();
                 } catch (err) {
                     console.error("Create folder failed:", err);
-                    alert("Failed to create folder");
+                    await showInfo({
+                        type: "error",
+                        message: "Failed to create folder"
+                    });
                 }
             },
             onCancel: () => {
@@ -399,18 +407,31 @@ async function renameFolder(folder) {
                 }
 
                 closeFolderModal();
+                await showInfo({
+                    type: "success",
+                    message: "Folder renamed successfully."
+                });
                 await loadFolderContent();
             } catch (err) {
                 console.error("Rename folder failed:", err);
-                alert("Failed to rename folder");
+                await showInfo({
+                    type: "error",
+                    message: "Failed to rename folder"
+                });
             }
+        },
+        onCancel: () => {
+            closeFolderModal();
         }
     });
 }
 
 async function deleteFolder(folder) {
     if (folder.is_default) {
-        alert("Default folder cannot be deleted");
+        await showInfo({
+            type: "error",
+            message: "Default folder cannot be deleted"
+        });
         return;
     }
 
@@ -435,10 +456,17 @@ async function deleteFolder(folder) {
                 }
 
                 closeFolderModal();
+                await showInfo({
+                    type: "success",
+                    message: "Folder deleted successfully."
+                });
                 await loadFolderContent();
             } catch (err) {
                 console.error("Delete folder failed:", err);
-                alert(err.message || "Failed to delete folder");
+                await showInfo({
+                    type: "error",
+                    message: err.message || "Failed to delete folder"
+                });
             }
         },
         onCancel: () => {
@@ -514,10 +542,12 @@ function setupUpload() {
             if (error) throw error;
 
             await loadFolderContent();
-
         } catch (err) {
             console.error("Upload failed:", err);
-            alert("Upload failed");
+            await showInfo({
+                type: "error",
+                message: "Upload failed"
+            });
         }
 
         input.value = "";
@@ -619,7 +649,6 @@ function createFolderRow(folder) {
     main.appendChild(icon);
     main.appendChild(metaWrap);
 
-    /* ADD MENU HERE */
     const actions = createActionMenu([
         {
             label: "Rename",
@@ -637,7 +666,7 @@ function createFolderRow(folder) {
     ]);
 
     row.appendChild(main);
-    row.appendChild(actions); // ⭐ THIS WAS MISSING
+    row.appendChild(actions);
 
     loadFolderStats(folder.id, sub);
 
@@ -710,10 +739,17 @@ function createFileRow(file) {
                             }
 
                             closeFolderModal();
+                            await showInfo({
+                                type: "success",
+                                message: "File deleted successfully."
+                            });
                             await loadFolderContent();
                         } catch (err) {
                             console.error("Delete error:", err);
-                            alert("Delete failed");
+                            await showInfo({
+                                type: "error",
+                                message: "Failed to delete file"
+                            });
                         }
                     },
                     onCancel: () => {
@@ -745,7 +781,10 @@ function createFileRow(file) {
             window.open(downloadUrl, "_blank");
         } catch (err) {
             console.error("Download error:", err);
-            alert("Download failed");
+            await showInfo({
+                type: "error",
+                message: "Download failed"
+            });
         }
     };
 
@@ -798,17 +837,14 @@ function getFileIcon(file) {
 
 async function loadFolderStats(folderId, subEl) {
     try {
-        const { data, error } = await supabase
-            .rpc("get_folder_total_size", {
+        const { data, error } = await supabase.rpc("get_folder_total_size", {
             p_folder_id: folderId
         });
 
         if (error) throw error;
 
         const sizeText = formatSize(data || 0);
-
         subEl.textContent = sizeText;
-
     } catch (err) {
         console.error("Folder size error:", err);
         subEl.textContent = "Folder";
