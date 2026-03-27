@@ -785,14 +785,14 @@ function createFolderRow(folder) {
     };
 
     row.addEventListener("dragenter", (event) => {
-        if (!hasDraggedFiles(event) || !currentFolderCanContribute) return;
+        if (!hasDraggedFiles(event) || !folder.member_can_contribute) return;
         event.preventDefault();
         event.stopPropagation();
         row.classList.add("file-row-drop-target");
     });
 
     row.addEventListener("dragover", (event) => {
-        if (!hasDraggedFiles(event) || !currentFolderCanContribute) return;
+        if (!hasDraggedFiles(event) || !folder.member_can_contribute) return;
         event.preventDefault();
         event.stopPropagation();
         row.classList.add("file-row-drop-target");
@@ -805,7 +805,7 @@ function createFolderRow(folder) {
     });
 
     row.addEventListener("drop", async (event) => {
-        if (!hasDraggedFiles(event) || !currentFolderCanContribute) return;
+        if (!hasDraggedFiles(event) || !folder.member_can_contribute) return;
 
         event.preventDefault();
         event.stopPropagation();
