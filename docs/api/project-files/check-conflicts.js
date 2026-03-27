@@ -1,9 +1,9 @@
-import { supabase } from "../../core/supabase.js";
+import { createClient } from "@supabase/supabase-js";
 
-console.log("ENV CHECK:", {
-    url: process.env.SUPABASE_URL,
-    key: process.env.SUPABASE_SERVICE_ROLE_KEY ? "OK" : "MISSING"
-});
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export default async function handler(req, res) {
     if (req.method !== "POST") {
@@ -17,11 +17,10 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: "Invalid payload" });
         }
 
-        if (filenames.length === 0) {
+        if (!filenames.length) {
             return res.status(200).json({ conflicts: [] });
         }
 
-        // Get existing files with same names in this folder
         const { data, error } = await supabase
             .from("project_files")
             .select("id, filename")
@@ -30,7 +29,8 @@ export default async function handler(req, res) {
             .in("filename", filenames);
 
         if (error) {
-            throw error;
+            console.error("Supabase error in check-conflicts:", error);
+            return res.status(500).json({ error: error.message });
         }
 
         const conflicts = (data || []).map((file) => ({
@@ -38,14 +38,11 @@ export default async function handler(req, res) {
             existingFileId: file.id
         }));
 
-        return res.status(200).json({
-            conflicts
-        });
-
+        return res.status(200).json({ conflicts });
     } catch (err) {
         console.error("check-conflicts error:", err);
         return res.status(500).json({
-            error: "Internal server error"
+            error: err.message || "Failed to check conflicts"
         });
     }
 }
