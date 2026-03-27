@@ -590,11 +590,25 @@ function createFolderRow(folder) {
     main.appendChild(icon);
     main.appendChild(metaWrap);
 
-    row.appendChild(main);
+    /* ADD MENU HERE */
+    const actions = createActionMenu([
+        {
+            label: "Rename",
+            onClick: async () => {
+                await renameFolder(folder);
+            }
+        },
+        ...(!folder.is_default ? [{
+            label: "Delete",
+            danger: true,
+            onClick: async () => {
+                await deleteFolder(folder);
+            }
+        }] : [])
+    ]);
 
-    /* =========================
-       LOAD FOLDER STATS
-    ========================= */
+    row.appendChild(main);
+    row.appendChild(actions); // ⭐ THIS WAS MISSING
 
     loadFolderStats(folder.id, sub);
 
