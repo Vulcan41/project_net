@@ -407,6 +407,7 @@ function setupUpload() {
                 headers,
                 body: JSON.stringify({
                     projectId: currentProject.id,
+                    folderId: currentFolderId,
                     fileName: file.name,
                     contentType: file.type
                 })

@@ -59,7 +59,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { projectId, fileName, contentType } = req.body;
+        const { projectId, folderId, fileName, contentType } = req.body || {};
 
         if (!projectId || !fileName) {
             return res.status(400).json({ error: "Missing projectId or fileName" });
@@ -81,7 +81,7 @@ export default async function handler(req, res) {
         }
 
         /* =========================
-           STEP 2: Check project ownership
+           STEP 2: Check project exists
         ========================= */
 
         const { data: project, error: projectError } = await supabaseAdmin
@@ -94,14 +94,52 @@ export default async function handler(req, res) {
             return res.status(404).json({ error: "Project not found" });
         }
 
+        /* =========================
+           STEP 3: Check permissions
+        ========================= */
+
         const isOwner = project.owner_id === user.id;
 
-        if (!isOwner) {
-            return res.status(403).json({ error: "Forbidden" });
+        let canUpload = false;
+
+        if (isOwner) {
+            canUpload = true;
+        } else {
+            if (!folderId) {
+                return res.status(400).json({ error: "Missing folderId" });
+            }
+
+            const { data: membership, error: membershipError } = await supabaseAdmin
+                .from("project_members")
+                .select("role, membership_status")
+                .eq("project_id", projectId)
+                .eq("user_id", user.id)
+                .single();
+
+            if (membershipError || !membership || membership.membership_status !== "active") {
+                return res.status(403).json({ error: "Forbidden" });
+            }
+
+            const { data: folder, error: folderError } = await supabaseAdmin
+                .from("project_folders")
+                .select("id, member_can_contribute")
+                .eq("id", folderId)
+                .eq("project_id", projectId)
+                .single();
+
+            if (folderError || !folder) {
+                return res.status(404).json({ error: "Folder not found" });
+            }
+
+            canUpload = !!folder.member_can_contribute;
+        }
+
+        if (!canUpload) {
+            return res.status(403).json({ error: "Upload not allowed in this folder" });
         }
 
         /* =========================
-           STEP 3: Build safe object key
+           STEP 4: Build safe object key
         ========================= */
 
         const fileId = crypto.randomUUID();
@@ -109,7 +147,7 @@ export default async function handler(req, res) {
         const objectKey = `projects/${projectId}/${fileId}/${safeFileName}`;
 
         /* =========================
-           STEP 4: Generate signed upload URL
+           STEP 5: Generate signed upload URL
         ========================= */
 
         const command = new PutObjectCommand({
