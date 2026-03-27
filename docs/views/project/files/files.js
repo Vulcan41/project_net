@@ -18,10 +18,6 @@ let currentFolderName = "Root Folder";
 let currentSort = "name_asc";
 let currentSearch = "";
 
-/* =========================
-   INIT
-========================= */
-
 export async function initFiles(project) {
     if (!project) return;
 
@@ -40,7 +36,6 @@ export async function initFiles(project) {
     setupSort();
     setupSearch();
     setupContainerDragAndDrop();
-
     await loadFolderContent();
 }
 
@@ -49,6 +44,9 @@ export async function initFiles(project) {
 ========================= */
 
 async function loadDefaultFolder() {
+    const list = document.getElementById("files-list");
+    const countEl = document.getElementById("files-count");
+
     const { data, error } = await supabase
         .from("project_folders")
         .select("id, name")
@@ -56,13 +54,96 @@ async function loadDefaultFolder() {
         .eq("is_default", true)
         .single();
 
-    if (error || !data) return false;
+    if (error || !data) {
+        console.error("Failed to load default folder:", error);
+        if (list) {
+            list.innerHTML = `<div class="files-empty">Failed to load folder</div>`;
+        }
+        if (countEl) {
+            countEl.textContent = "0 items";
+        }
+        return false;
+    }
 
     defaultFolderId = data.id;
     currentFolderId = data.id;
     currentFolderName = data.name || "Root Folder";
-
     return true;
+}
+
+async function loadFolderMeta(folderId) {
+    const { data, error } = await supabase
+        .from("project_folders")
+        .select("id, name, parent_folder_id, is_default")
+        .eq("id", folderId)
+        .eq("project_id", currentProject.id)
+        .single();
+
+    if (error || !data) {
+        console.error("Failed to load folder meta:", error);
+        return null;
+    }
+
+    return data;
+}
+
+async function buildBreadcrumbPath(folderId) {
+    const path = [];
+    let cursor = folderId;
+
+    while (cursor) {
+        const folder = await loadFolderMeta(cursor);
+        if (!folder) break;
+
+        path.unshift(folder);
+
+        if (!folder.parent_folder_id) break;
+        cursor = folder.parent_folder_id;
+    }
+
+    return path;
+}
+
+async function renderBreadcrumbs() {
+    const container = document.getElementById("files-breadcrumbs");
+    if (!container || !currentFolderId) return;
+
+    const path = await buildBreadcrumbPath(currentFolderId);
+
+    container.innerHTML = "";
+
+    path.forEach((folder, index) => {
+        const isLast = index === path.length - 1;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `files-breadcrumb-btn${isLast ? " active" : ""}`;
+        btn.textContent = folder.name;
+
+        if (!isLast) {
+            btn.onclick = async () => {
+                currentFolderId = folder.id;
+                currentFolderName = folder.name;
+                await loadFolderContent();
+            };
+        }
+
+        container.appendChild(btn);
+
+        if (!isLast) {
+            const sep = document.createElement("span");
+            sep.className = "files-breadcrumb-separator";
+            sep.textContent = "/";
+            container.appendChild(sep);
+        }
+    });
+}
+
+function updateBackButtonVisibility() {
+    const btn = document.getElementById("files-back-folder-btn");
+    if (!btn) return;
+
+    btn.classList.toggle("hidden", currentFolderId === defaultFolderId);
 }
 
 /* =========================
@@ -85,6 +166,8 @@ function setupSearch() {
     const input = document.getElementById("files-search-input");
     if (!input) return;
 
+    input.value = currentSearch;
+
     input.oninput = async () => {
         currentSearch = input.value.trim().toLowerCase();
         await loadFolderContent();
@@ -102,62 +185,160 @@ function sortByCurrentRule(items, getName, getDate, getSize = () => 0) {
     switch (currentSort) {
         case "name_asc":
             return sorted.sort((a, b) => getName(a).localeCompare(getName(b)));
+
         case "name_desc":
             return sorted.sort((a, b) => getName(b).localeCompare(getName(a)));
+
         case "newest_desc":
             return sorted.sort((a, b) => new Date(getDate(b)) - new Date(getDate(a)));
+
         case "newest_asc":
             return sorted.sort((a, b) => new Date(getDate(a)) - new Date(getDate(b)));
+
         case "size_desc":
-            return sorted.sort((a, b) => getSize(b) - getSize(a));
+            return sorted.sort((a, b) => (getSize(b) || 0) - (getSize(a) || 0));
+
         case "size_asc":
-            return sorted.sort((a, b) => getSize(a) - getSize(b));
+            return sorted.sort((a, b) => (getSize(a) || 0) - (getSize(b) || 0));
+
         default:
             return sorted;
     }
 }
 
 /* =========================
-   LOAD CONTENT
+   LOAD FOLDER CONTENT
 ========================= */
 
 async function loadFolderContent() {
     const list = document.getElementById("files-list");
     const countEl = document.getElementById("files-count");
 
-    list.innerHTML = "Loading...";
+    if (!list || !currentFolderId) return;
 
-    const [{ data: folders }, { data: files }] = await Promise.all([
-        supabase.from("project_folders").select("*")
+    await renderBreadcrumbs();
+    updateBackButtonVisibility();
+
+    list.innerHTML = `<div class="files-empty">Loading files...</div>`;
+
+    const [{ data: folders, error: foldersError }, { data: files, error: filesError }] =
+    await Promise.all([
+        supabase
+            .from("project_folders")
+            .select("*")
             .eq("project_id", currentProject.id)
-            .eq("parent_folder_id", currentFolderId),
+            .eq("parent_folder_id", currentFolderId)
+            .order("created_at", { ascending: true }),
 
-        supabase.from("project_files").select("*")
+        supabase
+            .from("project_files")
+            .select("*")
             .eq("project_id", currentProject.id)
             .eq("folder_id", currentFolderId)
+            .eq("status", "ready")
+            .order("created_at", { ascending: false })
     ]);
 
+    if (foldersError || filesError) {
+        console.error("Folder content load error:", foldersError || filesError);
+        list.innerHTML = `<div class="files-empty">Error loading files</div>`;
+        if (countEl) countEl.textContent = "0 items";
+        return;
+    }
+
+    let foldersWithSize = folders ?? [];
+
+    try {
+        foldersWithSize = await Promise.all(
+            foldersWithSize.map(async (folder) => ({
+                ...folder,
+                total_size: await getFolderTotalSize(folder.id)
+            }))
+        );
+    } catch (err) {
+        console.error("Failed to load folder sizes for sorting:", err);
+    }
+
     const safeFolders = sortByCurrentRule(
-        (folders || []).filter(f => matchesSearch(f.name)),
-        f => f.name,
-        f => f.created_at
+        foldersWithSize.filter((folder) => matchesSearch(folder.name)),
+        (folder) => folder.name?.toLowerCase() || "",
+        (folder) => folder.created_at,
+        (folder) => folder.total_size
     );
 
     const safeFiles = sortByCurrentRule(
-        (files || []).filter(f => matchesSearch(f.filename)),
-        f => f.filename,
-        f => f.created_at,
-        f => f.size_bytes
+        (files ?? []).filter((file) => matchesSearch(file.filename)),
+        (file) => file.filename?.toLowerCase() || "",
+        (file) => file.created_at,
+        (file) => file.size_bytes
     );
 
-    const total = safeFolders.length + safeFiles.length;
-    if (countEl) countEl.textContent = `${total} items`;
+    const totalItems = safeFolders.length + safeFiles.length;
+
+    if (countEl) {
+        countEl.textContent = `${totalItems} ${totalItems === 1 ? "item" : "items"}`;
+    }
+
+    if (!totalItems) {
+        list.innerHTML = `<div class="files-empty">No items in ${escapeHtml(currentFolderName)}</div>`;
+        return;
+    }
 
     list.innerHTML = "";
 
-    safeFolders.forEach(f => list.appendChild(createFolderRow(f)));
-    safeFiles.forEach(f => list.appendChild(createFileRow(f)));
+    safeFolders.forEach((folder) => list.appendChild(createFolderRow(folder)));
+    safeFiles.forEach((file) => list.appendChild(createFileRow(file)));
 }
+
+/* =========================
+   AUTH HEADERS
+========================= */
+
+async function getAuthHeaders() {
+    const {
+        data: { session }
+    } = await supabase.auth.getSession();
+
+    return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session?.access_token || ""}`
+    };
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function setupBackFolderButton() {
+    const btn = document.getElementById("files-back-folder-btn");
+    if (!btn) return;
+
+    btn.onclick = async () => {
+        if (!currentFolderId || currentFolderId === defaultFolderId) return;
+
+        const currentFolder = await loadFolderMeta(currentFolderId);
+        if (!currentFolder) return;
+
+        if (!currentFolder.parent_folder_id) {
+            currentFolderId = defaultFolderId;
+            const defaultFolder = await loadFolderMeta(defaultFolderId);
+            currentFolderName = defaultFolder?.name || "Root Folder";
+            await loadFolderContent();
+            return;
+        }
+
+        const parentFolder = await loadFolderMeta(currentFolder.parent_folder_id);
+        if (!parentFolder) return;
+
+        currentFolderId = parentFolder.id;
+        currentFolderName = parentFolder.name;
+        await loadFolderContent();
+    };
+}
+
+/* =========================
+   CREATE / RENAME / DELETE FOLDER
+========================= */
 
 function setupCreateFolderButton() {
     const btn = document.getElementById("files-create-folder-btn");
@@ -190,16 +371,13 @@ function setupCreateFolderButton() {
                     if (error) throw error;
 
                     closeFolderModal();
-
                     await showInfo({
                         type: "success",
                         message: "Folder created successfully."
                     });
-
                     await loadFolderContent();
                 } catch (err) {
                     console.error("Create folder failed:", err);
-
                     await showInfo({
                         type: "error",
                         message: "Failed to create folder"
@@ -213,20 +391,111 @@ function setupCreateFolderButton() {
     };
 }
 
+async function renameFolder(folder) {
+    openFolderModal({
+        title: "Rename folder",
+        label: "Rename folder:",
+        confirmText: "Save",
+        initialValue: folder.name,
+        onConfirm: async (value) => {
+            try {
+                const { error } = await supabase
+                    .from("project_folders")
+                    .update({
+                    name: value
+                })
+                    .eq("id", folder.id);
+
+                if (error) throw error;
+
+                if (folder.id === currentFolderId) {
+                    currentFolderName = value;
+                }
+
+                closeFolderModal();
+                await showInfo({
+                    type: "success",
+                    message: "Folder renamed successfully."
+                });
+                await loadFolderContent();
+            } catch (err) {
+                console.error("Rename folder failed:", err);
+                await showInfo({
+                    type: "error",
+                    message: "Failed to rename folder"
+                });
+            }
+        },
+        onCancel: () => {
+            closeFolderModal();
+        }
+    });
+}
+
+async function deleteFolder(folder) {
+    if (folder.is_default) {
+        await showInfo({
+            type: "error",
+            message: "Default folder cannot be deleted"
+        });
+        return;
+    }
+
+    openFolderConfirmModal({
+        title: "Delete folder",
+        message: `Delete folder "${folder.name}" and everything inside it? This action cannot be undone.`,
+        confirmText: "Delete",
+        danger: true,
+        onConfirm: async () => {
+            try {
+                const headers = await getAuthHeaders();
+
+                const res = await fetch("/api/project-files/delete-folder", {
+                    method: "POST",
+                    headers,
+                    body: JSON.stringify({ folderId: folder.id })
+                });
+
+                if (!res.ok) {
+                    const data = await res.json().catch(() => null);
+                    throw new Error(data?.error || "Delete failed");
+                }
+
+                closeFolderModal();
+                await showInfo({
+                    type: "success",
+                    message: "Folder deleted successfully."
+                });
+                await loadFolderContent();
+            } catch (err) {
+                console.error("Delete folder failed:", err);
+                await showInfo({
+                    type: "error",
+                    message: err.message || "Failed to delete folder"
+                });
+            }
+        },
+        onCancel: () => {
+            closeFolderModal();
+        }
+    });
+}
+
 /* =========================
-   UPLOAD FLOW (CORE)
+   UPLOAD
 ========================= */
 
 function setupUpload() {
-    const input = document.getElementById("files-input");
     const btn = document.getElementById("files-upload-btn");
+    const input = document.getElementById("files-input");
 
-    if (!input || !btn) return;
+    if (!btn || !input) return;
 
     btn.onclick = () => input.click();
 
     input.onchange = async () => {
-        const files = [...input.files];
+        const files = [...(input.files || [])];
+        if (!files.length || !currentFolderId) return;
 
         try {
             const plans = await resolveUploadPlans(files, currentFolderId);
@@ -243,15 +512,86 @@ function setupUpload() {
                 );
             }
 
+            await showInfo({
+                type: "success",
+                message: plans.length === 1
+                ? "Upload completed successfully."
+                : "Files uploaded successfully."
+            });
+
             await loadFolderContent();
         } catch (err) {
+            console.error("Upload failed:", err);
+
             if (err.message !== "Upload cancelled") {
-                await showInfo({ type: "error", message: err.message });
+                await showInfo({
+                    type: "error",
+                    message: err?.message || "Upload failed"
+                });
             }
         } finally {
             input.value = "";
+            setTimeout(() => {
+                hideUploadProgress();
+            }, 500);
         }
     };
+}
+
+/* =========================
+   MENUS
+========================= */
+
+function setupGlobalMenuCloser() {
+    document.addEventListener("click", closeAllMenus);
+}
+
+function closeAllMenus() {
+    document.querySelectorAll(".file-menu-dropdown.open").forEach((menu) => {
+        menu.classList.remove("open");
+    });
+}
+
+function createActionMenu(items) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "file-actions-menu";
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "file-menu-trigger";
+    trigger.textContent = "⋯";
+
+    const dropdown = document.createElement("div");
+    dropdown.className = "file-menu-dropdown";
+
+    items.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `file-menu-item${item.danger ? " file-menu-item-danger" : ""}`;
+        btn.textContent = item.label;
+
+        btn.onclick = async (event) => {
+            event.stopPropagation();
+            dropdown.classList.remove("open");
+            await item.onClick();
+        };
+
+        dropdown.appendChild(btn);
+    });
+
+    trigger.onclick = (event) => {
+        event.stopPropagation();
+        const isOpen = dropdown.classList.contains("open");
+        closeAllMenus();
+        if (!isOpen) {
+            dropdown.classList.add("open");
+        }
+    };
+
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(dropdown);
+
+    return wrapper;
 }
 
 /* =========================
@@ -262,12 +602,44 @@ function setupContainerDragAndDrop() {
     const list = document.getElementById("files-list");
     if (!list) return;
 
+    list.addEventListener("dragenter", (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+
+        const row = event.target.closest(".file-row");
+        if (row) return;
+
+        list.classList.add("files-drop-active");
+    });
+
+    list.addEventListener("dragover", (event) => {
+        if (!hasDraggedFiles(event)) return;
+
+        const row = event.target.closest(".file-row");
+        if (row) return;
+
+        event.preventDefault();
+        list.classList.add("files-drop-active");
+    });
+
+    list.addEventListener("dragleave", (event) => {
+        const related = event.relatedTarget;
+        if (related && list.contains(related)) return;
+
+        list.classList.remove("files-drop-active");
+    });
+
     list.addEventListener("drop", async (event) => {
         if (!hasDraggedFiles(event)) return;
 
-        event.preventDefault();
+        const row = event.target.closest(".file-row");
+        if (row) return;
 
-        const files = [...event.dataTransfer.files];
+        event.preventDefault();
+        list.classList.remove("files-drop-active");
+
+        const files = [...(event.dataTransfer?.files || [])];
+        if (!files.length || !currentFolderId) return;
 
         try {
             const plans = await resolveUploadPlans(files, currentFolderId);
@@ -284,9 +656,34 @@ function setupContainerDragAndDrop() {
                 );
             }
 
+            await showInfo({
+                type: "success",
+                message: plans.length === 1
+                ? "File uploaded successfully."
+                : "Files uploaded successfully."
+            });
+
             await loadFolderContent();
-        } catch (err) {}
+        } catch (err) {
+            console.error("Container drop upload failed:", err);
+
+            if (err.message !== "Upload cancelled") {
+                await showInfo({
+                    type: "error",
+                    message: err?.message || "Upload failed"
+                });
+            }
+        } finally {
+            setTimeout(() => {
+                hideUploadProgress();
+            }, 500);
+        }
     });
+}
+
+function hasDraggedFiles(event) {
+    const types = event.dataTransfer?.types;
+    return !!types && [...types].includes("Files");
 }
 
 /* =========================
@@ -295,14 +692,99 @@ function setupContainerDragAndDrop() {
 
 function createFolderRow(folder) {
     const row = document.createElement("div");
-    row.textContent = folder.name;
+    row.className = "file-row file-row-folder";
+
+    const main = document.createElement("div");
+    main.className = "file-main";
+
+    const icon = document.createElement("div");
+    icon.className = "file-icon";
+
+    const img = document.createElement("img");
+    img.src = "assets/folder.png";
+    img.alt = "folder";
+    img.className = "file-icon-img";
+
+    icon.appendChild(img);
+
+    const metaWrap = document.createElement("div");
+    metaWrap.className = "file-meta-wrap";
+
+    const name = document.createElement("div");
+    name.className = "file-name";
+    name.textContent = folder.name;
+    name.title = folder.name;
+
+    const sub = document.createElement("div");
+    sub.className = "file-sub";
+    sub.textContent = "Loading...";
+
+    metaWrap.appendChild(name);
+    metaWrap.appendChild(sub);
+
+    main.appendChild(icon);
+    main.appendChild(metaWrap);
+
+    const actions = createActionMenu([
+        {
+            label: "Rename",
+            onClick: async () => {
+                await renameFolder(folder);
+            }
+        },
+        ...(!folder.is_default ? [{
+            label: "Delete",
+            danger: true,
+            onClick: async () => {
+                await deleteFolder(folder);
+            }
+        }] : [])
+    ]);
+
+    row.appendChild(main);
+    row.appendChild(actions);
+
+    loadFolderStats(folder.id, sub);
+
+    row.onclick = async () => {
+        currentFolderId = folder.id;
+        currentFolderName = folder.name;
+        await loadFolderContent();
+    };
+
+    /* =========================
+       DROP INTO THIS FOLDER
+    ========================= */
+
+    row.addEventListener("dragenter", (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        row.classList.add("file-row-drop-target");
+    });
+
+    row.addEventListener("dragover", (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        row.classList.add("file-row-drop-target");
+    });
+
+    row.addEventListener("dragleave", (event) => {
+        const related = event.relatedTarget;
+        if (related && row.contains(related)) return;
+        row.classList.remove("file-row-drop-target");
+    });
 
     row.addEventListener("drop", async (event) => {
         if (!hasDraggedFiles(event)) return;
 
         event.preventDefault();
+        event.stopPropagation();
+        row.classList.remove("file-row-drop-target");
 
-        const files = [...event.dataTransfer.files];
+        const files = [...(event.dataTransfer?.files || [])];
+        if (!files.length) return;
 
         try {
             const plans = await resolveUploadPlans(files, folder.id);
@@ -319,8 +801,28 @@ function createFolderRow(folder) {
                 );
             }
 
+            await showInfo({
+                type: "success",
+                message: plans.length === 1
+                ? `File uploaded to "${folder.name}".`
+                : `Files uploaded to "${folder.name}".`
+            });
+
             await loadFolderContent();
-        } catch (err) {}
+        } catch (err) {
+            console.error("Folder drop upload failed:", err);
+
+            if (err.message !== "Upload cancelled") {
+                await showInfo({
+                    type: "error",
+                    message: err?.message || "Upload failed"
+                });
+            }
+        } finally {
+            setTimeout(() => {
+                hideUploadProgress();
+            }, 500);
+        }
     });
 
     return row;
@@ -328,18 +830,264 @@ function createFolderRow(folder) {
 
 function createFileRow(file) {
     const row = document.createElement("div");
-    row.textContent = file.filename;
+    row.className = "file-row";
+
+    const main = document.createElement("div");
+    main.className = "file-main";
+
+    const icon = document.createElement("div");
+    icon.className = "file-icon";
+
+    const img = document.createElement("img");
+    img.src = getFileIcon(file);
+    img.alt = "file";
+    img.className = "file-icon-img";
+
+    icon.appendChild(img);
+
+    const metaWrap = document.createElement("div");
+    metaWrap.className = "file-meta-wrap";
+
+    const name = document.createElement("div");
+    name.className = "file-name";
+    name.textContent = file.filename;
+    name.title = file.filename;
+
+    const sub = document.createElement("div");
+    sub.className = "file-sub";
+    sub.textContent = `${formatSize(file.size_bytes)} • ${formatDate(file.created_at)}`;
+
+    metaWrap.appendChild(name);
+    metaWrap.appendChild(sub);
+
+    main.appendChild(icon);
+    main.appendChild(metaWrap);
+
+    const actions = createActionMenu([
+        {
+            label: "Delete",
+            danger: true,
+            onClick: async () => {
+                openFolderConfirmModal({
+                    title: "Delete file",
+                    message: `Delete "${file.filename}"? This action cannot be undone.`,
+                    confirmText: "Delete",
+                    danger: true,
+                    onConfirm: async () => {
+                        try {
+                            const headers = await getAuthHeaders();
+
+                            const res = await fetch("/api/project-files/delete-file", {
+                                method: "POST",
+                                headers,
+                                body: JSON.stringify({ fileId: file.id })
+                            });
+
+                            if (!res.ok) {
+                                throw new Error("Delete failed");
+                            }
+
+                            closeFolderModal();
+                            await showInfo({
+                                type: "success",
+                                message: "File deleted successfully."
+                            });
+                            await loadFolderContent();
+                        } catch (err) {
+                            console.error("Delete error:", err);
+                            await showInfo({
+                                type: "error",
+                                message: "Failed to delete file"
+                            });
+                        }
+                    },
+                    onCancel: () => {
+                        closeFolderModal();
+                    }
+                });
+            }
+        }
+    ]);
+
+    row.appendChild(main);
+    row.appendChild(actions);
+
+    row.onclick = async () => {
+        try {
+            const headers = await getAuthHeaders();
+
+            const res = await fetch("/api/project-files/download-url", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({ fileId: file.id })
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to get download URL");
+            }
+
+            const { downloadUrl } = await res.json();
+            window.open(downloadUrl, "_blank");
+        } catch (err) {
+            console.error("Download error:", err);
+            await showInfo({
+                type: "error",
+                message: "Download failed"
+            });
+        }
+    };
+
+    /* =========================
+       BLOCK DROP ON FILE ROWS
+    ========================= */
+
+    row.addEventListener("dragenter", (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        row.classList.add("file-row-no-drop");
+    });
+
+    row.addEventListener("dragover", (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        row.classList.add("file-row-no-drop");
+    });
+
+    row.addEventListener("dragleave", () => {
+        row.classList.remove("file-row-no-drop");
+    });
+
+    row.addEventListener("drop", (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        row.classList.remove("file-row-no-drop");
+    });
+
     return row;
 }
 
 /* =========================
-   CONFLICT LOGIC
+   HELPERS
 ========================= */
 
+function getFileIcon(file) {
+    const mime = (file.mime_type || "").toLowerCase();
+    const name = (file.filename || "").toLowerCase();
+    const ext = getFileExtension(name);
+
+    if (mime.startsWith("image/") || ["png", "jpg", "jpeg", "webp", "gif"].includes(ext)) {
+        return "assets/icons_img.png";
+    }
+
+    if (mime === "application/pdf" || ext === "pdf") {
+        return "assets/icon_pdf.png";
+    }
+
+    if (["doc", "docx"].includes(ext)) {
+        return "assets/icon_doc.png";
+    }
+
+    if (["txt"].includes(ext)) {
+        return "assets/icon_txt.png";
+    }
+
+    if (["xls", "xlsx", "csv"].includes(ext)) {
+        return "assets/icon_xls.png";
+    }
+
+    if (["zip", "rar", "7z"].includes(ext)) {
+        return "assets/icon_zip.png";
+    }
+
+    if (mime.startsWith("video/") || ["mp4", "mov", "avi"].includes(ext)) {
+        return "assets/icon_video.png";
+    }
+
+    if (mime.startsWith("audio/") || ["mp3", "wav"].includes(ext)) {
+        return "assets/icon_audio.png";
+    }
+
+    return "assets/icon_file_file.png";
+}
+
+async function loadFolderStats(folderId, subEl) {
+    try {
+        const { data, error } = await supabase.rpc("get_folder_total_size", {
+            p_folder_id: folderId
+        });
+
+        if (error) throw error;
+
+        const sizeText = formatSize(data || 0);
+        subEl.textContent = sizeText;
+    } catch (err) {
+        console.error("Folder size error:", err);
+        subEl.textContent = "Folder";
+    }
+}
+
+async function uploadSingleFileToFolder(file, folderId, targetFilename = null) {
+    if (!file || !folderId) return;
+
+    const finalFilename = targetFilename || file.name;
+    const headers = await getAuthHeaders();
+
+    const res = await fetch("/api/project-files/upload-url", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+            projectId: currentProject.id,
+            fileName: finalFilename,
+            contentType: file.type
+        })
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to get upload URL");
+    }
+
+    const { uploadUrl, objectKey, fileId } = await res.json();
+
+    showUploadProgress(finalFilename);
+
+    await uploadFileWithProgress(uploadUrl, file, (progress) => {
+        updateUploadProgress(progress);
+    });
+
+    updateUploadProgress(100);
+
+    const {
+        data: { user }
+    } = await supabase.auth.getUser();
+
+    const { error } = await supabase
+        .from("project_files")
+        .insert({
+        id: fileId,
+        project_id: currentProject.id,
+        folder_id: folderId,
+        uploaded_by: user.id,
+        filename: finalFilename,
+        object_key: objectKey,
+        size_bytes: file.size,
+        mime_type: file.type,
+        status: "ready",
+        visibility: "public",
+        kind: "general"
+    });
+
+    if (error) throw error;
+}
+
 async function checkFileConflicts(folderId, filenames) {
+    const headers = await getAuthHeaders();
+
     const res = await fetch("/api/project-files/check-conflicts", {
         method: "POST",
-        headers: await getAuthHeaders(),
+        headers,
         body: JSON.stringify({
             projectId: currentProject.id,
             folderId,
@@ -347,19 +1095,84 @@ async function checkFileConflicts(folderId, filenames) {
         })
     });
 
+    if (!res.ok) {
+        throw new Error("Failed to check file conflicts");
+    }
+
     const data = await res.json();
-    return data.conflicts || [];
+    return data?.conflicts || [];
+}
+
+function splitFilename(filename) {
+    const lastDot = filename.lastIndexOf(".");
+    if (lastDot <= 0) {
+        return {
+            base: filename,
+            ext: ""
+        };
+    }
+
+    return {
+        base: filename.slice(0, lastDot),
+        ext: filename.slice(lastDot)
+    };
+}
+
+async function generateRenamedFilename(folderId, originalFilename) {
+    const { base, ext } = splitFilename(originalFilename);
+
+    const { data, error } = await supabase
+        .from("project_files")
+        .select("filename")
+        .eq("project_id", currentProject.id)
+        .eq("folder_id", folderId);
+
+    if (error) throw error;
+
+    const existingNames = new Set((data || []).map((item) => item.filename));
+
+    if (!existingNames.has(originalFilename)) {
+        return originalFilename;
+    }
+
+    let counter = 1;
+    while (true) {
+        const candidate = `${base} (${counter})${ext}`;
+        if (!existingNames.has(candidate)) {
+            return candidate;
+        }
+        counter += 1;
+    }
+}
+
+async function deleteExistingFileById(fileId) {
+    const headers = await getAuthHeaders();
+
+    const res = await fetch("/api/project-files/delete-file", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ fileId })
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to replace existing file");
+    }
 }
 
 async function resolveUploadPlans(files, folderId) {
-    const conflicts = await checkFileConflicts(folderId, files.map(f => f.name));
+    const conflicts = await checkFileConflicts(
+        folderId,
+        files.map((file) => file.name)
+    );
 
-    const map = new Map(conflicts.map(c => [c.filename, c]));
+    const conflictMap = new Map(
+        conflicts.map((conflict) => [conflict.filename, conflict])
+    );
 
     const plans = [];
 
     for (const file of files) {
-        const conflict = map.get(file.name);
+        const conflict = conflictMap.get(file.name);
 
         if (!conflict) {
             plans.push({
@@ -371,9 +1184,13 @@ async function resolveUploadPlans(files, folderId) {
             continue;
         }
 
-        const choice = await openFileConflictModal({ filename: file.name });
+        const choice = await openFileConflictModal({
+            filename: file.name
+        });
 
-        if (choice === "cancel") throw new Error("Upload cancelled");
+        if (choice === "cancel") {
+            throw new Error("Upload cancelled");
+        }
 
         if (choice === "replace") {
             plans.push({
@@ -382,8 +1199,12 @@ async function resolveUploadPlans(files, folderId) {
                 finalFilename: file.name,
                 replaceExistingFileId: conflict.existingFileId
             });
-        } else {
-            const renamed = file.name + " (1)";
+            continue;
+        }
+
+        if (choice === "rename") {
+            const renamed = await generateRenamedFilename(folderId, file.name);
+
             plans.push({
                 file,
                 folderId,
@@ -396,50 +1217,104 @@ async function resolveUploadPlans(files, folderId) {
     return plans;
 }
 
-/* =========================
-   UPLOAD
-========================= */
+function showUploadProgress(filename) {
+    const wrapper = document.getElementById("files-upload-progress");
+    const text = document.getElementById("files-upload-progress-text");
+    const percent = document.getElementById("files-upload-progress-percent");
+    const fill = document.getElementById("files-upload-progress-fill");
 
-async function uploadSingleFileToFolder(file, folderId, name) {
-    const res = await fetch("/api/project-files/upload-url", {
-        method: "POST",
-        headers: await getAuthHeaders(),
-        body: JSON.stringify({
-            projectId: currentProject.id,
-            fileName: name,
-            contentType: file.type
-        })
-    });
+    if (wrapper) wrapper.classList.remove("hidden");
+    if (text) text.textContent = `Uploading ${filename}...`;
+    if (percent) percent.textContent = "0%";
+    if (fill) fill.style.width = "0%";
+}
 
-    const { uploadUrl } = await res.json();
+function updateUploadProgress(value) {
+    const percent = document.getElementById("files-upload-progress-percent");
+    const fill = document.getElementById("files-upload-progress-fill");
 
-    await fetch(uploadUrl, {
-        method: "PUT",
-        body: file
+    const safeValue = Math.max(0, Math.min(100, Math.round(value)));
+
+    if (percent) percent.textContent = `${safeValue}%`;
+    if (fill) fill.style.width = `${safeValue}%`;
+}
+
+function hideUploadProgress() {
+    const wrapper = document.getElementById("files-upload-progress");
+    const fill = document.getElementById("files-upload-progress-fill");
+    const percent = document.getElementById("files-upload-progress-percent");
+
+    if (wrapper) wrapper.classList.add("hidden");
+    if (fill) fill.style.width = "0%";
+    if (percent) percent.textContent = "0%";
+}
+
+function uploadFileWithProgress(uploadUrl, file, onProgress) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.open("PUT", uploadUrl, true);
+
+        xhr.upload.onprogress = (event) => {
+            if (!event.lengthComputable) return;
+            const progress = (event.loaded / event.total) * 100;
+            onProgress?.(progress);
+        };
+
+        xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve();
+            } else {
+                reject(new Error(`Upload failed with status ${xhr.status}`));
+            }
+        };
+
+        xhr.onerror = () => {
+            reject(new Error("Upload failed"));
+        };
+
+        xhr.send(file);
     });
 }
 
-/* =========================
-   HELPERS
-========================= */
+async function getFolderTotalSize(folderId) {
+    const { data, error } = await supabase.rpc("get_folder_total_size", {
+        p_folder_id: folderId
+    });
 
-async function deleteExistingFileById(fileId) {
-    await fetch("/api/project-files/delete-file", {
-        method: "POST",
-        headers: await getAuthHeaders(),
-        body: JSON.stringify({ fileId })
+    if (error) throw error;
+    return Number(data || 0);
+}
+
+function getFileExtension(filename) {
+    const parts = filename.split(".");
+    return parts.length > 1 ? parts.pop().toLowerCase() : "";
+}
+
+function formatSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return "Unknown date";
+
+    const date = new Date(dateString);
+
+    return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
     });
 }
 
-function hasDraggedFiles(event) {
-    return [...(event.dataTransfer?.types || [])].includes("Files");
-}
-
-async function getAuthHeaders() {
-    const { data: { session } } = await supabase.auth.getSession();
-
-    return {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${session?.access_token || ""}`
-    };
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
