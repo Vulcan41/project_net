@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
    R2 CLIENT
 ========================= */
 
-const s3 = new S3Client({
+const client = new S3Client({
     region: "auto",
     endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     credentials: {
@@ -47,14 +47,14 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { fileId } = req.body;
+        const { fileId } = req.body || {};
 
         if (!fileId) {
             return res.status(400).json({ error: "Missing fileId" });
         }
 
         /* =========================
-           STEP 1: Get user
+           STEP 1: Get current user
         ========================= */
 
         const supabaseUser = getUserClient(req);
@@ -69,12 +69,12 @@ export default async function handler(req, res) {
         }
 
         /* =========================
-           STEP 2: Get file
+           STEP 2: Load file
         ========================= */
 
         const { data: file, error: fileError } = await supabaseAdmin
             .from("project_files")
-            .select("id, object_key, project_id")
+            .select("id, project_id, uploaded_by, object_key")
             .eq("id", fileId)
             .single();
 
@@ -83,12 +83,12 @@ export default async function handler(req, res) {
         }
 
         /* =========================
-           STEP 3: Check ownership
+           STEP 3: Load project
         ========================= */
 
         const { data: project, error: projectError } = await supabaseAdmin
             .from("projects")
-            .select("owner_id")
+            .select("id, owner_id")
             .eq("id", file.project_id)
             .single();
 
@@ -96,44 +96,47 @@ export default async function handler(req, res) {
             return res.status(404).json({ error: "Project not found" });
         }
 
-        const isOwner = project.owner_id === user.id;
+        /* =========================
+           STEP 4: Permission check
+        ========================= */
 
-        if (!isOwner) {
+        const isOwner = project.owner_id === user.id;
+        const isUploader = file.uploaded_by === user.id;
+
+        if (!isOwner && !isUploader) {
             return res.status(403).json({ error: "Forbidden" });
         }
 
         /* =========================
-           STEP 4: Delete from R2
+           STEP 5: Delete from R2
         ========================= */
 
-        const command = new DeleteObjectCommand({
-            Bucket: process.env.R2_BUCKET_NAME,
-            Key: file.object_key,
-        });
+        if (file.object_key) {
+            const command = new DeleteObjectCommand({
+                Bucket: process.env.R2_BUCKET_NAME,
+                Key: file.object_key,
+            });
 
-        await s3.send(command);
+            await client.send(command);
+        }
 
         /* =========================
-           STEP 5: Delete from DB
+           STEP 6: Delete DB row
         ========================= */
 
         const { error: deleteError } = await supabaseAdmin
             .from("project_files")
             .delete()
-            .eq("id", fileId);
+            .eq("id", file.id);
 
         if (deleteError) {
             throw deleteError;
         }
 
-        return res.status(200).json({
-            success: true
-        });
+        return res.status(200).json({ success: true });
 
-    } catch (err) {
-        console.error("Delete file error:", err);
-        return res.status(500).json({
-            error: "Failed to delete file"
-        });
+    } catch (error) {
+        console.error("Delete file error:", error);
+        return res.status(500).json({ error: "Failed to delete file" });
     }
 }
