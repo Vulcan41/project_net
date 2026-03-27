@@ -165,7 +165,7 @@ function matchesSearch(value) {
     return String(value || "").toLowerCase().includes(currentSearch);
 }
 
-function sortByCurrentRule(items, getName, getDate) {
+function sortByCurrentRule(items, getName, getDate, getSize = () => 0) {
     const sorted = [...items];
 
     switch (currentSort) {
@@ -180,6 +180,12 @@ function sortByCurrentRule(items, getName, getDate) {
 
         case "newest_asc":
             return sorted.sort((a, b) => new Date(getDate(a)) - new Date(getDate(b)));
+
+        case "size_desc":
+            return sorted.sort((a, b) => (getSize(b) || 0) - (getSize(a) || 0));
+
+        case "size_asc":
+            return sorted.sort((a, b) => (getSize(a) || 0) - (getSize(b) || 0));
 
         default:
             return sorted;
@@ -226,16 +232,31 @@ async function loadFolderContent() {
         return;
     }
 
+    let foldersWithSize = folders ?? [];
+
+    try {
+        foldersWithSize = await Promise.all(
+            foldersWithSize.map(async (folder) => ({
+                ...folder,
+                total_size: await getFolderTotalSize(folder.id)
+            }))
+        );
+    } catch (err) {
+        console.error("Failed to load folder sizes for sorting:", err);
+    }
+
     const safeFolders = sortByCurrentRule(
-        (folders ?? []).filter((folder) => matchesSearch(folder.name)),
+        foldersWithSize.filter((folder) => matchesSearch(folder.name)),
         (folder) => folder.name?.toLowerCase() || "",
-        (folder) => folder.created_at
+        (folder) => folder.created_at,
+        (folder) => folder.total_size
     );
 
     const safeFiles = sortByCurrentRule(
         (files ?? []).filter((file) => matchesSearch(file.filename)),
         (file) => file.filename?.toLowerCase() || "",
-        (file) => file.created_at
+        (file) => file.created_at,
+        (file) => file.size_bytes
     );
 
     const totalItems = safeFolders.length + safeFiles.length;
@@ -562,7 +583,7 @@ function createFolderRow(folder) {
 
     const sub = document.createElement("div");
     sub.className = "file-sub";
-    sub.textContent = folder.is_default ? "Default folder" : "Folder";
+    sub.textContent = "Loading...";
 
     metaWrap.appendChild(name);
     metaWrap.appendChild(sub);
@@ -570,24 +591,13 @@ function createFolderRow(folder) {
     main.appendChild(icon);
     main.appendChild(metaWrap);
 
-    const actions = createActionMenu([
-        {
-            label: "Rename",
-            onClick: async () => {
-                await renameFolder(folder);
-            }
-        },
-        ...(!folder.is_default ? [{
-            label: "Delete",
-            danger: true,
-            onClick: async () => {
-                await deleteFolder(folder);
-            }
-        }] : [])
-    ]);
-
     row.appendChild(main);
-    row.appendChild(actions);
+
+    /* =========================
+       LOAD FOLDER STATS
+    ========================= */
+
+    loadFolderStats(folder.id, sub);
 
     row.onclick = async () => {
         currentFolderId = folder.id;
@@ -700,7 +710,7 @@ function getFileIcon(file) {
     const ext = getFileExtension(name);
 
     if (mime.startsWith("image/") || ["png", "jpg", "jpeg", "webp", "gif"].includes(ext)) {
-        return "assets/icon_img.png";
+        return "assets/icons_img.png";
     }
 
     if (mime === "application/pdf" || ext === "pdf") {
@@ -732,6 +742,34 @@ function getFileIcon(file) {
     }
 
     return "assets/icon_file_file.png";
+}
+
+async function loadFolderStats(folderId, subEl) {
+    try {
+        const { data, error } = await supabase
+            .rpc("get_folder_total_size", {
+            p_folder_id: folderId
+        });
+
+        if (error) throw error;
+
+        const sizeText = formatSize(data || 0);
+
+        subEl.textContent = sizeText;
+
+    } catch (err) {
+        console.error("Folder size error:", err);
+        subEl.textContent = "Folder";
+    }
+}
+
+async function getFolderTotalSize(folderId) {
+    const { data, error } = await supabase.rpc("get_folder_total_size", {
+        p_folder_id: folderId
+    });
+
+    if (error) throw error;
+    return Number(data || 0);
 }
 
 function getFileExtension(filename) {
