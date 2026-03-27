@@ -507,3 +507,51 @@
 .hidden {
     display: none !important;
 }
+
+.files-upload-progress {
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.files-upload-progress-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.files-upload-progress-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111111;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.files-upload-progress-percent {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+.files-upload-progress-bar {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: #edf1f5;
+    overflow: hidden;
+}
+
+.files-upload-progress-fill {
+    width: 0%;
+    height: 100%;
+    border-radius: 999px;
+    background: #111111;
+    transition: width 0.15s ease;
+}
