@@ -1,5 +1,10 @@
 import { supabase } from "../../core/supabase.js";
 
+console.log("ENV CHECK:", {
+    url: process.env.SUPABASE_URL,
+    key: process.env.SUPABASE_SERVICE_ROLE_KEY ? "OK" : "MISSING"
+});
+
 export default async function handler(req, res) {
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed" });
