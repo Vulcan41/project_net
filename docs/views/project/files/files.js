@@ -1,4 +1,9 @@
 import { supabase } from "../../../core/supabase.js";
+import {
+ensureFolderModal,
+openFolderModal,
+closeFolderModal
+} from "../../../components/folderModal/folderModal.js";
 
 let currentProject = null;
 let defaultFolderId = null;
@@ -14,6 +19,8 @@ export async function initFiles(project) {
 
     const ready = await loadDefaultFolder();
     if (!ready) return;
+
+    await ensureFolderModal();
 
     setupUpload();
     setupCreateFolderButton();
@@ -361,28 +368,34 @@ function setupCreateFolderButton() {
 }
 
 async function renameFolder(folder) {
-    const nextName = window.prompt("Rename folder:", folder.name);
-    if (!nextName || !nextName.trim()) return;
+    openFolderModal({
+        title: "Rename folder",
+        label: "Rename folder:",
+        confirmText: "Save",
+        initialValue: folder.name,
+        onConfirm: async (value) => {
+            try {
+                const { error } = await supabase
+                    .from("project_folders")
+                    .update({
+                    name: value
+                })
+                    .eq("id", folder.id);
 
-    try {
-        const { error } = await supabase
-            .from("project_folders")
-            .update({
-            name: nextName.trim()
-        })
-            .eq("id", folder.id);
+                if (error) throw error;
 
-        if (error) throw error;
+                if (folder.id === currentFolderId) {
+                    currentFolderName = value;
+                }
 
-        if (folder.id === currentFolderId) {
-            currentFolderName = nextName.trim();
+                closeFolderModal();
+                await loadFolderContent();
+            } catch (err) {
+                console.error("Rename folder failed:", err);
+                alert("Failed to rename folder");
+            }
         }
-
-        await loadFolderContent();
-    } catch (err) {
-        console.error("Rename folder failed:", err);
-        alert("Failed to rename folder");
-    }
+    });
 }
 
 async function deleteFolder(folder) {

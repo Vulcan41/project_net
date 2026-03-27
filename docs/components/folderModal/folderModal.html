@@ -1,0 +1,29 @@
+<div id="folder-modal" class="folder-modal hidden">
+  <div class="folder-modal-backdrop"></div>
+
+  <div class="folder-modal-card" role="dialog" aria-modal="true" aria-labelledby="folder-modal-title">
+    <div class="folder-modal-title" id="folder-modal-title">Folder</div>
+
+    <label class="folder-modal-label" id="folder-modal-label" for="folder-modal-input">
+      Folder name
+    </label>
+
+    <input
+            id="folder-modal-input"
+            class="folder-modal-input"
+            type="text"
+            maxlength="120"
+            autocomplete="off"
+    />
+
+    <div class="folder-modal-actions">
+      <button id="folder-modal-cancel" class="folder-modal-btn folder-modal-btn-secondary" type="button">
+        Cancel
+      </button>
+
+      <button id="folder-modal-confirm" class="folder-modal-btn folder-modal-btn-primary" type="button">
+        Save
+      </button>
+    </div>
+  </div>
+</div>
