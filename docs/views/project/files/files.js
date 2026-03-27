@@ -2,6 +2,7 @@ import { supabase } from "../../../core/supabase.js";
 import {
 ensureFolderModal,
 openFolderModal,
+openFolderConfirmModal,
 closeFolderModal
 } from "../../../components/folderModal/folderModal.js";
 
@@ -413,31 +414,37 @@ async function deleteFolder(folder) {
         return;
     }
 
-    const confirmed = window.confirm(
-        `Delete folder "${folder.name}" and everything inside it?`
-    );
+    openFolderConfirmModal({
+        title: "Delete folder",
+        message: `Delete folder "${folder.name}" and everything inside it? This action cannot be undone.`,
+        confirmText: "Delete",
+        danger: true,
+        onConfirm: async () => {
+            try {
+                const headers = await getAuthHeaders();
 
-    if (!confirmed) return;
+                const res = await fetch("/api/project-files/delete-folder", {
+                    method: "POST",
+                    headers,
+                    body: JSON.stringify({ folderId: folder.id })
+                });
 
-    try {
-        const headers = await getAuthHeaders();
+                if (!res.ok) {
+                    const data = await res.json().catch(() => null);
+                    throw new Error(data?.error || "Delete failed");
+                }
 
-        const res = await fetch("/api/project-files/delete-folder", {
-            method: "POST",
-            headers,
-            body: JSON.stringify({ folderId: folder.id })
-        });
-
-        if (!res.ok) {
-            const data = await res.json().catch(() => null);
-            throw new Error(data?.error || "Delete failed");
+                closeFolderModal();
+                await loadFolderContent();
+            } catch (err) {
+                console.error("Delete folder failed:", err);
+                alert(err.message || "Failed to delete folder");
+            }
+        },
+        onCancel: () => {
+            closeFolderModal();
         }
-
-        await loadFolderContent();
-    } catch (err) {
-        console.error("Delete folder failed:", err);
-        alert(err.message || "Failed to delete folder");
-    }
+    });
 }
 
 /* =========================
@@ -683,26 +690,36 @@ function createFileRow(file) {
             label: "Delete",
             danger: true,
             onClick: async () => {
-                if (!confirm(`Delete "${file.filename}"?`)) return;
+                openFolderConfirmModal({
+                    title: "Delete file",
+                    message: `Delete "${file.filename}"? This action cannot be undone.`,
+                    confirmText: "Delete",
+                    danger: true,
+                    onConfirm: async () => {
+                        try {
+                            const headers = await getAuthHeaders();
 
-                try {
-                    const headers = await getAuthHeaders();
+                            const res = await fetch("/api/project-files/delete-file", {
+                                method: "POST",
+                                headers,
+                                body: JSON.stringify({ fileId: file.id })
+                            });
 
-                    const res = await fetch("/api/project-files/delete-file", {
-                        method: "POST",
-                        headers,
-                        body: JSON.stringify({ fileId: file.id })
-                    });
+                            if (!res.ok) {
+                                throw new Error("Delete failed");
+                            }
 
-                    if (!res.ok) {
-                        throw new Error("Delete failed");
+                            closeFolderModal();
+                            await loadFolderContent();
+                        } catch (err) {
+                            console.error("Delete error:", err);
+                            alert("Delete failed");
+                        }
+                    },
+                    onCancel: () => {
+                        closeFolderModal();
                     }
-
-                    await loadFolderContent();
-                } catch (err) {
-                    console.error("Delete error:", err);
-                    alert("Delete failed");
-                }
+                });
             }
         }
     ]);

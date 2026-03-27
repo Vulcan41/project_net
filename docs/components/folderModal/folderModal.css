@@ -92,3 +92,18 @@
 .folder-modal-btn-primary:hover {
     background: #222222;
 }
+
+.folder-modal-message {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #444444;
+}
+
+.folder-modal-btn-danger {
+    background: #b42318;
+    color: #ffffff;
+}
+
+.folder-modal-btn-danger:hover {
+    background: #991b1b;
+}
