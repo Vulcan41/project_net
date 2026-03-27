@@ -49,7 +49,7 @@ function bindBatchModalEvents() {
 
     continueBtn?.addEventListener("click", () => {
         const list = document.getElementById("file-conflicts-batch-list");
-        const selects = list?.querySelectorAll(".file-conflicts-batch-select") || [];
+        const selects = list?.querySelectorAll(".file-conflict-select") || [];
 
         const decisions = {};
 
@@ -89,7 +89,7 @@ function bindBatchModalEvents() {
 
 function setAllBatchSelections(value) {
     const list = document.getElementById("file-conflicts-batch-list");
-    const selects = list?.querySelectorAll(".file-conflicts-batch-select") || [];
+    const selects = list?.querySelectorAll(".file-conflict-select") || [];
     selects.forEach((select) => {
         select.value = value;
     });
@@ -102,10 +102,6 @@ function resolveBatchModal(result) {
     closeFileConflictsBatchModal();
 }
 
-/* =========================
-   NEW: ROW WITH ICONS
-========================= */
-
 function createConflictRow(conflict) {
     const row = document.createElement("div");
     row.className = "file-conflict-row";
@@ -117,7 +113,8 @@ function createConflictRow(conflict) {
     iconWrap.className = "file-conflict-icon";
 
     const img = document.createElement("img");
-    img.src = getFileIcon({ filename: conflict.filename }); // FIXED
+    img.src = getFileIcon({ filename: conflict.filename });
+    img.alt = "file";
     img.className = "file-conflict-icon-img";
 
     iconWrap.appendChild(img);
@@ -125,12 +122,14 @@ function createConflictRow(conflict) {
     const name = document.createElement("div");
     name.className = "file-conflict-name";
     name.textContent = conflict.filename;
+    name.title = conflict.filename;
 
     left.appendChild(iconWrap);
     left.appendChild(name);
 
     const select = document.createElement("select");
     select.className = "file-conflict-select";
+    select.setAttribute("data-filename", conflict.filename);
 
     select.innerHTML = `
         <option value="rename">Keep both and rename</option>
@@ -143,10 +142,6 @@ function createConflictRow(conflict) {
 
     return { row, select };
 }
-
-/* =========================
-   OPEN MODAL
-========================= */
 
 export function openFileConflictsBatchModal(conflicts = []) {
     const modal = document.getElementById("file-conflicts-batch-modal");
@@ -165,12 +160,7 @@ export function openFileConflictsBatchModal(conflicts = []) {
     list.innerHTML = "";
 
     conflicts.forEach((conflict) => {
-        const { row, select } = createConflictRow(conflict);
-
-        // IMPORTANT: keep compatibility with existing logic
-        select.classList.add("file-conflicts-batch-select");
-        select.setAttribute("data-filename", conflict.filename);
-
+        const { row } = createConflictRow(conflict);
         list.appendChild(row);
     });
 
@@ -188,10 +178,6 @@ export function closeFileConflictsBatchModal() {
     modal.classList.add("hidden");
     batchResolveHandler = null;
 }
-
-/* =========================
-   ICON LOGIC
-========================= */
 
 function getFileIcon(file) {
     const mime = (file.mime_type || "").toLowerCase();
