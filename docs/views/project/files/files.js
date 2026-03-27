@@ -510,14 +510,13 @@ function setupUpload() {
 
             const { uploadUrl, objectKey, fileId } = await res.json();
 
-            const uploadRes = await fetch(uploadUrl, {
-                method: "PUT",
-                body: file
+            showUploadProgress(file.name);
+
+            await uploadFileWithProgress(uploadUrl, file, (progress) => {
+                updateUploadProgress(progress);
             });
 
-            if (!uploadRes.ok) {
-                throw new Error("Upload to storage failed");
-            }
+            updateUploadProgress(100);
 
             const {
                 data: { user }
@@ -541,6 +540,11 @@ function setupUpload() {
 
             if (error) throw error;
 
+            await showInfo({
+                type: "success",
+                message: "Upload completed successfully."
+            });
+
             await loadFolderContent();
         } catch (err) {
             console.error("Upload failed:", err);
@@ -548,9 +552,13 @@ function setupUpload() {
                 type: "error",
                 message: "Upload failed"
             });
-        }
+        } finally {
+            input.value = "";
 
-        input.value = "";
+            setTimeout(() => {
+                hideUploadProgress();
+            }, 500);
+        }
     };
 }
 
@@ -849,6 +857,66 @@ async function loadFolderStats(folderId, subEl) {
         console.error("Folder size error:", err);
         subEl.textContent = "Folder";
     }
+}
+
+function showUploadProgress(filename) {
+    const wrapper = document.getElementById("files-upload-progress");
+    const text = document.getElementById("files-upload-progress-text");
+    const percent = document.getElementById("files-upload-progress-percent");
+    const fill = document.getElementById("files-upload-progress-fill");
+
+    if (wrapper) wrapper.classList.remove("hidden");
+    if (text) text.textContent = `Uploading ${filename}...`;
+    if (percent) percent.textContent = "0%";
+    if (fill) fill.style.width = "0%";
+}
+
+function updateUploadProgress(value) {
+    const percent = document.getElementById("files-upload-progress-percent");
+    const fill = document.getElementById("files-upload-progress-fill");
+
+    const safeValue = Math.max(0, Math.min(100, Math.round(value)));
+
+    if (percent) percent.textContent = `${safeValue}%`;
+    if (fill) fill.style.width = `${safeValue}%`;
+}
+
+function hideUploadProgress() {
+    const wrapper = document.getElementById("files-upload-progress");
+    const fill = document.getElementById("files-upload-progress-fill");
+    const percent = document.getElementById("files-upload-progress-percent");
+
+    if (wrapper) wrapper.classList.add("hidden");
+    if (fill) fill.style.width = "0%";
+    if (percent) percent.textContent = "0%";
+}
+
+function uploadFileWithProgress(uploadUrl, file, onProgress) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.open("PUT", uploadUrl, true);
+
+        xhr.upload.onprogress = (event) => {
+            if (!event.lengthComputable) return;
+            const progress = (event.loaded / event.total) * 100;
+            onProgress?.(progress);
+        };
+
+        xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve();
+            } else {
+                reject(new Error(`Upload failed with status ${xhr.status}`));
+            }
+        };
+
+        xhr.onerror = () => {
+            reject(new Error("Upload failed"));
+        };
+
+        xhr.send(file);
+    });
 }
 
 async function getFolderTotalSize(folderId) {
