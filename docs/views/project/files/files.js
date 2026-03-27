@@ -10,6 +10,10 @@ import {
 ensureFileConflictModal,
 openFileConflictModal
 } from "../../../components/fileConflictModal/fileConflictModal.js";
+import {
+ensureFileConflictsBatchModal,
+openFileConflictsBatchModal
+} from "../../../components/fileConflictsBatchModal/fileConflictsBatchModal.js";
 
 let currentProject = null;
 let defaultFolderId = null;
@@ -28,6 +32,7 @@ export async function initFiles(project) {
 
     await ensureFolderModal();
     await ensureFileConflictModal();
+    await ensureFileConflictsBatchModal();
 
     setupUpload();
     setupCreateFolderButton();
@@ -1170,6 +1175,70 @@ async function resolveUploadPlans(files, folderId) {
     );
 
     const plans = [];
+    const conflictingFiles = files.filter((file) => conflictMap.has(file.name));
+
+    if (conflictingFiles.length === 0) {
+        return files.map((file) => ({
+            file,
+            folderId,
+            finalFilename: file.name,
+            replaceExistingFileId: null
+        }));
+    }
+
+    if (conflictingFiles.length === 1) {
+        for (const file of files) {
+            const conflict = conflictMap.get(file.name);
+
+            if (!conflict) {
+                plans.push({
+                    file,
+                    folderId,
+                    finalFilename: file.name,
+                    replaceExistingFileId: null
+                });
+                continue;
+            }
+
+            const choice = await openFileConflictModal({
+                filename: file.name
+            });
+
+            if (choice === "cancel") {
+                throw new Error("Upload cancelled");
+            }
+
+            if (choice === "replace") {
+                plans.push({
+                    file,
+                    folderId,
+                    finalFilename: file.name,
+                    replaceExistingFileId: conflict.existingFileId
+                });
+                continue;
+            }
+
+            if (choice === "rename") {
+                const renamed = await generateRenamedFilename(folderId, file.name);
+
+                plans.push({
+                    file,
+                    folderId,
+                    finalFilename: renamed,
+                    replaceExistingFileId: null
+                });
+                continue;
+            }
+        }
+
+        return plans;
+    }
+
+    const decisions = await openFileConflictsBatchModal(conflicts);
+
+    if (!decisions) {
+        throw new Error("Upload cancelled");
+    }
 
     for (const file of files) {
         const conflict = conflictMap.get(file.name);
@@ -1184,15 +1253,13 @@ async function resolveUploadPlans(files, folderId) {
             continue;
         }
 
-        const choice = await openFileConflictModal({
-            filename: file.name
-        });
+        const decision = decisions[file.name] || "rename";
 
-        if (choice === "cancel") {
-            throw new Error("Upload cancelled");
+        if (decision === "skip") {
+            continue;
         }
 
-        if (choice === "replace") {
+        if (decision === "replace") {
             plans.push({
                 file,
                 folderId,
@@ -1202,7 +1269,7 @@ async function resolveUploadPlans(files, folderId) {
             continue;
         }
 
-        if (choice === "rename") {
+        if (decision === "rename") {
             const renamed = await generateRenamedFilename(folderId, file.name);
 
             plans.push({

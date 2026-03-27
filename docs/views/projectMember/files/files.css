@@ -95,17 +95,18 @@
 
 .file-icon {
     position: relative;
-    width: 42px;
-    height: 42px;
+    width: 34px;
+    height: 34px;
     flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: visible;
 }
 
 .file-icon-img {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     object-fit: contain;
     display: block;
 }

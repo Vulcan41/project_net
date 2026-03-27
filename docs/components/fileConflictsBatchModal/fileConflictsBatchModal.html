@@ -1,0 +1,66 @@
+<div id="file-conflicts-batch-modal" class="file-conflicts-batch-modal hidden">
+    <div class="file-conflicts-batch-backdrop"></div>
+
+    <div
+            class="file-conflicts-batch-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="file-conflicts-batch-title"
+    >
+        <div class="file-conflicts-batch-header">
+            <div class="file-conflicts-batch-title" id="file-conflicts-batch-title">
+                Files already exist
+            </div>
+
+            <div class="file-conflicts-batch-subtitle" id="file-conflicts-batch-subtitle">
+                Choose what to do with the conflicting files.
+            </div>
+        </div>
+
+        <div class="file-conflicts-batch-toolbar">
+            <button
+                    id="file-conflicts-batch-replace-all"
+                    class="file-conflicts-batch-toolbar-btn"
+                    type="button"
+            >
+                Replace all
+            </button>
+
+            <button
+                    id="file-conflicts-batch-rename-all"
+                    class="file-conflicts-batch-toolbar-btn"
+                    type="button"
+            >
+                Rename all
+            </button>
+
+            <button
+                    id="file-conflicts-batch-skip-all"
+                    class="file-conflicts-batch-toolbar-btn"
+                    type="button"
+            >
+                Skip all
+            </button>
+        </div>
+
+        <div id="file-conflicts-batch-list" class="file-conflicts-batch-list"></div>
+
+        <div class="file-conflicts-batch-actions">
+            <button
+                    id="file-conflicts-batch-cancel"
+                    class="file-conflicts-batch-btn file-conflicts-batch-btn-secondary"
+                    type="button"
+            >
+                Cancel upload
+            </button>
+
+            <button
+                    id="file-conflicts-batch-continue"
+                    class="file-conflicts-batch-btn file-conflicts-batch-btn-primary"
+                    type="button"
+            >
+                Continue
+            </button>
+        </div>
+    </div>
+</div>
