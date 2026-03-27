@@ -159,6 +159,60 @@ async function loadFolderContent() {
     safeFiles.forEach(f => list.appendChild(createFileRow(f)));
 }
 
+function setupCreateFolderButton() {
+    const btn = document.getElementById("files-create-folder-btn");
+    if (!btn) return;
+
+    btn.onclick = async () => {
+        if (!currentFolderId) return;
+
+        openFolderModal({
+            title: "New folder",
+            label: "Folder name:",
+            confirmText: "Create",
+            initialValue: "",
+            onConfirm: async (value) => {
+                try {
+                    const {
+                        data: { user }
+                    } = await supabase.auth.getUser();
+
+                    const { error } = await supabase
+                        .from("project_folders")
+                        .insert({
+                        project_id: currentProject.id,
+                        parent_folder_id: currentFolderId,
+                        name: value,
+                        created_by: user.id,
+                        is_default: false
+                    });
+
+                    if (error) throw error;
+
+                    closeFolderModal();
+
+                    await showInfo({
+                        type: "success",
+                        message: "Folder created successfully."
+                    });
+
+                    await loadFolderContent();
+                } catch (err) {
+                    console.error("Create folder failed:", err);
+
+                    await showInfo({
+                        type: "error",
+                        message: "Failed to create folder"
+                    });
+                }
+            },
+            onCancel: () => {
+                closeFolderModal();
+            }
+        });
+    };
+}
+
 /* =========================
    UPLOAD FLOW (CORE)
 ========================= */
