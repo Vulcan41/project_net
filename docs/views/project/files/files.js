@@ -79,7 +79,7 @@ async function loadDefaultFolder() {
 async function loadFolderMeta(folderId) {
     const { data, error } = await supabase
         .from("project_folders")
-        .select("id, name, parent_folder_id, is_default")
+        .select("id, name, parent_folder_id, is_default, member_can_contribute")
         .eq("id", folderId)
         .eq("project_id", currentProject.id)
         .single();
@@ -230,7 +230,7 @@ async function loadFolderContent() {
     await Promise.all([
         supabase
             .from("project_folders")
-            .select("*")
+            .select("*, member_can_contribute")
             .eq("project_id", currentProject.id)
             .eq("parent_folder_id", currentFolderId)
             .order("created_at", { ascending: true }),
@@ -735,6 +735,14 @@ function createFolderRow(folder) {
             label: "Rename",
             onClick: async () => {
                 await renameFolder(folder);
+            }
+        },
+        {
+            label: folder.member_can_contribute
+            ? "Disable member contributions"
+            : "Enable member contributions",
+            onClick: async () => {
+                await toggleFolderMemberContribution(folder);
             }
         },
         ...(!folder.is_default ? [{
@@ -1282,6 +1290,36 @@ async function resolveUploadPlans(files, folderId) {
     }
 
     return plans;
+}
+
+async function toggleFolderMemberContribution(folder) {
+    try {
+        const { error } = await supabase
+            .from("project_folders")
+            .update({
+            member_can_contribute: !folder.member_can_contribute
+        })
+            .eq("id", folder.id)
+            .eq("project_id", currentProject.id);
+
+        if (error) throw error;
+
+        await showInfo({
+            type: "success",
+            message: !folder.member_can_contribute
+            ? "Members can now contribute in this folder."
+            : "Members can no longer contribute in this folder."
+        });
+
+        await loadFolderContent();
+    } catch (err) {
+        console.error("Toggle member contribution failed:", err);
+
+        await showInfo({
+            type: "error",
+            message: "Failed to update folder permissions"
+        });
+    }
 }
 
 function showUploadProgress(filename) {

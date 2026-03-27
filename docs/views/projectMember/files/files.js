@@ -31,7 +31,7 @@ async function loadDefaultFolder() {
 
     const { data, error } = await supabase
         .from("project_folders")
-        .select("id, name")
+        .select("id, name, member_can_contribute")
         .eq("project_id", currentProject.id)
         .eq("is_default", true)
         .single();
@@ -56,7 +56,7 @@ async function loadDefaultFolder() {
 async function loadFolderMeta(folderId) {
     const { data, error } = await supabase
         .from("project_folders")
-        .select("id, name, parent_folder_id")
+        .select("id, name, parent_folder_id, member_can_contribute")
         .eq("id", folderId)
         .eq("project_id", currentProject.id)
         .single();
