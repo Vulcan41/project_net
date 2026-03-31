@@ -333,3 +333,17 @@ input::placeholder {
     background: #246e9d;
     border-color: #246e9d;
 }
+
+/* =========================================================
+   REMOVE CHROME AUTOFILL YELLOW
+========================================================= */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #f8f9fc inset !important; /* match your input bg */
+    -webkit-text-fill-color: #111 !important;
+    transition: background-color 9999s ease-in-out 0s;
+    border: 1.5px solid #d6d9e0;
+}
