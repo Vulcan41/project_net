@@ -6,28 +6,28 @@
     font-weight: 600;
 }
 
-#register-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.4);
-    display:none;              /* IMPORTANT */
-    align-items:center;
-    justify-content:center;
-    z-index:1000;
+#register-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
 }
 
-#register-modal{
-    background:white;
-    padding:30px;
-    border-radius:10px;
-    width:400px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
+#register-modal {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 /* =========================================================
-MODAL ANIMATION
+   MODAL ANIMATION
 ========================================================= */
 
 #register-overlay {
@@ -38,9 +38,6 @@ MODAL ANIMATION
     animation: modalScale 0.18s ease;
 }
 
-
-/* OVERLAY FADE */
-
 @keyframes overlayFade {
     from {
         opacity: 0;
@@ -49,9 +46,6 @@ MODAL ANIMATION
         opacity: 1;
     }
 }
-
-
-/* MODAL SCALE */
 
 @keyframes modalScale {
     from {
@@ -70,31 +64,18 @@ MODAL ANIMATION
 
 #avatar-section {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     margin-bottom: 10px;
 }
 
-#register-avatar-bg{
-    width:100%;
-    height:100%;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-
-/* =========================================================
-   AVATAR UPLOAD WRAPPER
-========================================================= */
-
 #avatar-upload {
+    margin-top: 6px;
     position: relative;
     width: 140px;
     height: 140px;
     cursor: pointer;
 }
-
 
 /* =========================================================
    IMAGE WRAPPER
@@ -105,21 +86,37 @@ MODAL ANIMATION
     width: 140px;
     height: 140px;
     overflow: hidden;
+    border-radius: 50%;
+    background: #f3f4f6;
 }
 
-
 /* =========================================================
-   AVATAR IMAGE
+   AVATAR PREVIEW
 ========================================================= */
 
+.register-avatar-preview-shell {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+}
+
+#register-avatar-preview img,
 #register-avatar-preview {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    position: relative;
-    z-index: 1;
 }
 
+#register-avatar-preview img {
+    object-fit: cover;
+    display: block;
+}
 
 /* =========================================================
    CROP MASK
@@ -130,15 +127,12 @@ MODAL ANIMATION
     inset: 0;
     z-index: 2;
     background:
-    radial-gradient(circle 70px at center,
+    radial-gradient(
+    circle 70px at center,
     transparent 70px,
-    rgba(255,255,255,0.6) 71px);
+    rgba(255,255,255,0.55) 71px
+    );
 }
-
-
-/* =========================================================
-   CIRCLE RING
-========================================================= */
 
 #avatar-mask::after {
     content: "";
@@ -146,22 +140,20 @@ MODAL ANIMATION
     width: 138px;
     height: 138px;
     border-radius: 50%;
-    border: 1px solid rgba(0,0,0,0.2);
+    border: 1px solid rgba(0,0,0,0.16);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
 }
 
-
 /* =========================================================
-   FILE INPUT (HIDDEN)
+   FILE INPUT
 ========================================================= */
 
 #register-avatar-input {
     display: none;
 }
-
 
 /* =========================================================
    HOVER OVERLAY
@@ -176,24 +168,30 @@ MODAL ANIMATION
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.3px;
-    color: white;
+    color: #ffffff;
     background: rgba(0,0,0,0.55);
     opacity: 0;
     transition: opacity 0.2s ease;
     z-index: 3;
+    border-radius: 50%;
 }
-
-
-/* =========================================================
-   SHOW OVERLAY ON HOVER
-========================================================= */
 
 #avatar-upload:hover #avatar-overlay {
     opacity: 1;
 }
 
+.register-avatar-help {
+    margin-top: 18px;
+    font-size: 11px;
+    line-height: 1.5;
+    color: #7a7a84;
+    text-align: center;
+    max-width: 170px;
+}
 
-/* FORM SECTION TITLES */
+/* =========================================================
+   FORM SECTION TITLES
+========================================================= */
 
 .register-section {
     margin-top: 12px;
@@ -204,7 +202,9 @@ MODAL ANIMATION
     letter-spacing: 0.3px;
 }
 
-/* PASSWORD FIELD */
+/* =========================================================
+   PASSWORD FIELD
+========================================================= */
 
 .password-wrapper {
     position: relative;
@@ -217,35 +217,36 @@ MODAL ANIMATION
 
 /* EYE BUTTON */
 
-.password-eye{
-    position:absolute;
-    right:8px;
-    top:50%;
-    transform:translateY(-50%);
+.password-eye {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
 
-    width:32px;
-    height:32px;
+    width: 32px;
+    height: 32px;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    border:none;
-    background:none;
-    cursor:pointer;
+    border: none;
+    background: none;
+    cursor: pointer;
 }
 
-.password-eye img{
-    width:25px;
-    height:25px;
+.password-eye img {
+    width: 25px;
+    height: 25px;
 }
 
 .password-eye:hover {
     opacity: 1;
 }
 
-
-/* ---------- REGISTER BUTTON ---------- */
+/* =========================================================
+   BUTTONS
+========================================================= */
 
 #register-submit {
     background: #000;
@@ -258,8 +259,6 @@ MODAL ANIMATION
     font-weight: 550;
 }
 
-/* ---------- CANCEL BUTTON ---------- */
-
 #register-cancel {
     background: #000;
     font-weight: 550;
@@ -271,59 +270,54 @@ MODAL ANIMATION
     font-weight: 550;
 }
 
-
 /* =========================================================
    FORM FIELD HINTS
 ========================================================= */
 
-.form-field{
-    position:relative;
+.form-field {
+    position: relative;
 }
 
-/* tooltip */
+.field-hint {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 6px);
 
-.field-hint{
-    position:absolute;
-    left:0;
-    bottom:calc(100% + 6px);
+    background: #000;
+    color: #fff;
 
-    background:#000;
-    color:#fff;
+    font-size: 11px;
+    font-weight: 600;
 
-    font-size:11px;
-    font-weight:600;
+    padding: 4px 8px;
+    border-radius: 6px;
 
-    padding:4px 8px;
-    border-radius:6px;
+    white-space: nowrap;
 
-    white-space:nowrap;
+    opacity: 0;
+    pointer-events: none;
 
-    opacity:0;
-    pointer-events:none;
-
-    transform:translateY(4px);
+    transform: translateY(4px);
 
     transition:
     opacity 0.15s ease,
     transform 0.15s ease;
 }
 
-/* show when field focused */
-
-.form-field:focus-within .field-hint{
-    opacity:1;
-    transform:translateY(0);
+.form-field:focus-within .field-hint {
+    opacity: 1;
+    transform: translateY(0);
 }
 
-/* USERNAME PREFIX */
+/* =========================================================
+   USERNAME PREFIX
+========================================================= */
 
-.username-field{
+.username-field {
     position: relative;
 }
 
-/* @ icon */
-
-.username-prefix{
+.username-prefix {
     position: absolute;
     left: 10px;
     top: 50%;
@@ -334,11 +328,6 @@ MODAL ANIMATION
     color: #9aa3b2;
 }
 
-/* push text right so it doesn't overlap */
-
-.username-field input{
+.username-field input {
     padding-left: 26px;
 }
-
-
-

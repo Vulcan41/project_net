@@ -2,7 +2,7 @@
 
     <div id="register-modal">
 
-        <h2>Create Account</h2>
+        <h2>Create New Account</h2>
 
         <!-- AVATAR -->
 
@@ -11,7 +11,9 @@
             <label id="avatar-upload">
 
                 <div id="avatar-image-wrapper">
-                    <img id="register-avatar-preview" src="assets/avatar.png">
+                    <div id="register-avatar-preview" class="register-avatar-preview-shell">
+                        <img src="assets/avatar.png" alt="Avatar preview">
+                    </div>
                     <div id="avatar-mask"></div>
                 </div>
 
@@ -20,6 +22,11 @@
                 <input type="file" id="register-avatar-input" accept="image/*">
 
             </label>
+
+            <div class="register-avatar-help">
+                PNG, JPG or WEBP<br>
+                Recommended: square image
+            </div>
 
         </div>
 
@@ -49,7 +56,7 @@
             >
 
             <button type="button" id="toggle-password" class="password-eye">
-                <img id="password-icon" src="assets/no_view.png">
+                <img id="password-icon" src="assets/no_view.png" alt="Toggle password visibility">
             </button>
 
             <div class="field-hint">
@@ -99,19 +106,15 @@
             </div>
         </div>
 
-
-
         <!-- BUTTONS -->
 
         <div class="auth-buttons">
-
             <button class="glow-btn" id="register-cancel">
                 <span>Cancel</span>
             </button>
             <button class="glow-btn" id="register-submit">
                 <span>Create</span>
             </button>
-
         </div>
 
     </div>
