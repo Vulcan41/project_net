@@ -14,68 +14,82 @@
     <div class="header-logo">
       <img src="assets/logo_5.png" alt="Logo">
     </div>
+
     <nav class="header-menu">
-      <button class="active">ΑΡΧΙΚΗ</button>
-      <button>ΣΧΕΤΙΚΑ</button>
-      <button>ΕΠΙΚΟΙΝΩΝΙΑ</button>
+      <button class="active">HOME</button>
+      <button>ABOUT</button>
+      <button>CONTACT</button>
     </nav>
   </header>
 
   <div class="header-divider"></div>
 
-<div id="layout">
+  <main id="main-layout">
 
-  <div id="left-panel">
+    <section id="left-panel">
 
-    <div class="panel-item">
-      <h1 class="panel-label label-1">All-In-One eHub</h1>
-    </div>
+      <div class="panel-item">
+        <h1 class="panel-label label-1">All-In-One eHub</h1>
+      </div>
 
-    <div class="panel-item">
-      <h1 class="panel-label label-2">Επεξεργαστική Ισχύς</h1>
-    </div>
+      <div class="panel-item">
+        <h1 class="panel-label label-2">Processing Power</h1>
+      </div>
 
-    <div class="panel-item">
-      <h1 class="panel-label label-3">Δικτύωση</h1>
-    </div>
+      <div class="panel-item">
+        <h1 class="panel-label label-3">Networking</h1>
+      </div>
 
-  </div>
+      <p class="panel-description">
+        A unified environment for digital collaboration,
+        productivity, and connection.
+      </p>
 
-<div id="auth">
-  <h2 class="auth-title">Καλωσήρθατε</h2>
-  <p class="auth-subtitle">Συνδεθείτε για να συνεχίσετε<br>ή δημιουργήστε έναν νέο λογαριασμό</p>
-  <input
-          id="email"
-          type="email"
-          placeholder="Email"
-          autocomplete="off"
-  >
-  <input
-          id="password"
-          type="password"
-          placeholder="Κωδικός Πρόσβασης"
-          autocomplete="new-password"
-  >
+    </section>
 
-  <label class="keep-signed">
-    <input type="checkbox" id="keepSignedIn">
-    Να παραμείνω συνδεδεμένος
-  </label>
-  <div class="auth-buttons">
-    <button class="glow-btn" id="signup-btn">
-      <span>Εγγραφή</span>
-    </button>
-    <button class="glow-btn" id="login-btn">
-      <span>Σύνδεση</span>
-    </button>
-  </div>
-</div>
+    <section id="right-panel">
+      <div id="auth">
+        <h2 class="auth-title">Welcome</h2>
+        <p class="auth-subtitle">Sign in to continue<br>or create a new account</p>
 
-</div>
+        <input
+                id="email"
+                type="email"
+                placeholder="Email"
+                autocomplete="off"
+        >
+
+        <input
+                id="password"
+                type="password"
+                placeholder="Password"
+                autocomplete="new-password"
+        >
+
+        <label class="keep-signed">
+          <span>Keep me signed in</span>
+
+          <div class="toggle">
+            <input type="checkbox" id="keepSignedIn">
+            <span class="slider"></span>
+          </div>
+        </label>
+
+        <div class="auth-buttons">
+          <button class="glow-btn" id="signup-btn">
+            <span>Sign Up</span>
+          </button>
+          <button class="glow-btn" id="login-btn">
+            <span>Log In</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
 
 </div>
 
 <script type="module" src="index.js"></script>
 </body>
 </html>
-

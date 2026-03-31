@@ -1,4 +1,4 @@
-import { supabase } from "./core/supabase.js";
+import { supabase, getSupabaseClient } from "./core/supabase.js";
 import { initRegister } from "./register/register.js";
 
 /* =========================================================
@@ -26,6 +26,7 @@ initRegister();
 
 const email = document.getElementById("email");
 const password = document.getElementById("password");
+const keepSignedIn = document.getElementById("keepSignedIn");
 
 /* =========================================================
    LOGIN
@@ -35,7 +36,9 @@ async function login(e) {
 
     e?.preventDefault();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const authClient = getSupabaseClient(keepSignedIn.checked);
+
+    const { error } = await authClient.auth.signInWithPassword({
         email: email.value,
         password: password.value,
     });
