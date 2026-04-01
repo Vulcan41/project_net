@@ -198,11 +198,9 @@ async function loadConversations(targetUserId = null) {
         const latestMessage = latestMessagesMap.get(conversation.id);
 
         if (latestMessage) {
+            const isOwnMessage = latestMessage.sender_id === currentUserId;
 
-            const prefix =
-            latestMessage.sender_id === currentUserId ? "Εσείς: " : "";
-
-            meta.textContent = prefix + latestMessage.content;
+            meta.textContent = getConversationPreviewText(latestMessage, isOwnMessage);
 
             const lastReadAt = conversation.last_read_at;
 
@@ -220,7 +218,6 @@ async function loadConversations(targetUserId = null) {
                 row.classList.remove("unread-conversation");
                 newBadge.style.display = "none";
             }
-
         } else {
 
             meta.textContent = "Δεν υπάρχουν μηνύματα ακόμη";
@@ -304,8 +301,48 @@ async function loadConversations(targetUserId = null) {
     });
 }
 
-async function loadLatestMessagesMap(conversationIds) {
+function getConversationPreviewText(message, isOwnMessage) {
+    const content = String(message?.content || "").trim();
+    const attachments = message?.attachments || [];
 
+    if (content) {
+        return isOwnMessage ? `Εσείς: ${content}` : content;
+    }
+
+    if (!attachments.length) {
+        return isOwnMessage ? "Εσείς:" : "Δεν υπάρχουν μηνύματα ακόμη";
+    }
+
+    const imageCount = attachments.filter((a) =>
+    String(a?.mime_type || "").toLowerCase().startsWith("image/")
+    ).length;
+
+    const totalCount = attachments.length;
+
+    if (totalCount === 1) {
+        if (imageCount === 1) {
+            return isOwnMessage
+            ? "Εσείς: Σας έστειλα μια εικόνα"
+            : "Σας έστειλε μια εικόνα";
+        }
+
+        return isOwnMessage
+        ? "Εσείς: Σας έστειλα ένα αρχείο"
+        : "Σας έστειλε ένα αρχείο";
+    }
+
+    if (imageCount === totalCount) {
+        return isOwnMessage
+        ? `Εσείς: Σας έστειλα ${totalCount} εικόνες`
+        : `Σας έστειλε ${totalCount} εικόνες`;
+    }
+
+    return isOwnMessage
+    ? `Εσείς: Σας έστειλα ${totalCount} αρχεία`
+    : `Σας έστειλε ${totalCount} αρχεία`;
+}
+
+async function loadLatestMessagesMap(conversationIds) {
     const map = new Map();
 
     if (!conversationIds || conversationIds.length === 0) {
@@ -314,7 +351,17 @@ async function loadLatestMessagesMap(conversationIds) {
 
     const { data, error } = await supabase
         .from("messages")
-        .select("conversation_id,sender_id,content,created_at")
+        .select(`
+            conversation_id,
+            sender_id,
+            content,
+            created_at,
+            attachments:message_attachments (
+                id,
+                mime_type,
+                file_name
+            )
+        `)
         .in("conversation_id", conversationIds)
         .order("created_at", { ascending: false });
 
