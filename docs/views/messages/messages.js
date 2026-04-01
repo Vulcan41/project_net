@@ -376,8 +376,8 @@ function renderChatSkeleton(chatPanel, conversation) {
         </button>
     </div>
 
-    <input id="chat-attach-input" type="file" class="hidden" multiple />
-    <input id="chat-image-input" type="file" class="hidden" accept="image/*" multiple />
+    <input id="chat-attach-input" type="file" hidden multiple />
+<input id="chat-image-input" type="file" hidden accept="image/*" multiple />
 
     ${disabled
         ? `<div class="chat-disabled-note">
