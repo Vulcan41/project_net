@@ -704,17 +704,25 @@ function createImageAttachmentCard(attachment) {
 function renderMessageAttachments(container, attachments = []) {
     if (!attachments.length) return;
 
-    const list = createAttachmentList();
+    const grouped = groupMessageAttachments(attachments);
+    const images = grouped.filter(isImageAttachment);
+    const files = grouped.filter((a) => !isImageAttachment(a));
 
-    groupMessageAttachments(attachments).forEach((attachment) => {
-        const node = isImageAttachment(attachment)
-        ? createImageAttachmentCard(attachment)
-        : createFileAttachmentCard(attachment);
+    if (images.length) {
+        const imageGrid = createMessageImageGrid(images);
+        container.appendChild(imageGrid);
+    }
 
-        list.appendChild(node);
-    });
+    if (files.length) {
+        const fileList = createAttachmentList();
 
-    container.appendChild(list);
+        files.forEach((attachment) => {
+            const node = createFileAttachmentCard(attachment);
+            fileList.appendChild(node);
+        });
+
+        container.appendChild(fileList);
+    }
 }
 
 function renderActiveConversationWithPending() {
@@ -877,25 +885,47 @@ function getPendingMessageStatusText(message) {
 function renderPendingMessageAttachments(container, attachments = []) {
     if (!attachments.length) return;
 
-    const list = createAttachmentList();
-
     const images = attachments.filter((a) =>
     String(a?.file?.type || "").toLowerCase().startsWith("image/")
     );
+
     const files = attachments.filter((a) =>
     !String(a?.file?.type || "").toLowerCase().startsWith("image/")
     );
 
-    [...images, ...files].forEach((attachment) => {
-        const isImage = String(attachment?.file?.type || "").toLowerCase().startsWith("image/");
-        const node = isImage
-        ? createPendingImageAttachmentCard(attachment)
-        : createPendingFileAttachmentCard(attachment);
+    if (images.length) {
+        const grid = document.createElement("div");
+        grid.className = "message-image-grid";
 
-        list.appendChild(node);
-    });
+        if (images.length === 1) {
+            grid.classList.add("one");
+        } else if (images.length === 2) {
+            grid.classList.add("two");
+        } else if (images.length === 3) {
+            grid.classList.add("three");
+        } else {
+            grid.classList.add("multi");
+        }
 
-    container.appendChild(list);
+        images.forEach((attachment) => {
+            const node = createPendingImageAttachmentCard(attachment);
+            node.classList.add("message-image-grid-item");
+            grid.appendChild(node);
+        });
+
+        container.appendChild(grid);
+    }
+
+    if (files.length) {
+        const list = createAttachmentList();
+
+        files.forEach((attachment) => {
+            const node = createPendingFileAttachmentCard(attachment);
+            list.appendChild(node);
+        });
+
+        container.appendChild(list);
+    }
 }
 
 function createPendingFileAttachmentCard(attachment) {
@@ -1781,4 +1811,27 @@ function scheduleScrollToBottom(force = false) {
         messagesArea.scrollTop = messagesArea.scrollHeight;
         scrollScheduled = false;
     });
+}
+
+function createMessageImageGrid(images = []) {
+    const grid = document.createElement("div");
+    grid.className = "message-image-grid";
+
+    if (images.length === 1) {
+        grid.classList.add("one");
+    } else if (images.length === 2) {
+        grid.classList.add("two");
+    } else if (images.length === 3) {
+        grid.classList.add("three");
+    } else {
+        grid.classList.add("multi");
+    }
+
+    images.forEach((attachment) => {
+        const node = createImageAttachmentCard(attachment);
+        node.classList.add("message-image-grid-item");
+        grid.appendChild(node);
+    });
+
+    return grid;
 }
