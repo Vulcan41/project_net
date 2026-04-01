@@ -873,9 +873,22 @@
 
 .message-bubble-attachment-only {
     background: transparent !important;
+    color: #1c1c1e;
     padding: 2px 0;
     box-shadow: none;
     max-width: 260px;
+}
+
+.message-row.own .message-bubble-attachment-only,
+.message-row.other .message-bubble-attachment-only {
+    color: #1c1c1e;
+}
+
+.message-bubble-attachment-only .message-time {
+    color: #7a7a84;
+    text-align: right;
+    align-self: flex-end;
+    margin-top: 4px;
 }
 
 .message-attachment-file {
