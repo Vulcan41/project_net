@@ -1389,50 +1389,66 @@ function bindChatInput(currentUserId) {
     const sendMessage = async () => {
         const content = input.value.trim();
         const conversationId = activeConversationId;
+        const hasAttachments = pendingAttachments.length > 0;
 
-        if (!content && pendingAttachments.length === 0) return;
+        if (!content && !hasAttachments) return;
 
         sendBtn.disabled = true;
         input.disabled = true;
 
-        const tempMessageId = crypto.randomUUID();
-        const tempAttachments = getGroupedPendingAttachments().map((item) => ({
-            id: item.id,
-            file: item.file,
-            progress: 0,
-            uploading: true,
-            uploaded: false,
-            error: false
-        }));
+        const shouldUsePendingBubble = hasAttachments;
 
-        addPendingMessage({
-            tempId: tempMessageId,
-            conversationId,
-            senderId: currentUserId,
-            content,
-            createdAt: new Date().toISOString(),
-            status: "uploading",
-            attachments: tempAttachments
-        });
+        let tempMessageId = null;
+        let tempAttachments = [];
 
-        input.value = "";
-        input.style.height = "42px";
-        input.style.overflowY = "hidden";
-        resetPendingAttachments();
+        if (shouldUsePendingBubble) {
+            tempMessageId = crypto.randomUUID();
+
+            tempAttachments = getGroupedPendingAttachments().map((item) => ({
+                id: item.id,
+                file: item.file,
+                progress: 0,
+                uploading: true,
+                uploaded: false,
+                error: false
+            }));
+
+            addPendingMessage({
+                tempId: tempMessageId,
+                conversationId,
+                senderId: currentUserId,
+                content,
+                createdAt: new Date().toISOString(),
+                status: "uploading",
+                attachments: tempAttachments
+            });
+
+            input.value = "";
+            input.style.height = "42px";
+            input.style.overflowY = "hidden";
+            resetPendingAttachments();
+        }
 
         try {
             const uploadedAttachments = [];
 
-            for (const tempAttachment of tempAttachments) {
-                const uploaded = await uploadMessageAttachmentForPendingMessage(
-                    conversationId,
-                    tempMessageId,
-                    tempAttachment
-                );
-                uploadedAttachments.push(uploaded);
-            }
+            if (shouldUsePendingBubble) {
+                for (const tempAttachment of tempAttachments) {
+                    const uploaded = await uploadMessageAttachmentForPendingMessage(
+                        conversationId,
+                        tempMessageId,
+                        tempAttachment
+                    );
+                    uploadedAttachments.push(uploaded);
+                }
 
-            updatePendingMessage(tempMessageId, { status: "sending" });
+                updatePendingMessage(tempMessageId, { status: "sending" });
+            } else {
+                for (const item of getGroupedPendingAttachments()) {
+                    const uploaded = await uploadMessageAttachment(conversationId, item);
+                    uploadedAttachments.push(uploaded);
+                }
+            }
 
             const { data: insertedMessage, error: insertError } = await supabase
                 .from("messages")
@@ -1479,13 +1495,23 @@ function bindChatInput(currentUserId) {
                 console.error("Conversation timestamp update failed:", updateError);
             }
 
-            removePendingMessage(tempMessageId);
+            if (shouldUsePendingBubble) {
+                removePendingMessage(tempMessageId);
+            } else {
+                input.value = "";
+                input.style.height = "42px";
+                input.style.overflowY = "hidden";
+                resetPendingAttachments();
+            }
 
             await loadMessages(conversationId);
             await loadConversations();
         } catch (err) {
             console.error("Send message failed:", err);
-            updatePendingMessage(tempMessageId, { status: "failed" });
+
+            if (shouldUsePendingBubble && tempMessageId) {
+                updatePendingMessage(tempMessageId, { status: "failed" });
+            }
         } finally {
             sendBtn.disabled = false;
             input.disabled = false;
