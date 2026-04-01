@@ -9,6 +9,8 @@ let activeConversationData = null;
 let activeMessagesChannel = null;
 let currentUserId = null;
 let pendingAttachments = [];
+let pendingMessages = [];
+let activeConversationMessages = [];
 
 /* =========================
    INIT
@@ -28,6 +30,7 @@ export async function initMessages(targetUserId = null)  {
     activeConversationId = null;
     activeConversationData = null;
     currentUserId = null;
+    activeConversationMessages = [];
 
     container.innerHTML = "";
     info.textContent = "Φόρτωση συνομιλιών...";
@@ -254,6 +257,7 @@ async function loadConversations(targetUserId = null) {
             if (badge) badge.style.display = "none";
 
             activeConversationId = conversation.id;
+            activeConversationMessages = [];
 
             await supabase
                 .from("conversations")
@@ -704,6 +708,253 @@ function renderMessageAttachments(container, attachments = []) {
     container.appendChild(list);
 }
 
+function renderActiveConversationWithPending() {
+    const messagesArea = document.getElementById("chat-messages-area");
+    if (!messagesArea) return;
+
+    messagesArea.innerHTML = "";
+
+    const realMessages = (activeConversationMessages || []).map((message) => ({
+        type: "real",
+        sortDate: message.created_at,
+        data: message
+    }));
+
+    const pending = getPendingMessagesForActiveConversation().map((message) => ({
+        type: "pending",
+        sortDate: message.createdAt,
+        data: message
+    }));
+
+    const allItems = [...realMessages, ...pending]
+        .sort((a, b) => new Date(a.sortDate) - new Date(b.sortDate));
+
+    let lastDayKey = null;
+
+    allItems.forEach((item) => {
+        const dateString = item.type === "real"
+        ? item.data.created_at
+        : item.data.createdAt;
+
+        const currentDayKey = getMessageDayKey(dateString);
+
+        if (currentDayKey !== lastDayKey) {
+            const dividerRow = document.createElement("div");
+            dividerRow.className = "chat-day-divider-row";
+
+            const divider = document.createElement("div");
+            divider.className = "chat-day-divider";
+            divider.textContent = formatMessageDayLabel(dateString);
+
+            dividerRow.appendChild(divider);
+            messagesArea.appendChild(dividerRow);
+
+            lastDayKey = currentDayKey;
+        }
+
+        if (item.type === "real") {
+            renderSingleRealMessage(messagesArea, item.data);
+        } else {
+            renderSinglePendingMessage(messagesArea, item.data);
+        }
+    });
+
+    requestAnimationFrame(() => {
+        scrollMessagesToBottom();
+    });
+}
+
+function renderSingleRealMessage(messagesArea, message) {
+    const isOwn = message.sender_id === currentUserId;
+    const hasText = message.content && message.content.trim();
+    const hasAttachments = message.attachments && message.attachments.length > 0;
+
+    if (hasText) {
+        const row = document.createElement("div");
+        row.className = `message-row ${isOwn ? "own" : "other"}`;
+
+        const bubble = document.createElement("div");
+        bubble.className = "message-bubble";
+
+        const content = document.createElement("div");
+        content.className = "message-content";
+        renderMessageContent(content, message.content);
+
+        const time = document.createElement("div");
+        time.className = "message-time";
+        time.textContent = formatMessageTime(message.created_at);
+
+        bubble.appendChild(content);
+        bubble.appendChild(time);
+        row.appendChild(bubble);
+
+        messagesArea.appendChild(row);
+    }
+
+    if (hasAttachments) {
+        const row = document.createElement("div");
+        row.className = `message-row ${isOwn ? "own" : "other"}`;
+
+        const bubble = document.createElement("div");
+        bubble.className = "message-bubble message-bubble-attachment-only";
+
+        renderMessageAttachments(bubble, message.attachments);
+
+        const time = document.createElement("div");
+        time.className = "message-time";
+        time.textContent = formatMessageTime(message.created_at);
+
+        bubble.appendChild(time);
+        row.appendChild(bubble);
+
+        messagesArea.appendChild(row);
+    }
+}
+
+function renderSinglePendingMessage(messagesArea, pendingMessage) {
+    const hasText = pendingMessage.content && pendingMessage.content.trim();
+    const hasAttachments = pendingMessage.attachments && pendingMessage.attachments.length > 0;
+
+    if (hasText) {
+        const row = document.createElement("div");
+        row.className = "message-row own";
+
+        const bubble = document.createElement("div");
+        bubble.className = "message-bubble pending-message-bubble";
+
+        const content = document.createElement("div");
+        content.className = "message-content";
+        renderMessageContent(content, pendingMessage.content);
+
+        const time = document.createElement("div");
+        time.className = "message-time";
+        time.textContent = getPendingMessageStatusText(pendingMessage);
+
+        bubble.appendChild(content);
+        bubble.appendChild(time);
+        row.appendChild(bubble);
+
+        messagesArea.appendChild(row);
+    }
+
+    if (hasAttachments) {
+        const row = document.createElement("div");
+        row.className = "message-row own";
+
+        const bubble = document.createElement("div");
+        bubble.className = "message-bubble message-bubble-attachment-only pending-message-bubble";
+
+        renderPendingMessageAttachments(bubble, pendingMessage.attachments);
+
+        const time = document.createElement("div");
+        time.className = "message-time";
+        time.textContent = getPendingMessageStatusText(pendingMessage);
+
+        bubble.appendChild(time);
+        row.appendChild(bubble);
+
+        messagesArea.appendChild(row);
+    }
+}
+
+function getPendingMessageStatusText(message) {
+    if (message.status === "failed") return "Αποτυχία αποστολής";
+    if (message.status === "sending") return "Αποστολή...";
+    return "Μεταφόρτωση...";
+}
+
+function renderPendingMessageAttachments(container, attachments = []) {
+    if (!attachments.length) return;
+
+    const list = createAttachmentList();
+
+    const images = attachments.filter((a) =>
+    String(a?.file?.type || "").toLowerCase().startsWith("image/")
+    );
+    const files = attachments.filter((a) =>
+    !String(a?.file?.type || "").toLowerCase().startsWith("image/")
+    );
+
+    [...images, ...files].forEach((attachment) => {
+        const isImage = String(attachment?.file?.type || "").toLowerCase().startsWith("image/");
+        const node = isImage
+        ? createPendingImageAttachmentCard(attachment)
+        : createPendingFileAttachmentCard(attachment);
+
+        list.appendChild(node);
+    });
+
+    container.appendChild(list);
+}
+
+function createPendingFileAttachmentCard(attachment) {
+    const card = document.createElement("div");
+    card.className = "message-attachment-file pending-attachment-file";
+
+    const left = document.createElement("div");
+    left.className = "message-attachment-file-left";
+
+    const icon = document.createElement("img");
+    icon.className = "message-attachment-file-icon";
+    icon.src = getMessageFileIcon(attachment.file.name);
+    icon.alt = "file";
+
+    const meta = document.createElement("div");
+    meta.className = "message-attachment-file-meta";
+
+    const name = document.createElement("div");
+    name.className = "message-attachment-file-name";
+    name.textContent = attachment.file.name;
+
+    const info = document.createElement("div");
+    info.className = "message-attachment-file-info";
+    info.textContent = `${formatAttachmentSize(attachment.file.size)} • ${attachment.progress || 0}%`;
+
+    meta.appendChild(name);
+    meta.appendChild(info);
+    left.appendChild(icon);
+    left.appendChild(meta);
+    card.appendChild(left);
+
+    const progress = document.createElement("div");
+    progress.className = "pending-attachment-progress";
+
+    const bar = document.createElement("div");
+    bar.className = "pending-attachment-progress-bar";
+    bar.style.width = `${attachment.progress || 0}%`;
+
+    progress.appendChild(bar);
+    card.appendChild(progress);
+
+    return card;
+}
+
+function createPendingImageAttachmentCard(attachment) {
+    const wrap = document.createElement("div");
+    wrap.className = "message-attachment-image pending-attachment-image";
+
+    const img = document.createElement("img");
+    img.alt = attachment.file.name;
+
+    const objectUrl = URL.createObjectURL(attachment.file);
+    img.src = objectUrl;
+    img.onload = () => URL.revokeObjectURL(objectUrl);
+
+    wrap.appendChild(img);
+
+    const progress = document.createElement("div");
+    progress.className = "pending-attachment-progress pending-image-progress";
+
+    const bar = document.createElement("div");
+    bar.className = "pending-attachment-progress-bar";
+    bar.style.width = `${attachment.progress || 0}%`;
+
+    progress.appendChild(bar);
+    wrap.appendChild(progress);
+
+    return wrap;
+}
+
 /* =========================
    LOAD MESSAGES
 ========================= */
@@ -748,90 +999,8 @@ async function loadMessages(conversationId, showLoading = false) {
         return;
     }
 
-    messagesArea.innerHTML = "";
-
-    let lastDayKey = null;
-
-    data.forEach(message => {
-
-        const currentDayKey = getMessageDayKey(message.created_at);
-
-        /* =========================
-           DAY DIVIDER
-        ========================= */
-
-        if (currentDayKey !== lastDayKey) {
-            const dividerRow = document.createElement("div");
-            dividerRow.className = "chat-day-divider-row";
-
-            const divider = document.createElement("div");
-            divider.className = "chat-day-divider";
-            divider.textContent = formatMessageDayLabel(message.created_at);
-
-            dividerRow.appendChild(divider);
-            messagesArea.appendChild(dividerRow);
-
-            lastDayKey = currentDayKey;
-        }
-
-        const isOwn = message.sender_id === user.id;
-        const hasText = message.content && message.content.trim();
-        const hasAttachments = message.attachments && message.attachments.length > 0;
-
-        /* =========================
-           TEXT MESSAGE
-        ========================= */
-
-        if (hasText) {
-            const row = document.createElement("div");
-            row.className = `message-row ${isOwn ? "own" : "other"}`;
-
-            const bubble = document.createElement("div");
-            bubble.className = "message-bubble";
-
-            const content = document.createElement("div");
-            content.className = "message-content";
-            renderMessageContent(content, message.content);
-
-            const time = document.createElement("div");
-            time.className = "message-time";
-            time.textContent = formatMessageTime(message.created_at);
-
-            bubble.appendChild(content);
-            bubble.appendChild(time);
-            row.appendChild(bubble);
-
-            messagesArea.appendChild(row);
-        }
-
-        /* =========================
-           ATTACHMENT MESSAGE
-        ========================= */
-
-        if (hasAttachments) {
-            const row = document.createElement("div");
-            row.className = `message-row ${isOwn ? "own" : "other"}`;
-
-            const bubble = document.createElement("div");
-            bubble.className = "message-bubble message-bubble-attachment-only";
-
-            renderMessageAttachments(bubble, message.attachments);
-
-            const time = document.createElement("div");
-            time.className = "message-time";
-            time.textContent = formatMessageTime(message.created_at);
-
-            bubble.appendChild(time);
-            row.appendChild(bubble);
-
-            messagesArea.appendChild(row);
-        }
-
-    });
-
-    /* =========================
-       SCROLL FIX
-    ========================= */
+    activeConversationMessages = data || [];
+    renderActiveConversationWithPending();
 
     requestAnimationFrame(() => {
         scrollMessagesToBottom();
@@ -924,6 +1093,7 @@ function addPendingAttachments(files) {
     pendingAttachments.push(...nextFiles);
     renderAttachmentPreview();
 }
+
 function updatePendingAttachmentState(attachmentId, patch) {
     pendingAttachments = pendingAttachments.map((item) =>
     item.id === attachmentId
@@ -1109,6 +1279,43 @@ async function uploadMessageAttachment(conversationId, pendingItem) {
     };
 }
 
+async function uploadMessageAttachmentForPendingMessage(conversationId, tempMessageId, tempAttachment) {
+    const file = tempAttachment.file;
+    const headers = await getMessagesAuthHeaders();
+
+    const res = await fetch("/api/messages/upload-attachment-url", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+            conversationId,
+            fileName: file.name,
+            contentType: file.type
+        })
+    });
+
+    if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Failed to get attachment upload URL");
+    }
+
+    const { uploadUrl, objectKey } = await res.json();
+
+    await uploadFileWithProgress(uploadUrl, file, (progress) => {
+        updatePendingMessageAttachment(tempMessageId, tempAttachment.id, {
+            progress,
+            uploading: progress < 100,
+            uploaded: progress >= 100
+        });
+    });
+
+    return {
+        object_key: objectKey,
+        file_name: file.name,
+        mime_type: file.type || null,
+        size_bytes: file.size || 0
+    };
+}
+
 function uploadFileWithProgress(uploadUrl, file, onProgress) {
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
@@ -1196,13 +1403,44 @@ function bindChatInput(currentUserId) {
         sendBtn.disabled = true;
         input.disabled = true;
 
+        const tempMessageId = crypto.randomUUID();
+        const tempAttachments = getGroupedPendingAttachments().map((item) => ({
+            id: item.id,
+            file: item.file,
+            progress: 0,
+            uploading: true,
+            uploaded: false,
+            error: false
+        }));
+
+        addPendingMessage({
+            tempId: tempMessageId,
+            conversationId,
+            senderId: currentUserId,
+            content,
+            createdAt: new Date().toISOString(),
+            status: "uploading",
+            attachments: tempAttachments
+        });
+
+        input.value = "";
+        input.style.height = "42px";
+        input.style.overflowY = "hidden";
+        resetPendingAttachments();
+
         try {
             const uploadedAttachments = [];
 
-            for (const item of getGroupedPendingAttachments()) {
-                const uploaded = await uploadMessageAttachment(conversationId, item);
+            for (const tempAttachment of tempAttachments) {
+                const uploaded = await uploadMessageAttachmentForPendingMessage(
+                    conversationId,
+                    tempMessageId,
+                    tempAttachment
+                );
                 uploadedAttachments.push(uploaded);
             }
+
+            updatePendingMessage(tempMessageId, { status: "sending" });
 
             const { data: insertedMessage, error: insertError } = await supabase
                 .from("messages")
@@ -1249,15 +1487,13 @@ function bindChatInput(currentUserId) {
                 console.error("Conversation timestamp update failed:", updateError);
             }
 
-            input.value = "";
-            input.style.height = "42px";
-            input.style.overflowY = "hidden";
-            resetPendingAttachments();
+            removePendingMessage(tempMessageId);
 
             await loadMessages(conversationId);
             await loadConversations();
         } catch (err) {
             console.error("Send message failed:", err);
+            updatePendingMessage(tempMessageId, { status: "failed" });
         } finally {
             sendBtn.disabled = false;
             input.disabled = false;
@@ -1387,4 +1623,42 @@ function groupMessageAttachments(attachments = []) {
     const images = attachments.filter(isImageAttachment);
     const files = attachments.filter((a) => !isImageAttachment(a));
     return [...images, ...files];
+}
+
+function addPendingMessage(message) {
+    pendingMessages.push(message);
+    renderActiveConversationWithPending();
+}
+
+function updatePendingMessage(tempId, patch) {
+    pendingMessages = pendingMessages.map((msg) =>
+    msg.tempId === tempId ? { ...msg, ...patch } : msg
+    );
+    renderActiveConversationWithPending();
+}
+
+function updatePendingMessageAttachment(tempId, attachmentId, patch) {
+    pendingMessages = pendingMessages.map((msg) => {
+        if (msg.tempId !== tempId) return msg;
+
+        return {
+            ...msg,
+            attachments: msg.attachments.map((att) =>
+            att.id === attachmentId ? { ...att, ...patch } : att
+            )
+        };
+    });
+
+    renderActiveConversationWithPending();
+}
+
+function removePendingMessage(tempId) {
+    pendingMessages = pendingMessages.filter((msg) => msg.tempId !== tempId);
+    renderActiveConversationWithPending();
+}
+
+function getPendingMessagesForActiveConversation() {
+    return pendingMessages.filter(
+        (msg) => msg.conversationId === activeConversationId
+    );
 }

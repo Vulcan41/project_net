@@ -1042,3 +1042,40 @@
     font-weight: 600;
     z-index: 3;
 }
+
+
+
+
+.pending-message-bubble {
+    opacity: 0.92;
+}
+
+.pending-attachment-file,
+.pending-attachment-image {
+    position: relative;
+}
+
+.pending-attachment-progress {
+    margin-top: 8px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(36, 110, 157, 0.15);
+    overflow: hidden;
+}
+
+.pending-image-progress {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    margin-top: 0;
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.pending-attachment-progress-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    background: #246e9d;
+    transition: width 0.15s ease;
+}
