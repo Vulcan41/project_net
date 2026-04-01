@@ -670,7 +670,10 @@ function createImageAttachmentCard(attachment) {
         }
     };
 
-    getMessageAttachmentDownloadUrl(...)
+    getMessageAttachmentDownloadUrl(
+        attachment.object_key,
+        attachment.file_name
+    )
         .then(({ downloadUrl }) => {
         img.onload = () => {
             scrollMessagesToBottom();
