@@ -776,16 +776,39 @@ async function loadMessages(conversationId, showLoading = false) {
         const bubble = document.createElement("div");
         bubble.className = "message-bubble";
 
-        if (message.content && message.content.trim()) {
+        const hasText = message.content && message.content.trim();
+        const hasAttachments = message.attachments && message.attachments.length > 0;
+
+        /* =========================
+           TEXT CONTENT
+        ========================= */
+
+        if (hasText) {
             const content = document.createElement("div");
             content.className = "message-content";
             renderMessageContent(content, message.content);
             bubble.appendChild(content);
         }
 
-        if (message.attachments && message.attachments.length > 0) {
+        /* =========================
+           ATTACHMENTS
+        ========================= */
+
+        if (hasAttachments) {
             renderMessageAttachments(bubble, message.attachments);
         }
+
+        /* =========================
+           TRANSPARENT BUBBLE LOGIC
+        ========================= */
+
+        if (!hasText && hasAttachments) {
+            bubble.classList.add("message-bubble-attachment-only");
+        }
+
+        /* =========================
+           TIME
+        ========================= */
 
         const time = document.createElement("div");
         time.className = "message-time";
@@ -796,10 +819,13 @@ async function loadMessages(conversationId, showLoading = false) {
         messagesArea.appendChild(row);
     });
 
+    /* =========================
+       SCROLL FIX
+    ========================= */
+
     requestAnimationFrame(() => {
         scrollMessagesToBottom();
 
-        // second pass for async stuff (images etc)
         setTimeout(() => {
             scrollMessagesToBottom();
         }, 120);
