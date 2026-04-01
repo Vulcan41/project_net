@@ -670,8 +670,11 @@ function createImageAttachmentCard(attachment) {
         }
     };
 
-    getMessageAttachmentDownloadUrl(attachment.object_key, attachment.file_name)
+    getMessageAttachmentDownloadUrl(...)
         .then(({ downloadUrl }) => {
+        img.onload = () => {
+            scrollMessagesToBottom();
+        };
         img.src = downloadUrl;
     })
         .catch((err) => {
@@ -790,7 +793,14 @@ async function loadMessages(conversationId, showLoading = false) {
         messagesArea.appendChild(row);
     });
 
-    messagesArea.scrollTop = messagesArea.scrollHeight;
+    requestAnimationFrame(() => {
+        scrollMessagesToBottom();
+
+        // second pass for async stuff (images etc)
+        setTimeout(() => {
+            scrollMessagesToBottom();
+        }, 120);
+    });
 }
 
 /* =========================
@@ -1174,4 +1184,11 @@ function formatMessageTime(dateString) {
         hour: "2-digit",
         minute: "2-digit"
     });
+}
+
+function scrollMessagesToBottom() {
+    const messagesArea = document.getElementById("chat-messages-area");
+    if (!messagesArea) return;
+
+    messagesArea.scrollTop = messagesArea.scrollHeight;
 }
