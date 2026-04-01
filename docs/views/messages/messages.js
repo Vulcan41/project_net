@@ -8,6 +8,7 @@ let activeConversationId = null;
 let activeConversationData = null;
 let activeMessagesChannel = null;
 let currentUserId = null;
+let pendingAttachments = [];
 
 /* =========================
    INIT
@@ -284,6 +285,8 @@ async function loadConversations(targetUserId = null) {
 
             if (inputArea && input) {
                 await initTextTools(inputArea, input);
+                bindAttachmentInputs();
+                resetPendingAttachments();
             }
 
             await loadMessages(conversation.id, true);
@@ -358,26 +361,31 @@ function renderChatSkeleton(chatPanel, conversation) {
 
             <div class="chat-input-area" id="chat-input-area">
 
-                <div class="chat-input-row">
-                    <textarea
-                        id="chat-input"
-                        rows="1"
-                        placeholder="Γράψτε μήνυμα..."
-                        ${disabled ? "disabled" : ""}
-                    ></textarea>
+    <div id="chat-attachments-preview" class="chat-attachments-preview hidden"></div>
 
-                    <button id="chat-send-btn" ${disabled ? "disabled" : ""}>
-                        Αποστολή
-                    </button>
-                </div>
+    <div class="chat-input-row">
+        <textarea
+            id="chat-input"
+            rows="1"
+            placeholder="Γράψτε μήνυμα..."
+            ${disabled ? "disabled" : ""}
+        ></textarea>
 
-                ${disabled
-                    ? `<div class="chat-disabled-note">
-                           Η συνομιλία είναι ανενεργή γιατί δεν είστε πλέον φίλοι.
-                       </div>`
-                    : ""}
+        <button id="chat-send-btn" ${disabled ? "disabled" : ""}>
+            Αποστολή
+        </button>
+    </div>
 
-            </div>
+    <input id="chat-attach-input" type="file" class="hidden" multiple />
+    <input id="chat-image-input" type="file" class="hidden" accept="image/*" multiple />
+
+    ${disabled
+        ? `<div class="chat-disabled-note">
+               Η συνομιλία είναι ανενεργή γιατί δεν είστε πλέον φίλοι.
+           </div>`
+        : ""}
+
+</div>
 
         </div>
     `;
@@ -512,6 +520,136 @@ function formatMessageDayLabel(dateString) {
     });
 }
 
+function isImageAttachment(attachment) {
+    const mime = (attachment?.mime_type || "").toLowerCase();
+    return mime.startsWith("image/");
+}
+
+async function getMessageAttachmentDownloadUrl(objectKey, fileName) {
+    const headers = await getMessagesAuthHeaders();
+
+    const res = await fetch("/api/messages/download-attachment-url", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+            conversationId: activeConversationId,
+            objectKey,
+            fileName
+        })
+    });
+
+    if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Failed to get attachment URL");
+    }
+
+    return res.json();
+}
+
+function createAttachmentList() {
+    const wrap = document.createElement("div");
+    wrap.className = "message-attachments";
+    return wrap;
+}
+
+function createFileAttachmentCard(attachment) {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "message-attachment-file";
+
+    const left = document.createElement("div");
+    left.className = "message-attachment-file-left";
+
+    const icon = document.createElement("div");
+    icon.className = "message-attachment-file-icon";
+    icon.textContent = "📎";
+
+    const meta = document.createElement("div");
+    meta.className = "message-attachment-file-meta";
+
+    const name = document.createElement("div");
+    name.className = "message-attachment-file-name";
+    name.textContent = attachment.file_name;
+    name.title = attachment.file_name;
+
+    const info = document.createElement("div");
+    info.className = "message-attachment-file-info";
+    info.textContent = formatAttachmentSize(attachment.size_bytes || 0);
+
+    meta.appendChild(name);
+    meta.appendChild(info);
+
+    left.appendChild(icon);
+    left.appendChild(meta);
+    card.appendChild(left);
+
+    card.onclick = async () => {
+        try {
+            const { downloadUrl } = await getMessageAttachmentDownloadUrl(
+                attachment.object_key,
+                attachment.file_name
+            );
+
+            window.open(downloadUrl, "_blank");
+        } catch (err) {
+            console.error("Attachment download failed:", err);
+        }
+    };
+
+    return card;
+}
+
+function createImageAttachmentCard(attachment) {
+    const wrap = document.createElement("button");
+    wrap.type = "button";
+    wrap.className = "message-attachment-image";
+
+    const img = document.createElement("img");
+    img.alt = attachment.file_name;
+    img.loading = "lazy";
+
+    wrap.appendChild(img);
+
+    wrap.onclick = async () => {
+        try {
+            const { downloadUrl } = await getMessageAttachmentDownloadUrl(
+                attachment.object_key,
+                attachment.file_name
+            );
+
+            window.open(downloadUrl, "_blank");
+        } catch (err) {
+            console.error("Image attachment open failed:", err);
+        }
+    };
+
+    getMessageAttachmentDownloadUrl(attachment.object_key, attachment.file_name)
+        .then(({ downloadUrl }) => {
+        img.src = downloadUrl;
+    })
+        .catch((err) => {
+        console.error("Image attachment preview failed:", err);
+    });
+
+    return wrap;
+}
+
+function renderMessageAttachments(container, attachments = []) {
+    if (!attachments.length) return;
+
+    const list = createAttachmentList();
+
+    attachments.forEach((attachment) => {
+        const node = isImageAttachment(attachment)
+        ? createImageAttachmentCard(attachment)
+        : createFileAttachmentCard(attachment);
+
+        list.appendChild(node);
+    });
+
+    container.appendChild(list);
+}
+
 /* =========================
    LOAD MESSAGES
 ========================= */
@@ -531,7 +669,20 @@ async function loadMessages(conversationId, showLoading = false) {
 
     const { data, error } = await supabase
         .from("messages")
-        .select("id,sender_id,content,created_at")
+        .select(`
+        id,
+        sender_id,
+        content,
+        created_at,
+        attachments:message_attachments (
+            id,
+            object_key,
+            file_name,
+            mime_type,
+            size_bytes,
+            created_at
+        )
+    `)
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: true });
 
@@ -572,15 +723,21 @@ async function loadMessages(conversationId, showLoading = false) {
         const bubble = document.createElement("div");
         bubble.className = "message-bubble";
 
-        const content = document.createElement("div");
-        content.className = "message-content";
-        renderMessageContent(content, message.content);
+        if (message.content && message.content.trim()) {
+            const content = document.createElement("div");
+            content.className = "message-content";
+            renderMessageContent(content, message.content);
+            bubble.appendChild(content);
+        }
+
+        if (message.attachments && message.attachments.length > 0) {
+            renderMessageAttachments(bubble, message.attachments);
+        }
 
         const time = document.createElement("div");
         time.className = "message-time";
         time.textContent = formatMessageTime(message.created_at);
 
-        bubble.appendChild(content);
         bubble.appendChild(time);
         row.appendChild(bubble);
         messagesArea.appendChild(row);
@@ -651,8 +808,177 @@ function setupChatInputExpand() {
    SEND MESSAGE
 ========================= */
 
-function bindChatInput(currentUserId) {
+function resetPendingAttachments() {
+    pendingAttachments = [];
+    renderAttachmentPreview();
+}
 
+function addPendingAttachments(files) {
+    if (!files?.length) return;
+
+    const nextFiles = [...files].map((file) => ({
+        id: crypto.randomUUID(),
+        file
+    }));
+
+    pendingAttachments.push(...nextFiles);
+    renderAttachmentPreview();
+}
+
+function removePendingAttachment(attachmentId) {
+    pendingAttachments = pendingAttachments.filter((item) => item.id !== attachmentId);
+    renderAttachmentPreview();
+}
+
+function renderAttachmentPreview() {
+    const preview = document.getElementById("chat-attachments-preview");
+    if (!preview) return;
+
+    if (!pendingAttachments.length) {
+        preview.classList.add("hidden");
+        preview.innerHTML = "";
+        return;
+    }
+
+    preview.classList.remove("hidden");
+    preview.innerHTML = "";
+
+    pendingAttachments.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "chat-attachment-chip";
+
+        const name = document.createElement("div");
+        name.className = "chat-attachment-chip-name";
+        name.textContent = item.file.name;
+        name.title = item.file.name;
+
+        const meta = document.createElement("div");
+        meta.className = "chat-attachment-chip-meta";
+        meta.textContent = formatAttachmentSize(item.file.size);
+
+        const left = document.createElement("div");
+        left.className = "chat-attachment-chip-left";
+        left.appendChild(name);
+        left.appendChild(meta);
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "chat-attachment-chip-remove";
+        removeBtn.textContent = "×";
+        removeBtn.onclick = () => {
+            removePendingAttachment(item.id);
+        };
+
+        row.appendChild(left);
+        row.appendChild(removeBtn);
+        preview.appendChild(row);
+    });
+}
+
+function formatAttachmentSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+}
+
+async function getMessagesAuthHeaders() {
+    const {
+        data: { session }
+    } = await supabase.auth.getSession();
+
+    return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session?.access_token || ""}`
+    };
+}
+
+async function uploadMessageAttachment(conversationId, file) {
+    const headers = await getMessagesAuthHeaders();
+
+    const res = await fetch("/api/messages/upload-attachment-url", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+            conversationId,
+            fileName: file.name,
+            contentType: file.type
+        })
+    });
+
+    if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Failed to get attachment upload URL");
+    }
+
+    const { uploadUrl, objectKey } = await res.json();
+
+    await uploadFileWithProgress(uploadUrl, file);
+
+    return {
+        object_key: objectKey,
+        file_name: file.name,
+        mime_type: file.type || null,
+        size_bytes: file.size || 0
+    };
+}
+
+function uploadFileWithProgress(uploadUrl, file) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.open("PUT", uploadUrl, true);
+
+        xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve();
+            } else {
+                reject(new Error(`Upload failed with status ${xhr.status}`));
+            }
+        };
+
+        xhr.onerror = () => {
+            reject(new Error("Upload failed"));
+        };
+
+        xhr.send(file);
+    });
+}
+
+function bindAttachmentInputs() {
+    const attachBtn = document.querySelector(".text-tool-attach");
+    const imageBtn = document.querySelector(".text-tool-image");
+    const attachInput = document.getElementById("chat-attach-input");
+    const imageInput = document.getElementById("chat-image-input");
+
+    if (attachBtn && attachInput) {
+        attachBtn.onclick = () => {
+            attachInput.click();
+        };
+    }
+
+    if (imageBtn && imageInput) {
+        imageBtn.onclick = () => {
+            imageInput.click();
+        };
+    }
+
+    if (attachInput) {
+        attachInput.onchange = () => {
+            addPendingAttachments(attachInput.files);
+            attachInput.value = "";
+        };
+    }
+
+    if (imageInput) {
+        imageInput.onchange = () => {
+            addPendingAttachments(imageInput.files);
+            imageInput.value = "";
+        };
+    }
+}
+
+function bindChatInput(currentUserId) {
     const input = document.getElementById("chat-input");
     const sendBtn = document.getElementById("chat-send-btn");
 
@@ -663,42 +989,80 @@ function bindChatInput(currentUserId) {
     setupAutoResizeTextarea(input);
 
     const sendMessage = async () => {
-
         const content = input.value.trim();
-        if (!content) return;
-
         const conversationId = activeConversationId;
 
-        const { error: insertError } = await supabase
-            .from("messages")
-            .insert({
-            conversation_id: conversationId,
-            sender_id: currentUserId,
-            content
-        });
+        if (!content && pendingAttachments.length === 0) return;
 
-        if (insertError) {
-            console.error("Message insert failed:", insertError);
-            return;
+        sendBtn.disabled = true;
+        input.disabled = true;
+
+        try {
+            const uploadedAttachments = [];
+
+            for (const item of pendingAttachments) {
+                const uploaded = await uploadMessageAttachment(conversationId, item.file);
+                uploadedAttachments.push(uploaded);
+            }
+
+            const { data: insertedMessage, error: insertError } = await supabase
+                .from("messages")
+                .insert({
+                conversation_id: conversationId,
+                sender_id: currentUserId,
+                content: content || ""
+            })
+                .select("id")
+                .single();
+
+            if (insertError || !insertedMessage) {
+                throw insertError || new Error("Failed to create message");
+            }
+
+            if (uploadedAttachments.length > 0) {
+                const attachmentRows = uploadedAttachments.map((attachment) => ({
+                    message_id: insertedMessage.id,
+                    conversation_id: conversationId,
+                    sender_id: currentUserId,
+                    object_key: attachment.object_key,
+                    file_name: attachment.file_name,
+                    mime_type: attachment.mime_type,
+                    size_bytes: attachment.size_bytes
+                }));
+
+                const { error: attachmentError } = await supabase
+                    .from("message_attachments")
+                    .insert(attachmentRows);
+
+                if (attachmentError) {
+                    throw attachmentError;
+                }
+            }
+
+            const { error: updateError } = await supabase
+                .from("conversations")
+                .update({
+                last_message_at: new Date().toISOString()
+            })
+                .eq("id", conversationId);
+
+            if (updateError) {
+                console.error("Conversation timestamp update failed:", updateError);
+            }
+
+            input.value = "";
+            input.style.height = "42px";
+            input.style.overflowY = "hidden";
+            resetPendingAttachments();
+
+            await loadMessages(conversationId);
+            await loadConversations();
+        } catch (err) {
+            console.error("Send message failed:", err);
+        } finally {
+            sendBtn.disabled = false;
+            input.disabled = false;
         }
-
-        const { error: updateError } = await supabase
-            .from("conversations")
-            .update({
-            last_message_at: new Date().toISOString()
-        })
-            .eq("id", conversationId);
-
-        if (updateError) {
-            console.error("Conversation timestamp update failed:", updateError);
-        }
-
-        input.value = "";
-        input.style.height = "42px";
-        input.style.overflowY = "hidden";
-
-        await loadMessages(conversationId);
-        await loadConversations();
     };
 
     sendBtn.onclick = sendMessage;

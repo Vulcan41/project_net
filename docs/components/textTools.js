@@ -27,7 +27,16 @@ export async function initTextTools(container, textarea) {
             return null;
         }
 
-        container.prepend(bar);
+        const inputRow = container.querySelector(".chat-input-row");
+        const sendBtn = inputRow?.querySelector("#chat-send-btn");
+
+        if (inputRow && sendBtn) {
+            inputRow.insertBefore(bar, sendBtn);
+        } else if (inputRow) {
+            inputRow.appendChild(bar);
+        } else {
+            container.prepend(bar);
+        }
     }
 
     bindTextTools(bar, textarea);
@@ -54,17 +63,11 @@ function preventToolbarFocusSteal(bar) {
 }
 
 function bindEmojiInsert(bar, textarea) {
-    const picker = bar.querySelector(".emoji-picker");
-    if (!picker) return;
+    const emojiBtn = bar.querySelector(".text-tool-emoji");
+    if (!emojiBtn) return;
 
-    picker.onclick = (e) => {
-        const btn = e.target.closest(".emoji");
-        if (!btn) return;
-
-        const emoji = btn.textContent.trim();
-        if (!emoji) return;
-
-        insertAtSelection(textarea, emoji);
+    emojiBtn.onclick = () => {
+        insertAtSelection(textarea, "😊");
     };
 }
 
