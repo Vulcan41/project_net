@@ -2,6 +2,7 @@ import { supabase } from "../../core/supabase.js";
 import { DEFAULT_AVATAR } from "../../state/userStore.js";
 import { loadView } from "../../core/router.js";
 import { initTextTools } from "../../components/textTools.js";
+import { t, getLocale } from "../../core/i18n.js";
 
 let conversationsLoadToken = 0;
 let activeConversationId = null;
@@ -34,12 +35,12 @@ export async function initMessages(targetUserId = null)  {
     activeConversationMessages = [];
 
     container.innerHTML = "";
-    info.textContent = "Φόρτωση συνομιλιών...";
+    info.textContent = t("messages.loading_conversations");
 
     chatPanel.innerHTML = `
     <div class="chat-empty-state">
-        <div class="chat-empty-title">Δεν έχει επιλεγεί συνομιλία</div>
-        <div class="chat-empty-text">Επιλέξτε μια συνομιλία από τα αριστερά</div>
+        <div class="chat-empty-title">${t("messages.no_conversation_selected")}</div>
+        <div class="chat-empty-text">${t("messages.select_conversation")}</div>
 
         <img
             src="assets/bubbles.png"
@@ -51,7 +52,7 @@ export async function initMessages(targetUserId = null)  {
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-        info.textContent = "Δεν βρέθηκε συνδεδεμένος χρήστης";
+        info.textContent = t("messages.no_authenticated_user");
         return;
     }
 
@@ -130,12 +131,12 @@ async function loadConversations(targetUserId = null) {
 
     if (error) {
         console.error("Failed to load conversations:", error);
-        info.textContent = "Αποτυχία φόρτωσης συνομιλιών";
+        info.textContent = t("messages.failed_to_load_conversations");
         return;
     }
 
     if (!data || data.length === 0) {
-        info.textContent = "Δεν υπάρχουν συνομιλίες";
+        info.textContent = t("messages.no_conversations");
         return;
     }
 
@@ -148,8 +149,8 @@ async function loadConversations(targetUserId = null) {
 
     info.textContent =
     data.length === 1
-    ? "1 συνομιλία"
-    : `${data.length} συνομιλίες`;
+    ? t("messages.conversation_count_one", { count: 1 })
+    : t("messages.conversation_count_other", { count: data.length });
 
     data.forEach(conversation => {
 
@@ -183,11 +184,11 @@ async function loadConversations(targetUserId = null) {
         nameText.textContent =
         otherUser?.full_name ||
         otherUser?.username ||
-        "User";
+        t("messages.user_fallback");
 
         const newBadge = document.createElement("span");
         newBadge.className = "conversation-new-badge";
-        newBadge.textContent = "Νέο";
+        newBadge.textContent = t("messages.new_badge");
 
         name.appendChild(nameText);
         name.appendChild(newBadge);
@@ -224,7 +225,7 @@ async function loadConversations(targetUserId = null) {
             }
         } else {
 
-            meta.textContent = "Δεν υπάρχουν μηνύματα ακόμη";
+            meta.textContent = t("messages.no_messages_yet");
             meta.classList.remove("unread");
             row.classList.remove("unread-conversation");
 
@@ -274,7 +275,7 @@ async function loadConversations(targetUserId = null) {
                 fullName:
                 otherUser?.full_name ||
                 otherUser?.username ||
-                "User",
+                t("messages.user_fallback"),
                 username: otherUser?.username || "user",
                 avatarUrl:
                 otherUser?.avatar_url || DEFAULT_AVATAR
@@ -311,11 +312,15 @@ function getConversationPreviewText(message, isOwnMessage) {
     const attachments = message?.attachments || [];
 
     if (content) {
-        return isOwnMessage ? `Εσείς: ${content}` : content;
+        return isOwnMessage
+        ? t("messages.you") + ": " + content
+        : content;
     }
 
     if (!attachments.length) {
-        return isOwnMessage ? "Εσείς:" : "Δεν υπάρχουν μηνύματα ακόμη";
+        return isOwnMessage
+        ? t("messages.you") + ":"
+        : t("messages.no_messages_yet");
     }
 
     const imageCount = attachments.filter((a) =>
@@ -327,24 +332,24 @@ function getConversationPreviewText(message, isOwnMessage) {
     if (totalCount === 1) {
         if (imageCount === 1) {
             return isOwnMessage
-            ? "Εσείς: Σας έστειλα μια εικόνα"
-            : "Σας έστειλε μια εικόνα";
+            ? t("messages.you") + ": " + t("messages.sent_image")
+            : t("messages.sent_image");
         }
 
         return isOwnMessage
-        ? "Εσείς: Σας έστειλα ένα αρχείο"
-        : "Σας έστειλε ένα αρχείο";
+        ? t("messages.you") + ": " + t("messages.sent_file")
+        : t("messages.sent_file");
     }
 
     if (imageCount === totalCount) {
         return isOwnMessage
-        ? `Εσείς: Σας έστειλα ${totalCount} εικόνες`
-        : `Σας έστειλε ${totalCount} εικόνες`;
+        ? t("messages.you") + ": " + t("messages.sent_images", { count: totalCount })
+        : t("messages.sent_images", { count: totalCount });
     }
 
     return isOwnMessage
-    ? `Εσείς: Σας έστειλα ${totalCount} αρχεία`
-    : `Σας έστειλε ${totalCount} αρχεία`;
+    ? t("messages.you") + ": " + t("messages.sent_files", { count: totalCount })
+    : t("messages.sent_files", { count: totalCount });
 }
 
 async function loadLatestMessagesMap(conversationIds) {
@@ -405,13 +410,13 @@ function renderChatSkeleton(chatPanel, conversation) {
                         <div class="chat-header-username">@${conversation.username}</div>
                     </div>
 
-                    <div class="chat-user-tooltip">Προβολή προφίλ</div>
+                    <div class="chat-user-tooltip">${t("messages.view_profile")}</div>
                 </div>
             </div>
 
             <div id="chat-messages-area" class="chat-messages-area"></div>
 
-            <div class="chat-input-area" id="chat-input-area">
+            <div class="chat-input-area" id="chat-input-area" data-i18n-drop="${t("messages.drop_files")}">
 
     <div id="chat-attachments-preview" class="chat-attachments-preview hidden"></div>
 
@@ -419,12 +424,12 @@ function renderChatSkeleton(chatPanel, conversation) {
         <textarea
             id="chat-input"
             rows="1"
-            placeholder="Γράψτε μήνυμα..."
+            placeholder="${t("messages.type_message")}"
             ${disabled ? "disabled" : ""}
         ></textarea>
 
         <button id="chat-send-btn" ${disabled ? "disabled" : ""}>
-            Αποστολή
+            ${t("messages.send")}
         </button>
     </div>
 
@@ -433,7 +438,7 @@ function renderChatSkeleton(chatPanel, conversation) {
 
     ${disabled
         ? `<div class="chat-disabled-note">
-               Η συνομιλία είναι ανενεργή γιατί δεν είστε πλέον φίλοι.
+               ${t("messages.inactive_chat")}
            </div>`
         : ""}
 
@@ -562,10 +567,10 @@ function formatMessageDayLabel(dateString) {
     const todayKey = getMessageDayKey(today.toISOString());
     const yesterdayKey = getMessageDayKey(yesterday.toISOString());
 
-    if (dateKey === todayKey) return "Σήμερα";
-    if (dateKey === yesterdayKey) return "Χθες";
+    if (dateKey === todayKey) return t("messages.today");
+    if (dateKey === yesterdayKey) return t("messages.yesterday");
 
-    return date.toLocaleDateString("el-GR", {
+    return date.toLocaleDateString(getLocale(), {
         day: "2-digit",
         month: "2-digit",
         year: "numeric"
@@ -861,9 +866,9 @@ function renderSinglePendingMessage(messagesArea, pendingMessage) {
 }
 
 function getPendingMessageStatusText(message) {
-    if (message.status === "failed") return "Αποτυχία αποστολής";
-    if (message.status === "sending") return "Αποστολή...";
-    return "Μεταφόρτωση...";
+    if (message.status === "failed") return t("messages.failed");
+    if (message.status === "sending") return t("messages.sending");
+    return t("messages.uploading");
 }
 
 function renderPendingMessageAttachments(container, attachments = []) {
@@ -969,7 +974,7 @@ async function loadMessages(conversationId, showLoading = false) {
 
     if (showLoading) {
         messagesArea.innerHTML =
-        `<div class="chat-messages-empty">Φόρτωση μηνυμάτων...</div>`;
+        `<div class="chat-messages-empty">${t("messages.loading_messages")}</div>`;
     }
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -1205,7 +1210,7 @@ function renderAttachmentPreview() {
         if (item.error) {
             const errorBadge = document.createElement("div");
             errorBadge.className = "chat-attachment-error";
-            errorBadge.textContent = "Upload failed";
+            errorBadge.textContent = t("messages.upload_failed");
             chip.appendChild(errorBadge);
         }
 
@@ -1644,10 +1649,9 @@ function cleanupMessagesRealtime() {
 ========================= */
 
 function formatMessageTime(dateString) {
-
     const date = new Date(dateString);
 
-    return date.toLocaleTimeString("el-GR", {
+    return date.toLocaleTimeString(getLocale(), {
         hour: "2-digit",
         minute: "2-digit"
     });
@@ -1756,7 +1760,7 @@ function isUserNearBottom() {
     const el = document.getElementById("chat-messages-area");
     if (!el) return true;
 
-    const threshold = 80; // px tolerance
+    const threshold = 80;
     return el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
 }
 
