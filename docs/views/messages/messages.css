@@ -1107,3 +1107,9 @@
     pointer-events: none;
     z-index: 5;
 }
+
+.message-attachment-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}

@@ -797,12 +797,16 @@ function renderSingleRealMessage(messagesArea, message) {
         const bubble = document.createElement("div");
         bubble.className = "message-bubble message-bubble-attachment-only";
 
-        renderMessageAttachments(bubble, message.attachments);
+        const contentWrap = document.createElement("div");
+        contentWrap.className = "message-attachment-content";
+
+        renderMessageAttachments(contentWrap, message.attachments);
 
         const time = document.createElement("div");
         time.className = "message-time";
         time.textContent = formatMessageTime(message.created_at);
 
+        bubble.appendChild(contentWrap);
         bubble.appendChild(time);
         row.appendChild(bubble);
 
