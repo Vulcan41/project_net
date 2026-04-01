@@ -338,7 +338,16 @@
 .message-time {
     font-size: 11px;
     opacity: 0.8;
+}
+
+.message-row.own .message-time {
     align-self: flex-end;
+    text-align: right;
+}
+
+.message-row.other .message-time {
+    align-self: flex-start;
+    text-align: left;
 }
 
 .chat-day-divider-row {
@@ -886,9 +895,17 @@
 
 .message-bubble-attachment-only .message-time {
     color: #7a7a84;
-    text-align: right;
-    align-self: flex-end;
     margin-top: 4px;
+}
+
+.message-row.own .message-bubble-attachment-only .message-time {
+    align-self: flex-end;
+    text-align: right;
+}
+
+.message-row.other .message-bubble-attachment-only .message-time {
+    align-self: flex-start;
+    text-align: left;
 }
 
 .message-attachment-file {
