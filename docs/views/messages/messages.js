@@ -1348,6 +1348,7 @@ function bindAttachmentInputs() {
     const imageBtn = document.querySelector(".text-tool-image");
     const attachInput = document.getElementById("chat-attach-input");
     const imageInput = document.getElementById("chat-image-input");
+    const inputArea = document.getElementById("chat-input-area");
 
     if (attachBtn && attachInput) {
         attachBtn.onclick = () => {
@@ -1374,6 +1375,57 @@ function bindAttachmentInputs() {
             imageInput.value = "";
         };
     }
+
+    if (!inputArea) return;
+
+    let dragCounter = 0;
+
+    const hasFilesInDragEvent = (e) => {
+        return Array.from(e.dataTransfer?.types || []).includes("Files");
+    };
+
+    const clearDragState = () => {
+        dragCounter = 0;
+        inputArea.classList.remove("drag-over");
+    };
+
+    inputArea.addEventListener("dragenter", (e) => {
+        if (!hasFilesInDragEvent(e)) return;
+
+        e.preventDefault();
+        dragCounter += 1;
+        inputArea.classList.add("drag-over");
+    });
+
+    inputArea.addEventListener("dragover", (e) => {
+        if (!hasFilesInDragEvent(e)) return;
+
+        e.preventDefault();
+        inputArea.classList.add("drag-over");
+    });
+
+    inputArea.addEventListener("dragleave", (e) => {
+        if (!hasFilesInDragEvent(e)) return;
+
+        e.preventDefault();
+        dragCounter -= 1;
+
+        if (dragCounter <= 0) {
+            clearDragState();
+        }
+    });
+
+    inputArea.addEventListener("drop", (e) => {
+        if (!hasFilesInDragEvent(e)) return;
+
+        e.preventDefault();
+        clearDragState();
+
+        const files = Array.from(e.dataTransfer?.files || []);
+        if (!files.length) return;
+
+        addPendingAttachments(files);
+    });
 }
 
 function bindChatInput(currentUserId) {

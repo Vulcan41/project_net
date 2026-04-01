@@ -1079,3 +1079,31 @@
     background: #246e9d;
     transition: width 0.15s ease;
 }
+
+
+
+
+
+
+.chat-input-area.drag-over {
+    background: #f4f9fd;
+    box-shadow: inset 0 0 0 2px #246e9d;
+    border-top-color: #d7e7f3;
+}
+
+.chat-input-area.drag-over::after {
+    content: "Αφήστε τα αρχεία εδώ";
+    position: absolute;
+    inset: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #246e9d;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.82);
+    color: #246e9d;
+    font-size: 13px;
+    font-weight: 600;
+    pointer-events: none;
+    z-index: 5;
+}
