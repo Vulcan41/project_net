@@ -731,51 +731,17 @@ function renderActiveConversationWithPending() {
     const messagesArea = document.getElementById("chat-messages-area");
     if (!messagesArea) return;
 
-    messagesArea.innerHTML = "";
+    const pending = getPendingMessagesForActiveConversation();
 
-    const realMessages = (activeConversationMessages || []).map((message) => ({
-        type: "real",
-        sortDate: message.created_at,
-        data: message
-    }));
+    pending.forEach((msg) => {
+        if (document.querySelector(`[data-pending-id="${msg.tempId}"]`)) return;
 
-    const pending = getPendingMessagesForActiveConversation().map((message) => ({
-        type: "pending",
-        sortDate: message.createdAt,
-        data: message
-    }));
+        const row = document.createElement("div");
+        row.dataset.pendingId = msg.tempId;
 
-    const allItems = [...realMessages, ...pending]
-        .sort((a, b) => new Date(a.sortDate) - new Date(b.sortDate));
+        renderSinglePendingMessage(row, msg);
 
-    let lastDayKey = null;
-
-    allItems.forEach((item) => {
-        const dateString = item.type === "real"
-        ? item.data.created_at
-        : item.data.createdAt;
-
-        const currentDayKey = getMessageDayKey(dateString);
-
-        if (currentDayKey !== lastDayKey) {
-            const dividerRow = document.createElement("div");
-            dividerRow.className = "chat-day-divider-row";
-
-            const divider = document.createElement("div");
-            divider.className = "chat-day-divider";
-            divider.textContent = formatMessageDayLabel(dateString);
-
-            dividerRow.appendChild(divider);
-            messagesArea.appendChild(dividerRow);
-
-            lastDayKey = currentDayKey;
-        }
-
-        if (item.type === "real") {
-            renderSingleRealMessage(messagesArea, item.data);
-        } else {
-            renderSinglePendingMessage(messagesArea, item.data);
-        }
+        messagesArea.appendChild(row);
     });
 
     scheduleScrollToBottom();
@@ -832,7 +798,7 @@ function renderSingleRealMessage(messagesArea, message) {
     }
 }
 
-function renderSinglePendingMessage(messagesArea, pendingMessage) {
+function renderSinglePendingMessage(container, pendingMessage) {
     const hasText = pendingMessage.content && pendingMessage.content.trim();
     const hasAttachments = pendingMessage.attachments && pendingMessage.attachments.length > 0;
 
@@ -855,7 +821,7 @@ function renderSinglePendingMessage(messagesArea, pendingMessage) {
         bubble.appendChild(time);
         row.appendChild(bubble);
 
-        messagesArea.appendChild(row);
+        container.appendChild(row);
     }
 
     if (hasAttachments) {
@@ -874,7 +840,7 @@ function renderSinglePendingMessage(messagesArea, pendingMessage) {
         bubble.appendChild(time);
         row.appendChild(bubble);
 
-        messagesArea.appendChild(row);
+        container.appendChild(row);
     }
 }
 
@@ -1831,7 +1797,9 @@ function updatePendingMessageAttachment(tempId, attachmentId, patch) {
 
 function removePendingMessage(tempId) {
     pendingMessages = pendingMessages.filter((msg) => msg.tempId !== tempId);
-    renderActiveConversationWithPending();
+
+    const el = document.querySelector(`[data-pending-id="${tempId}"]`);
+    if (el) el.remove();
 }
 
 function getPendingMessagesForActiveConversation() {
