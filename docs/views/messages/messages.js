@@ -1117,10 +1117,10 @@ function setupAutoResizeTextarea(textarea) {
     if (!textarea) return;
 
     const resize = () => {
-        textarea.style.height = "42px";
-        textarea.style.height = `${Math.min(textarea.scrollHeight, 82)}px`;
+        textarea.style.height = "24px";
+        textarea.style.height = `${Math.min(textarea.scrollHeight, 48)}px`;
 
-        if (textarea.scrollHeight > 82) {
+        if (textarea.scrollHeight > 48) {
             textarea.style.overflowY = "auto";
         } else {
             textarea.style.overflowY = "hidden";

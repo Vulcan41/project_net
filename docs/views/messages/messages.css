@@ -395,8 +395,8 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    min-height: 46px;
-    padding: 6px 10px 6px 14px;
+    min-height: 50px;
+    padding: 0 12px 0 14px;
     border: 1px solid #dddddd;
     border-radius: 999px;
     background: #fafafa;
@@ -407,27 +407,29 @@
     min-width: 0;
     display: flex;
     align-items: center;
+    min-height: 50px;
 }
 
 #chat-input {
     width: 100%;
-    min-height: 32px;
-    max-height: 90px;
-    padding: 0;
+    min-height: 24px;
+    max-height: 48px; /* about 2 lines */
+    padding: 13px 0;
     margin: 0;
     box-sizing: border-box;
     border: none;
     background: transparent;
     color: #222;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 22px;
     font-family: inherit;
     outline: none;
     resize: none;
-    overflow-y: hidden;
+    overflow-y: auto;
     overflow-x: hidden;
     white-space: pre-wrap;
     word-break: break-word;
+    scrollbar-width: thin;
 }
 
 #chat-input::placeholder {
