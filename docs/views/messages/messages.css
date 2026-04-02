@@ -885,17 +885,12 @@
     max-width: 260px;
 }
 
+/* remove extra side spacing — stack already handles alignment */
 .message-row.own .message-bubble-attachment-only,
 .message-row.other .message-bubble-attachment-only {
     color: #1c1c1e;
-}
-
-.message-row.other .message-bubble-attachment-only {
-    margin-left: 12px;
-}
-
-.message-row.own .message-bubble-attachment-only {
-    margin-right: 8px;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .message-bubble-attachment-only .message-time {
