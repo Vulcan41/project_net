@@ -1145,7 +1145,7 @@ function extractFirstUrl(text = "") {
 }
 
 async function fetchLinkPreview(url) {
-    const res = await fetch("/api/link-preview", {
+    const res = await fetch("/api/messages/link-preview", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
