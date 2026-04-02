@@ -4,7 +4,7 @@ import { loadView } from "../../core/router.js";
 import { t, getLocale } from "../../core/i18n.js";
 import { initLightboxModal, openLightboxGallery } from "../../components/lightboxModal/lightboxModal.js";
 import { initComposer } from "./layout/composer.js";
-import { renderMessages, appendMessage } from "./layout/chatHistory.js";
+import { renderMessages } from "./layout/chatHistory.js";
 
 let conversationsLoadToken = 0;
 let activeConversationId = null;
@@ -1449,14 +1449,18 @@ function subscribeToActiveConversation() {
 
             if (error || !data) return;
 
+            const alreadyExists = activeConversationMessages.some(
+                (msg) => msg.id === data.id
+            );
+            if (alreadyExists) return;
+
             activeConversationMessages.push(data);
             activeConversationMessages.sort(
                 (a, b) => new Date(a.created_at) - new Date(b.created_at)
             );
 
-            appendMessage({
+            renderMessages({
                 messagesArea: document.getElementById("chat-messages-area"),
-                message: data,
                 messages: activeConversationMessages,
                 currentUserId,
                 renderMessageContent,
