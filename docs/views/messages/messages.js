@@ -726,7 +726,6 @@ function renderMessageAttachments(container, attachments = []) {
         container.appendChild(fileList);
     }
 }
-
 function renderActiveConversationWithPending() {
     const messagesArea = document.getElementById("chat-messages-area");
     if (!messagesArea) return;
@@ -736,12 +735,12 @@ function renderActiveConversationWithPending() {
     pending.forEach((msg) => {
         if (document.querySelector(`[data-pending-id="${msg.tempId}"]`)) return;
 
-        const row = document.createElement("div");
-        row.dataset.pendingId = msg.tempId;
+        const wrapper = document.createElement("div");
+        wrapper.dataset.pendingId = msg.tempId;
 
-        renderSinglePendingMessage(row, msg);
+        renderSinglePendingMessage(wrapper, msg);
 
-        messagesArea.appendChild(row);
+        messagesArea.appendChild(wrapper);
     });
 
     scheduleScrollToBottom();
@@ -1861,38 +1860,85 @@ function appendRealMessageToChat(message) {
 
     if (renderedMessageIds.has(message.id)) return;
 
-    const lastMessageEl = messagesArea.lastElementChild;
+    // 🔥 TRY MATCH PENDING
+    const matchedPending = findMatchingPendingMessage(message);
 
-    let lastDate = null;
+    if (matchedPending) {
+        const pendingEl = document.querySelector(
+            `[data-pending-id="${matchedPending.tempId}"]`
+        );
 
-    if (lastMessageEl && lastMessageEl.dataset?.date) {
-        lastDate = lastMessageEl.dataset.date;
-    }
+        if (pendingEl) {
+            const parent = pendingEl.parentElement;
 
-    const currentDayKey = getMessageDayKey(message.created_at);
+            // render real message in a temp container
+            const tempWrap = document.createElement("div");
+            renderSingleRealMessage(tempWrap, message);
 
-    if (currentDayKey !== lastDate) {
-        const dividerRow = document.createElement("div");
-        dividerRow.className = "chat-day-divider-row";
+            // replace pending with real
+            parent.replaceChild(tempWrap.firstChild, pendingEl);
+        }
 
-        const divider = document.createElement("div");
-        divider.className = "chat-day-divider";
-        divider.textContent = formatMessageDayLabel(message.created_at);
+        removePendingMessage(matchedPending.tempId);
+    } else {
+        // NORMAL APPEND FLOW
 
-        dividerRow.dataset.date = currentDayKey;
+        const lastMessageEl = messagesArea.lastElementChild;
 
-        dividerRow.appendChild(divider);
-        messagesArea.appendChild(dividerRow);
-    }
+        let lastDate = null;
 
-    renderSingleRealMessage(messagesArea, message);
+        if (lastMessageEl && lastMessageEl.dataset?.date) {
+            lastDate = lastMessageEl.dataset.date;
+        }
 
-    const lastNode = messagesArea.lastElementChild;
-    if (lastNode) {
-        lastNode.dataset.date = currentDayKey;
+        const currentDayKey = getMessageDayKey(message.created_at);
+
+        if (currentDayKey !== lastDate) {
+            const dividerRow = document.createElement("div");
+            dividerRow.className = "chat-day-divider-row";
+
+            const divider = document.createElement("div");
+            divider.className = "chat-day-divider";
+            divider.textContent = formatMessageDayLabel(message.created_at);
+
+            dividerRow.dataset.date = currentDayKey;
+
+            dividerRow.appendChild(divider);
+            messagesArea.appendChild(dividerRow);
+        }
+
+        renderSingleRealMessage(messagesArea, message);
+
+        const lastNode = messagesArea.lastElementChild;
+        if (lastNode) {
+            lastNode.dataset.date = currentDayKey;
+        }
     }
 
     renderedMessageIds.add(message.id);
-
     scheduleScrollToBottom();
+}
+
+function findMatchingPendingMessage(realMessage) {
+    const candidates = getPendingMessagesForActiveConversation();
+
+    return candidates.find((pending) => {
+
+        if (pending.senderId !== realMessage.sender_id) return false;
+
+        const sameContent =
+        (pending.content || "").trim() === (realMessage.content || "").trim();
+
+        const pendingAttachments = pending.attachments || [];
+        const realAttachments = realMessage.attachments || [];
+
+        const sameAttachmentCount =
+        pendingAttachments.length === realAttachments.length;
+
+        const timeDiff = Math.abs(
+            new Date(realMessage.created_at) - new Date(pending.createdAt)
+        );
+
+        return sameContent && sameAttachmentCount && timeDiff < 10000;
+    });
 }
