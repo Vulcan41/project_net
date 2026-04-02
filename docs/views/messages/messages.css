@@ -383,29 +383,54 @@
     transition: box-shadow 0.18s ease, background 0.18s ease;
 }
 
-.chat-composer-shell {
-    position: relative;
+.chat-composer-instagram {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 46px;
+    padding: 6px 10px;
+    border: 1px solid #dddddd;
+    border-radius: 999px;
+    background: #fafafa;
 }
 
-.chat-input-row {
-    position: relative;
+.chat-composer-left-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
     display: flex;
-    align-items: flex-end;
-    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.chat-composer-left-btn:hover {
+    background: #eef3f7;
+}
+
+.chat-composer-input-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
 }
 
 #chat-input {
-    flex: 1;
-    min-height: 44px;
+    width: 100%;
+    min-height: 32px;
     max-height: 90px;
-    padding: 10px 150px 10px 14px;
+    padding: 0;
+    margin: 0;
     box-sizing: border-box;
-    border: 1px solid #e2e2e2;
-    border-radius: 14px;
-    background: #fafafa;
+    border: none;
+    background: transparent;
     color: #222;
-    font-size: 13px;
-    line-height: 1.6;
+    font-size: 14px;
+    line-height: 1.5;
     font-family: inherit;
     outline: none;
     resize: none;
@@ -413,21 +438,42 @@
     overflow-x: hidden;
     white-space: pre-wrap;
     word-break: break-word;
-    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
 }
 
-#chat-input:focus {
-    border-color: #246e9d;
-    background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(36, 110, 157, 0.08);
-    scrollbar-width: thin;
+#chat-input::placeholder {
+    color: #8a8a8a;
 }
 
-#chat-send-btn {
-    height: 44px;
-    padding: 0 16px;
-    border-radius: 12px;
-    border: 1px solid #246e9d;
+.chat-composer-tools {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.chat-composer-tool {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.chat-composer-tool:hover {
+    background: #eef3f7;
+}
+
+.chat-composer-send {
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: none;
     background: #246e9d;
     color: #ffffff;
     font-size: 13px;
@@ -437,16 +483,18 @@
     flex-shrink: 0;
 }
 
-#chat-send-btn:hover {
+.chat-composer-send:hover {
     background: #378bc0;
 }
 
-#chat-send-btn:active {
+.chat-composer-send:active {
     transform: scale(0.98);
 }
 
-#chat-send-btn:disabled,
-#chat-input:disabled {
+.chat-composer-send:disabled,
+#chat-input:disabled,
+.chat-composer-left-btn:disabled,
+.chat-composer-tool:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
@@ -459,70 +507,11 @@
 }
 
 /* =========================
-   TEXT TOOLS INSIDE INPUT
+   LEGACY TEXT TOOLS
 ========================= */
 
 .text-tools {
-    position: absolute;
-    right: 74px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    z-index: 2;
-    background: transparent;
-    border: none;
-    padding: 0;
-    margin: 0;
-}
-
-.text-tool-bold,
-.text-tool-italic {
     display: none !important;
-}
-
-.text-tools hr,
-.text-tools .text-tools-separator,
-.text-tools .toolbar-separator {
-    display: none !important;
-}
-
-.text-tools button {
-    width: 30px;
-    height: 30px;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: #666;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease;
-    padding: 0;
-}
-
-.text-tools button:hover {
-    background: #eef3f7;
-    color: #246e9d;
-}
-
-.text-tools button:active {
-    transform: scale(0.96);
-}
-
-.text-tools button img,
-.text-tools button svg {
-    width: 18px;
-    height: 18px;
-    display: block;
-}
-
-.text-tool-attach,
-.text-tool-image,
-.text-tool-emoji {
-    display: flex !important;
 }
 
 /* =========================

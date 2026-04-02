@@ -294,7 +294,6 @@ async function loadConversations(targetUserId = null) {
             const input = chatPanel.querySelector("#chat-input");
 
             if (inputArea && input) {
-                await initTextTools(inputArea, input);
                 bindAttachmentInputs();
                 resetPendingAttachments();
             }
@@ -427,16 +426,50 @@ function renderChatSkeleton(chatPanel, conversation) {
 
                 <div id="chat-attachments-preview" class="chat-attachments-preview hidden"></div>
 
-                <div class="chat-composer-shell">
-                    <div class="chat-input-row">
+                <div class="chat-composer-instagram">
+                    <button
+                        type="button"
+                        class="chat-composer-left-btn text-tool-attach"
+                        aria-label="Attach file"
+                        ${disabled ? "disabled" : ""}
+                    >
+                        📎
+                    </button>
+
+                    <div class="chat-composer-input-wrap">
                         <textarea
                             id="chat-input"
                             rows="1"
                             placeholder="${t("messages.type_message")}"
                             ${disabled ? "disabled" : ""}
                         ></textarea>
+                    </div>
 
-                        <button id="chat-send-btn" ${disabled ? "disabled" : ""}>
+                    <div class="chat-composer-tools">
+                        <button
+                            type="button"
+                            class="chat-composer-tool text-tool-image"
+                            aria-label="Send image"
+                            ${disabled ? "disabled" : ""}
+                        >
+                            🖼
+                        </button>
+
+                        <button
+                            type="button"
+                            class="chat-composer-tool text-tool-emoji"
+                            aria-label="Emoji"
+                            ${disabled ? "disabled" : ""}
+                        >
+                            😊
+                        </button>
+
+                        <button
+                            id="chat-send-btn"
+                            type="button"
+                            class="chat-composer-send"
+                            ${disabled ? "disabled" : ""}
+                        >
                             ${t("messages.send")}
                         </button>
                     </div>
@@ -1415,11 +1448,13 @@ function uploadFileWithProgress(uploadUrl, file, onProgress) {
 }
 
 function bindAttachmentInputs() {
-    const attachBtn = document.querySelector(".text-tool-attach");
-    const imageBtn = document.querySelector(".text-tool-image");
+    const attachBtn = document.querySelector(".chat-composer-left-btn.text-tool-attach");
+    const imageBtn = document.querySelector(".chat-composer-tool.text-tool-image");
+    const emojiBtn = document.querySelector(".chat-composer-tool.text-tool-emoji");
     const attachInput = document.getElementById("chat-attach-input");
     const imageInput = document.getElementById("chat-image-input");
     const inputArea = document.getElementById("chat-input-area");
+    const input = document.getElementById("chat-input");
 
     if (attachBtn && attachInput) {
         attachBtn.onclick = () => {
@@ -1430,6 +1465,14 @@ function bindAttachmentInputs() {
     if (imageBtn && imageInput) {
         imageBtn.onclick = () => {
             imageInput.click();
+        };
+    }
+
+    if (emojiBtn && input) {
+        emojiBtn.onclick = () => {
+            input.value += "😊";
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.focus();
         };
     }
 
@@ -2067,4 +2110,35 @@ function applyBubbleGroupClasses(row, bubble, groupPosition) {
 
 function getImageAttachmentsFromMessage(attachments = []) {
     return attachments.filter(isImageAttachment);
+}
+
+async function initComposerTools(inputArea, input) {
+    if (!inputArea || !input) return;
+
+    await initTextTools(inputArea, input);
+
+    const composerShell = inputArea.querySelector(".chat-composer-shell");
+    if (!composerShell) return;
+
+    const attachBtn = inputArea.querySelector(".text-tool-attach");
+    const imageBtn = inputArea.querySelector(".text-tool-image");
+    const emojiBtn = inputArea.querySelector(".text-tool-emoji");
+
+    if (!attachBtn && !imageBtn && !emojiBtn) return;
+
+    let toolbar =
+    attachBtn?.parentElement ||
+    imageBtn?.parentElement ||
+    emojiBtn?.parentElement;
+
+    if (!toolbar) return;
+
+    toolbar.classList.add("text-tools");
+    composerShell.appendChild(toolbar);
+
+    const boldBtn = toolbar.querySelector(".text-tool-bold");
+    const italicBtn = toolbar.querySelector(".text-tool-italic");
+
+    if (boldBtn) boldBtn.remove();
+    if (italicBtn) italicBtn.remove();
 }
