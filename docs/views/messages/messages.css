@@ -1302,3 +1302,63 @@
     color: #7a7a84;
     text-transform: lowercase;
 }
+
+/* =========================
+   IMAGE CIRCULAR PROGRESS
+========================= */
+
+.image-progress-ring {
+    --progress-deg: 0deg;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 46px;
+    height: 46px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+    conic-gradient(
+    rgba(255, 255, 255, 0.98) 0deg,
+    rgba(255, 255, 255, 0.98) var(--progress-deg),
+    rgba(255, 255, 255, 0.28) var(--progress-deg),
+    rgba(255, 255, 255, 0.28) 360deg
+    );
+    z-index: 3;
+    pointer-events: none;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+.image-progress-ring::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.58);
+}
+
+.image-progress-ring-inner {
+    position: relative;
+    z-index: 1;
+    font-size: 10px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.image-progress-ring.is-done {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* composer image chip support */
+.chat-attachment-chip.is-image {
+    position: relative;
+}
+
+/* pending image support */
+.pending-attachment-image {
+    position: relative;
+}

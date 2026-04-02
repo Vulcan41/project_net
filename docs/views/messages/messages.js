@@ -930,6 +930,22 @@ function removePendingAttachment(attachmentId) {
     renderAttachmentPreview();
 }
 
+function createCircularProgressLoader(progress = 0, className = "") {
+    const clamped = Math.max(0, Math.min(100, Number(progress) || 0));
+    const degrees = (clamped / 100) * 360;
+
+    const wrap = document.createElement("div");
+    wrap.className = `image-progress-ring${className ? ` ${className}` : ""}`;
+    wrap.style.setProperty("--progress-deg", `${degrees}deg`);
+
+    const inner = document.createElement("div");
+    inner.className = "image-progress-ring-inner";
+    inner.textContent = `${clamped}%`;
+
+    wrap.appendChild(inner);
+    return wrap;
+}
+
 function renderAttachmentPreview() {
     const preview = document.getElementById("chat-attachments-preview");
     if (!preview) return;
@@ -1011,15 +1027,23 @@ function renderAttachmentPreview() {
         };
 
         if (item.uploading || item.uploaded) {
-            const progressWrap = document.createElement("div");
-            progressWrap.className = `chat-attachment-progress${item.uploaded ? " is-done" : ""}`;
+            if (isImage) {
+                const ring = createCircularProgressLoader(
+                    item.progress || 0,
+                    item.uploaded ? "is-done" : ""
+                );
+                chip.appendChild(ring);
+            } else {
+                const progressWrap = document.createElement("div");
+                progressWrap.className = `chat-attachment-progress${item.uploaded ? " is-done" : ""}`;
 
-            const progressBar = document.createElement("div");
-            progressBar.className = "chat-attachment-progress-bar";
-            progressBar.style.width = `${item.progress || 0}%`;
+                const progressBar = document.createElement("div");
+                progressBar.className = "chat-attachment-progress-bar";
+                progressBar.style.width = `${item.progress || 0}%`;
 
-            progressWrap.appendChild(progressBar);
-            chip.appendChild(progressWrap);
+                progressWrap.appendChild(progressBar);
+                chip.appendChild(progressWrap);
+            }
         }
 
         if (item.error) {

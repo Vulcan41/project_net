@@ -421,6 +421,22 @@ formatAttachmentSize
     return card;
 }
 
+function createCircularProgressLoader(progress = 0, className = "") {
+    const clamped = Math.max(0, Math.min(100, Number(progress) || 0));
+    const degrees = (clamped / 100) * 360;
+
+    const wrap = document.createElement("div");
+    wrap.className = `image-progress-ring${className ? ` ${className}` : ""}`;
+    wrap.style.setProperty("--progress-deg", `${degrees}deg`);
+
+    const inner = document.createElement("div");
+    inner.className = "image-progress-ring-inner";
+    inner.textContent = `${clamped}%`;
+
+    wrap.appendChild(inner);
+    return wrap;
+}
+
 function createPendingImageAttachmentCard(attachment) {
     const wrap = document.createElement("div");
     wrap.className = "message-attachment-image pending-attachment-image";
@@ -431,15 +447,11 @@ function createPendingImageAttachmentCard(attachment) {
 
     wrap.appendChild(img);
 
-    const progress = document.createElement("div");
-    progress.className = "pending-attachment-progress pending-image-progress";
-
-    const bar = document.createElement("div");
-    bar.className = "pending-attachment-progress-bar";
-    bar.style.width = `${attachment.progress || 0}%`;
-
-    progress.appendChild(bar);
-    wrap.appendChild(progress);
+    const ring = createCircularProgressLoader(
+        attachment.progress || 0,
+        attachment.uploaded ? "is-done" : ""
+    );
+    wrap.appendChild(ring);
 
     return wrap;
 }
