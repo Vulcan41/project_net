@@ -17,6 +17,8 @@ let activeConversationMessages = [];
 let scrollScheduled = false;
 let renderedMessageIds = new Set();
 
+const attachmentUrlCache = new Map();
+
 // switch to English
 localStorage.setItem("lang", "en");
 
@@ -624,25 +626,38 @@ function isImageAttachment(attachment) {
     return mime.startsWith("image/");
 }
 
-async function getMessageAttachmentDownloadUrl(objectKey, fileName) {
-    const headers = await getMessagesAuthHeaders();
+export async function getMessageAttachmentDownloadUrl(objectKey) {
+    if (!objectKey) return null;
 
+    // 🔥 CACHE HIT
+    if (attachmentUrlCache.has(objectKey)) {
+        return {
+            downloadUrl: attachmentUrlCache.get(objectKey)
+        };
+    }
+
+    // 🔥 FETCH FROM API
     const res = await fetch("/api/messages/download-attachment-url", {
         method: "POST",
-        headers,
-        body: JSON.stringify({
-            conversationId: activeConversationId,
-            objectKey,
-            fileName
-        })
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ objectKey })
     });
 
     if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.error || "Failed to get attachment URL");
+        throw new Error(data?.error || "Failed to get download URL");
     }
 
-    return res.json();
+    const data = await res.json();
+
+    // 🔥 STORE IN CACHE
+    if (data?.downloadUrl) {
+        attachmentUrlCache.set(objectKey, data.downloadUrl);
+    }
+
+    return data;
 }
 
 function createFileAttachmentCard(attachment) {
@@ -734,7 +749,9 @@ function createImageAttachmentCard(attachment, imageItems = [], imageIndex = 0) 
         img.onload = () => {
             scheduleScrollToBottom();
         };
-        img.src = downloadUrl;
+        if (img.src !== downloadUrl) {
+            img.src = downloadUrl;
+        }
     })
         .catch((err) => {
         console.error("Image attachment preview failed:", err);
