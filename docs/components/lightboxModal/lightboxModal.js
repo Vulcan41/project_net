@@ -22,7 +22,13 @@ function createLightboxMarkup() {
                     ‹
                 </button>
 
-                <img id="lightbox-image" class="lightbox-image" alt="" />
+                <div class="lightbox-image-wrap">
+                    <img id="lightbox-image" class="lightbox-image" alt="" />
+
+                    <a id="lightbox-download-btn" class="lightbox-download-btn" href="#" download>
+                        Download
+                    </a>
+                </div>
 
                 <button id="lightbox-next-btn" class="lightbox-nav-btn lightbox-next-btn" type="button" aria-label="Next image">
                     ›
