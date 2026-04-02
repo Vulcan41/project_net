@@ -1524,7 +1524,7 @@ function bindChatInput(currentUserId) {
                 attachments: tempAttachments
             });
 
-            scheduleScrollToBottom(true);
+            scheduleScrollToBottom(isUserNearBottom());
 
             input.value = "";
             input.style.height = "42px";
@@ -1826,8 +1826,10 @@ function scheduleScrollToBottom(force = false) {
     scrollScheduled = true;
 
     requestAnimationFrame(() => {
-        messagesArea.scrollTop = messagesArea.scrollHeight;
-        scrollScheduled = false;
+        requestAnimationFrame(() => {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+            scrollScheduled = false;
+        });
     });
 }
 
