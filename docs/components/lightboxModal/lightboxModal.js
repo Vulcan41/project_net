@@ -39,6 +39,7 @@ function renderLightboxImage() {
     const prevBtn = document.getElementById("lightbox-prev-btn");
     const nextBtn = document.getElementById("lightbox-next-btn");
     const counter = document.getElementById("lightbox-counter");
+    const downloadBtn = document.getElementById("lightbox-download-btn");
 
     if (!image) return;
     if (!lightboxItems.length) return;
@@ -46,6 +47,11 @@ function renderLightboxImage() {
     const currentItem = lightboxItems[lightboxIndex];
     image.src = currentItem.src;
     image.alt = currentItem.alt || "";
+
+    if (downloadBtn) {
+        downloadBtn.href = currentItem.src;
+        downloadBtn.setAttribute("download", currentItem.alt || "image");
+    }
 
     const shouldShowNav = lightboxItems.length > 1;
 
@@ -145,6 +151,7 @@ function finishLightboxClose() {
     const modal = document.getElementById("lightbox-modal");
     const image = document.getElementById("lightbox-image");
     const counter = document.getElementById("lightbox-counter");
+    const downloadBtn = document.getElementById("lightbox-download-btn");
 
     if (!modal || !image) return;
 
@@ -157,6 +164,11 @@ function finishLightboxClose() {
     if (counter) {
         counter.textContent = "";
         counter.classList.add("hidden");
+    }
+
+    if (downloadBtn) {
+        downloadBtn.href = "#";
+        downloadBtn.removeAttribute("download");
     }
 
     lightboxItems = [];

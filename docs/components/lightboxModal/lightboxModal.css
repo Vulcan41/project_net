@@ -149,3 +149,43 @@
 body.lightbox-open {
     overflow: hidden;
 }
+
+
+
+
+
+.lightbox-image-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: calc(92vh - 40px);
+}
+
+.lightbox-download-btn {
+    position: absolute;
+    bottom: 14px;
+    right: 14px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.58);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, background 0.15s ease;
+}
+
+.lightbox-image-wrap:hover .lightbox-download-btn {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.lightbox-download-btn:hover {
+    background: rgba(0, 0, 0, 0.72);
+}
