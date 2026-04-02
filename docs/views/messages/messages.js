@@ -626,33 +626,34 @@ function isImageAttachment(attachment) {
     return mime.startsWith("image/");
 }
 
-export async function getMessageAttachmentDownloadUrl(objectKey) {
+async function getMessageAttachmentDownloadUrl(objectKey, fileName) {
     if (!objectKey) return null;
 
-    // 🔥 CACHE HIT
     if (attachmentUrlCache.has(objectKey)) {
         return {
             downloadUrl: attachmentUrlCache.get(objectKey)
         };
     }
 
-    // 🔥 FETCH FROM API
+    const headers = await getMessagesAuthHeaders();
+
     const res = await fetch("/api/messages/download-attachment-url", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ objectKey })
+        headers,
+        body: JSON.stringify({
+            conversationId: activeConversationId,
+            objectKey,
+            fileName
+        })
     });
 
     if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.error || "Failed to get download URL");
+        throw new Error(data?.error || "Failed to get attachment URL");
     }
 
     const data = await res.json();
 
-    // 🔥 STORE IN CACHE
     if (data?.downloadUrl) {
         attachmentUrlCache.set(objectKey, data.downloadUrl);
     }
