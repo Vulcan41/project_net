@@ -61,60 +61,41 @@ export function renderMessages({
     scheduleScrollToBottom(true);
 }
 
-export function appendMessage({
+export function renderPendingMessages({
     messagesArea,
-    message,
-    messages = [],
-    currentUserId,
+    pendingMessages,
+    activeConversationId,
     renderMessageContent,
-    formatMessageTime,
-    getMessageDayKey,
-    formatMessageDayLabel,
-    isImageAttachment,
-    createImageAttachmentCard,
-    createFileAttachmentCard,
+    getPendingMessageStatusText,
+    getMessageFileIcon,
+    formatAttachmentSize,
     scheduleScrollToBottom
 }) {
     if (!messagesArea) return;
 
-    const currentDayKey = getMessageDayKey(message.created_at);
+    const pending = pendingMessages.filter(
+        (msg) => msg.conversationId === activeConversationId
+    );
 
-    let lastDayKey = null;
-    const existingDividers = messagesArea.querySelectorAll(".chat-day-divider-row");
+    pending.forEach((msg) => {
+        let wrapper = document.querySelector(`[data-pending-id="${msg.tempId}"]`);
 
-    if (existingDividers.length) {
-        const lastDivider = existingDividers[existingDividers.length - 1];
-        lastDayKey = lastDivider.dataset.dayKey || null;
-    }
+        if (!wrapper) {
+            wrapper = document.createElement("div");
+            wrapper.dataset.pendingId = msg.tempId;
+            messagesArea.appendChild(wrapper);
+        }
 
-    if (currentDayKey !== lastDayKey) {
-        const dividerRow = document.createElement("div");
-        dividerRow.className = "chat-day-divider-row";
-        dividerRow.dataset.dayKey = currentDayKey;
+        wrapper.innerHTML = "";
 
-        const divider = document.createElement("div");
-        divider.className = "chat-day-divider";
-        divider.textContent = formatMessageDayLabel(message.created_at);
-
-        dividerRow.appendChild(divider);
-        messagesArea.appendChild(dividerRow);
-    }
-
-    const index = messages.findIndex((m) => m.id === message.id);
-    const safeIndex = index >= 0 ? index : messages.length - 1;
-
-    renderSingleRealMessage({
-        messagesArea,
-        message,
-        index: safeIndex,
-        messages,
-        currentUserId,
-        renderMessageContent,
-        formatMessageTime,
-        isImageAttachment,
-        createImageAttachmentCard,
-        createFileAttachmentCard,
-        getMessageDayKey
+        renderSinglePendingMessage({
+            container: wrapper,
+            pendingMessage: msg,
+            renderMessageContent,
+            getPendingMessageStatusText,
+            getMessageFileIcon,
+            formatAttachmentSize
+        });
     });
 
     scheduleScrollToBottom();
@@ -209,6 +190,77 @@ function renderSingleRealMessage({
 }
 
 /* =========================
+   PENDING MESSAGE RENDERING
+========================= */
+
+function renderSinglePendingMessage({
+    container,
+    pendingMessage,
+    renderMessageContent,
+    getPendingMessageStatusText,
+    getMessageFileIcon,
+    formatAttachmentSize
+}) {
+    const hasText = pendingMessage.content && pendingMessage.content.trim();
+    const hasAttachments = pendingMessage.attachments && pendingMessage.attachments.length > 0;
+
+    if (hasText) {
+        const row = document.createElement("div");
+        row.className = "message-row own";
+
+        const stack = document.createElement("div");
+        stack.className = "message-stack";
+
+        const bubble = document.createElement("div");
+        bubble.className = "message-bubble pending-message-bubble";
+
+        const content = document.createElement("div");
+        content.className = "message-content";
+        renderMessageContent(content, pendingMessage.content);
+
+        const time = document.createElement("div");
+        time.className = "message-time";
+        time.textContent = getPendingMessageStatusText(pendingMessage);
+
+        bubble.appendChild(content);
+        stack.appendChild(bubble);
+        stack.appendChild(time);
+        row.appendChild(stack);
+
+        container.appendChild(row);
+    }
+
+    if (hasAttachments) {
+        const row = document.createElement("div");
+        row.className = "message-row own";
+
+        const stack = document.createElement("div");
+        stack.className = "message-stack";
+
+        const bubble = document.createElement("div");
+        bubble.className = "message-bubble message-bubble-attachment-only pending-message-bubble";
+
+        renderPendingMessageAttachments({
+            container: bubble,
+            attachments: pendingMessage.attachments,
+            getMessageFileIcon,
+            formatAttachmentSize
+        });
+
+        stack.appendChild(bubble);
+
+        const time = document.createElement("div");
+        time.className = "message-time";
+        time.textContent = getPendingMessageStatusText(pendingMessage);
+
+        stack.appendChild(time);
+        row.appendChild(stack);
+
+        container.appendChild(row);
+    }
+}
+
+/* =========================
    ATTACHMENTS
 ========================= */
 
@@ -240,6 +292,57 @@ createFileAttachmentCard
     }
 }
 
+function renderPendingMessageAttachments({
+    container,
+    attachments,
+    getMessageFileIcon,
+    formatAttachmentSize
+}) {
+    if (!attachments.length) return;
+
+    const images = attachments.filter((a) =>
+    String(a?.file?.type || "").toLowerCase().startsWith("image/")
+    );
+
+    const files = attachments.filter((a) =>
+    !String(a?.file?.type || "").toLowerCase().startsWith("image/")
+    );
+
+    if (images.length) {
+        const grid = document.createElement("div");
+        grid.className = "message-image-grid";
+
+        if (images.length === 1) grid.classList.add("one");
+        else if (images.length === 2) grid.classList.add("two");
+        else if (images.length === 3) grid.classList.add("three");
+        else grid.classList.add("multi");
+
+        images.forEach((attachment) => {
+            const node = createPendingImageAttachmentCard(attachment);
+            node.classList.add("message-image-grid-item");
+            grid.appendChild(node);
+        });
+
+        container.appendChild(grid);
+    }
+
+    if (files.length) {
+        const list = createAttachmentList();
+
+        files.forEach((attachment) => {
+            list.appendChild(
+                createPendingFileAttachmentCard(
+                    attachment,
+                    getMessageFileIcon,
+                    formatAttachmentSize
+                )
+            );
+        });
+
+        container.appendChild(list);
+    }
+}
+
 function createAttachmentList() {
     const wrap = document.createElement("div");
     wrap.className = "message-attachments";
@@ -262,6 +365,78 @@ function createMessageImageGrid(images, createImageAttachmentCard) {
     });
 
     return grid;
+}
+
+function createPendingFileAttachmentCard(
+attachment,
+getMessageFileIcon,
+formatAttachmentSize
+) {
+    const card = document.createElement("div");
+    card.className = "message-attachment-file pending-attachment-file";
+
+    const left = document.createElement("div");
+    left.className = "message-attachment-file-left";
+
+    const icon = document.createElement("img");
+    icon.className = "message-attachment-file-icon";
+    icon.src = getMessageFileIcon(attachment.file.name);
+    icon.alt = "file";
+
+    const meta = document.createElement("div");
+    meta.className = "message-attachment-file-meta";
+
+    const name = document.createElement("div");
+    name.className = "message-attachment-file-name";
+    name.textContent = attachment.file.name;
+
+    const info = document.createElement("div");
+    info.className = "message-attachment-file-info";
+    info.textContent = `${formatAttachmentSize(attachment.file.size)} • ${attachment.progress || 0}%`;
+
+    meta.appendChild(name);
+    meta.appendChild(info);
+    left.appendChild(icon);
+    left.appendChild(meta);
+    card.appendChild(left);
+
+    const progress = document.createElement("div");
+    progress.className = "pending-attachment-progress";
+
+    const bar = document.createElement("div");
+    bar.className = "pending-attachment-progress-bar";
+    bar.style.width = `${attachment.progress || 0}%`;
+
+    progress.appendChild(bar);
+    card.appendChild(progress);
+
+    return card;
+}
+
+function createPendingImageAttachmentCard(attachment) {
+    const wrap = document.createElement("div");
+    wrap.className = "message-attachment-image pending-attachment-image";
+
+    const img = document.createElement("img");
+    img.alt = attachment.file.name;
+
+    const objectUrl = URL.createObjectURL(attachment.file);
+    img.src = objectUrl;
+    img.onload = () => URL.revokeObjectURL(objectUrl);
+
+    wrap.appendChild(img);
+
+    const progress = document.createElement("div");
+    progress.className = "pending-attachment-progress pending-image-progress";
+
+    const bar = document.createElement("div");
+    bar.className = "pending-attachment-progress-bar";
+    bar.style.width = `${attachment.progress || 0}%`;
+
+    progress.appendChild(bar);
+    wrap.appendChild(progress);
+
+    return wrap;
 }
 
 /* =========================
