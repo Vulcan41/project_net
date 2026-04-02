@@ -733,14 +733,16 @@ function renderActiveConversationWithPending() {
     const pending = getPendingMessagesForActiveConversation();
 
     pending.forEach((msg) => {
-        if (document.querySelector(`[data-pending-id="${msg.tempId}"]`)) return;
+        let wrapper = document.querySelector(`[data-pending-id="${msg.tempId}"]`);
 
-        const wrapper = document.createElement("div");
-        wrapper.dataset.pendingId = msg.tempId;
+        if (!wrapper) {
+            wrapper = document.createElement("div");
+            wrapper.dataset.pendingId = msg.tempId;
+            messagesArea.appendChild(wrapper);
+        }
 
+        wrapper.innerHTML = "";
         renderSinglePendingMessage(wrapper, msg);
-
-        messagesArea.appendChild(wrapper);
     });
 
     scheduleScrollToBottom();
@@ -1503,6 +1505,8 @@ function bindChatInput(currentUserId) {
         let tempAttachments = [];
 
         if (shouldUsePendingBubble) {
+            const wasNearBottom = isUserNearBottom();
+
             tempMessageId = crypto.randomUUID();
 
             tempAttachments = getGroupedPendingAttachments().map((item) => ({
@@ -1524,7 +1528,7 @@ function bindChatInput(currentUserId) {
                 attachments: tempAttachments
             });
 
-            scheduleScrollToBottom(isUserNearBottom());
+            scheduleScrollToBottom(wasNearBottom);
 
             input.value = "";
             input.style.height = "42px";
@@ -1598,9 +1602,7 @@ function bindChatInput(currentUserId) {
                 console.error("Conversation timestamp update failed:", updateError);
             }
 
-            if (shouldUsePendingBubble) {
-                removePendingMessage(tempMessageId);
-            } else {
+            if (!shouldUsePendingBubble) {
                 input.value = "";
                 input.style.height = "42px";
                 input.style.overflowY = "hidden";
@@ -1862,74 +1864,45 @@ function appendRealMessageToChat(message) {
 
     if (renderedMessageIds.has(message.id)) return;
 
-    // 🔥 TRY MATCH PENDING
     const matchedPending = findMatchingPendingMessage(message);
 
     if (matchedPending) {
-        const pendingEl = document.querySelector(
-            `[data-pending-id="${matchedPending.tempId}"]`
-        );
-
-        if (pendingEl) {
-            const parent = pendingEl.parentElement;
-
-            // create real message
-            const tempWrap = document.createElement("div");
-            renderSingleRealMessage(tempWrap, message);
-
-            const newNode = tempWrap.firstChild;
-
-            // prepare animation
-            const bubble = newNode.querySelector(".message-bubble");
-            if (bubble) {
-                bubble.classList.add("fade-in");
-            }
-
-            // fade out pending
-            pendingEl.style.opacity = "0";
-            pendingEl.style.transform = "scale(0.98)";
-            pendingEl.style.transition = "opacity 0.15s ease, transform 0.15s ease";
-
-            setTimeout(() => {
-                if (parent.contains(pendingEl)) {
-                    parent.replaceChild(newNode, pendingEl);
-                }
-            }, 150);
-        }
-
         removePendingMessage(matchedPending.tempId);
-    } else {
-        // NORMAL APPEND FLOW
+    }
 
-        const lastMessageEl = messagesArea.lastElementChild;
+    const lastMessageEl = messagesArea.lastElementChild;
 
-        let lastDate = null;
+    let lastDate = null;
 
-        if (lastMessageEl && lastMessageEl.dataset?.date) {
-            lastDate = lastMessageEl.dataset.date;
-        }
+    if (lastMessageEl && lastMessageEl.dataset?.date) {
+        lastDate = lastMessageEl.dataset.date;
+    }
 
-        const currentDayKey = getMessageDayKey(message.created_at);
+    const currentDayKey = getMessageDayKey(message.created_at);
 
-        if (currentDayKey !== lastDate) {
-            const dividerRow = document.createElement("div");
-            dividerRow.className = "chat-day-divider-row";
+    if (currentDayKey !== lastDate) {
+        const dividerRow = document.createElement("div");
+        dividerRow.className = "chat-day-divider-row";
+        dividerRow.dataset.date = currentDayKey;
 
-            const divider = document.createElement("div");
-            divider.className = "chat-day-divider";
-            divider.textContent = formatMessageDayLabel(message.created_at);
+        const divider = document.createElement("div");
+        divider.className = "chat-day-divider";
+        divider.textContent = formatMessageDayLabel(message.created_at);
 
-            dividerRow.dataset.date = currentDayKey;
+        dividerRow.appendChild(divider);
+        messagesArea.appendChild(dividerRow);
+    }
 
-            dividerRow.appendChild(divider);
-            messagesArea.appendChild(dividerRow);
-        }
+    renderSingleRealMessage(messagesArea, message);
 
-        renderSingleRealMessage(messagesArea, message);
+    const appendedNodes = messagesArea.querySelectorAll(".message-row");
+    const lastAppendedRow = appendedNodes[appendedNodes.length - 1];
+    if (lastAppendedRow) {
+        lastAppendedRow.dataset.date = currentDayKey;
 
-        const lastNode = messagesArea.lastElementChild;
-        if (lastNode) {
-            lastNode.dataset.date = currentDayKey;
+        const bubble = lastAppendedRow.querySelector(".message-bubble");
+        if (bubble) {
+            bubble.classList.add("fade-in");
         }
     }
 
