@@ -6,11 +6,6 @@ export function renderMessages({
     messagesArea,
     messages,
     currentUserId,
-    renderMessageContent,
-    formatMessageTime,
-    getMessageDayKey,
-    formatMessageDayLabel,
-    isImageAttachment,
     createImageAttachmentCard,
     createFileAttachmentCard,
     scheduleScrollToBottom
@@ -49,26 +44,18 @@ export function renderMessages({
             index,
             messages: sortedMessages,
             currentUserId,
-            renderMessageContent,
-            formatMessageTime,
-            isImageAttachment,
             createImageAttachmentCard,
-            createFileAttachmentCard,
-            getMessageDayKey
+            createFileAttachmentCard
         });
     });
 
-    scheduleScrollToBottom(true);
+    scheduleScrollToBottom?.(true);
 }
 
 export function renderPendingMessages({
     messagesArea,
     pendingMessages,
     activeConversationId,
-    renderMessageContent,
-    getPendingMessageStatusText,
-    getMessageFileIcon,
-    formatAttachmentSize,
     scheduleScrollToBottom
 }) {
     if (!messagesArea) return;
@@ -90,15 +77,11 @@ export function renderPendingMessages({
 
         renderSinglePendingMessage({
             container: wrapper,
-            pendingMessage: msg,
-            renderMessageContent,
-            getPendingMessageStatusText,
-            getMessageFileIcon,
-            formatAttachmentSize
+            pendingMessage: msg
         });
     });
 
-    scheduleScrollToBottom();
+    scheduleScrollToBottom?.();
 }
 
 /* =========================
@@ -111,20 +94,16 @@ function renderSingleRealMessage({
     index,
     messages,
     currentUserId,
-    renderMessageContent,
-    formatMessageTime,
-    isImageAttachment,
     createImageAttachmentCard,
-    createFileAttachmentCard,
-    getMessageDayKey
+    createFileAttachmentCard
 }) {
     const isOwn = message.sender_id === currentUserId;
-    const hasText = message.content && message.content.trim();
-    const hasAttachments = message.attachments && message.attachments.length > 0;
+    const hasText = !!String(message.content || "").trim();
+    const hasAttachments = Array.isArray(message.attachments) && message.attachments.length > 0;
     const hasLinkPreview = !!message.link_url;
 
-    const groupPosition = getMessageGroupPosition(messages, index, getMessageDayKey);
-    const showTime = shouldShowTimeForMessage(messages, index, getMessageDayKey);
+    const groupPosition = getMessageGroupPosition(messages, index);
+    const showTime = shouldShowTimeForMessage(messages, index);
 
     if (hasText || hasLinkPreview) {
         const row = document.createElement("div");
@@ -146,8 +125,7 @@ function renderSingleRealMessage({
         }
 
         if (hasLinkPreview) {
-            const previewCard = createLinkPreviewCard(message);
-            stack.appendChild(previewCard);
+            stack.appendChild(createLinkPreviewCard(message));
         }
 
         if (showTime) {
@@ -174,13 +152,12 @@ function renderSingleRealMessage({
         const contentWrap = document.createElement("div");
         contentWrap.className = "message-attachment-content";
 
-        renderMessageAttachments(
-            contentWrap,
-            message.attachments,
-            isImageAttachment,
+        renderMessageAttachments({
+            container: contentWrap,
+            attachments: message.attachments,
             createImageAttachmentCard,
             createFileAttachmentCard
-        );
+        });
 
         bubble.appendChild(contentWrap);
         stack.appendChild(bubble);
@@ -203,14 +180,12 @@ function renderSingleRealMessage({
 
 function renderSinglePendingMessage({
     container,
-    pendingMessage,
-    renderMessageContent,
-    getPendingMessageStatusText,
-    getMessageFileIcon,
-    formatAttachmentSize
+    pendingMessage
 }) {
-    const hasText = pendingMessage.content && pendingMessage.content.trim();
-    const hasAttachments = pendingMessage.attachments && pendingMessage.attachments.length > 0;
+    const hasText = !!String(pendingMessage.content || "").trim();
+    const hasAttachments =
+    Array.isArray(pendingMessage.attachments) &&
+    pendingMessage.attachments.length > 0;
 
     if (hasText) {
         const row = document.createElement("div");
@@ -250,9 +225,7 @@ function renderSinglePendingMessage({
 
         renderPendingMessageAttachments({
             container: bubble,
-            attachments: pendingMessage.attachments,
-            getMessageFileIcon,
-            formatAttachmentSize
+            attachments: pendingMessage.attachments
         });
 
         stack.appendChild(bubble);
@@ -272,14 +245,13 @@ function renderSinglePendingMessage({
    ATTACHMENTS
 ========================= */
 
-function renderMessageAttachments(
-container,
-attachments,
-isImageAttachment,
-createImageAttachmentCard,
-createFileAttachmentCard
-) {
-    if (!attachments.length) return;
+function renderMessageAttachments({
+    container,
+    attachments,
+    createImageAttachmentCard,
+    createFileAttachmentCard
+}) {
+    if (!attachments?.length) return;
 
     const images = attachments.filter(isImageAttachment);
     const files = attachments.filter((a) => !isImageAttachment(a));
@@ -302,11 +274,9 @@ createFileAttachmentCard
 
 function renderPendingMessageAttachments({
     container,
-    attachments,
-    getMessageFileIcon,
-    formatAttachmentSize
+    attachments
 }) {
-    if (!attachments.length) return;
+    if (!attachments?.length) return;
 
     const images = attachments.filter((a) =>
     String(a?.file?.type || "").toLowerCase().startsWith("image/")
@@ -338,13 +308,7 @@ function renderPendingMessageAttachments({
         const list = createAttachmentList();
 
         files.forEach((attachment) => {
-            list.appendChild(
-                createPendingFileAttachmentCard(
-                    attachment,
-                    getMessageFileIcon,
-                    formatAttachmentSize
-                )
-            );
+            list.appendChild(createPendingFileAttachmentCard(attachment));
         });
 
         container.appendChild(list);
@@ -375,11 +339,7 @@ function createMessageImageGrid(images, createImageAttachmentCard) {
     return grid;
 }
 
-function createPendingFileAttachmentCard(
-attachment,
-getMessageFileIcon,
-formatAttachmentSize
-) {
+function createPendingFileAttachmentCard(attachment) {
     const card = document.createElement("div");
     card.className = "message-attachment-file pending-attachment-file";
 
@@ -421,22 +381,6 @@ formatAttachmentSize
     return card;
 }
 
-function createCircularProgressLoader(progress = 0, className = "") {
-    const clamped = Math.max(0, Math.min(100, Number(progress) || 0));
-    const degrees = (clamped / 100) * 360;
-
-    const wrap = document.createElement("div");
-    wrap.className = `image-progress-ring${className ? ` ${className}` : ""}`;
-    wrap.style.setProperty("--progress-deg", `${degrees}deg`);
-
-    const inner = document.createElement("div");
-    inner.className = "image-progress-ring-inner";
-    inner.textContent = `${clamped}%`;
-
-    wrap.appendChild(inner);
-    return wrap;
-}
-
 function createPendingImageAttachmentCard(attachment) {
     const wrap = document.createElement("div");
     wrap.className = "message-attachment-image pending-attachment-image";
@@ -456,29 +400,152 @@ function createPendingImageAttachmentCard(attachment) {
     return wrap;
 }
 
+function createCircularProgressLoader(progress = 0, className = "") {
+    const clamped = Math.max(0, Math.min(100, Number(progress) || 0));
+    const degrees = (clamped / 100) * 360;
+
+    const wrap = document.createElement("div");
+    wrap.className = `image-progress-ring${className ? ` ${className}` : ""}`;
+    wrap.style.setProperty("--progress-deg", `${degrees}deg`);
+
+    const inner = document.createElement("div");
+    inner.className = "image-progress-ring-inner";
+    inner.textContent = `${clamped}%`;
+
+    wrap.appendChild(inner);
+    return wrap;
+}
+
 /* =========================
-   GROUPING + TIME
+   MESSAGE CONTENT
 ========================= */
 
-function shouldGroupMessages(first, second, getMessageDayKey) {
+function renderMessageContent(container, text) {
+    const urlRegex = /(?:https?:\/\/|www\.)[^\s]+/g;
+
+    let lastIndex = 0;
+    let match;
+
+    while ((match = urlRegex.exec(text)) !== null) {
+        const url = match[0];
+        const start = match.index;
+
+        if (start > lastIndex) {
+            appendFormattedText(container, text.slice(lastIndex, start));
+        }
+
+        const link = document.createElement("a");
+        link.href = url.startsWith("http") ? url : `https://${url}`;
+        link.textContent = url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+
+        container.appendChild(link);
+
+        lastIndex = start + url.length;
+    }
+
+    if (lastIndex < text.length) {
+        appendFormattedText(container, text.slice(lastIndex));
+    }
+}
+
+function appendFormattedText(container, text) {
+    const formatRegex = /(\*\*([^*]+)\*\*|\*([^*]+)\*)/g;
+
+    let lastIndex = 0;
+    let match;
+
+    while ((match = formatRegex.exec(text)) !== null) {
+        const fullMatch = match[0];
+        const start = match.index;
+
+        if (start > lastIndex) {
+            container.appendChild(
+                document.createTextNode(text.slice(lastIndex, start))
+            );
+        }
+
+        if (match[2] !== undefined) {
+            const strong = document.createElement("strong");
+            strong.textContent = match[2];
+            container.appendChild(strong);
+        } else if (match[3] !== undefined) {
+            const em = document.createElement("em");
+            em.textContent = match[3];
+            container.appendChild(em);
+        }
+
+        lastIndex = start + fullMatch.length;
+    }
+
+    if (lastIndex < text.length) {
+        container.appendChild(
+            document.createTextNode(text.slice(lastIndex))
+        );
+    }
+}
+
+/* =========================
+   TIME / DAY / GROUPING
+========================= */
+
+function formatMessageTime(dateString) {
+    const date = new Date(dateString);
+
+    return date.toLocaleTimeString(getLocale(), {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+function getMessageDayKey(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+function formatMessageDayLabel(dateString) {
+    const date = new Date(dateString);
+
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    const dateKey = getMessageDayKey(dateString);
+    const todayKey = getMessageDayKey(today.toISOString());
+    const yesterdayKey = getMessageDayKey(yesterday.toISOString());
+
+    if (dateKey === todayKey) return "Today";
+    if (dateKey === yesterdayKey) return "Yesterday";
+
+    return date.toLocaleDateString(getLocale(), {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+    });
+}
+
+function shouldGroupMessages(first, second) {
     if (!first || !second) return false;
     if (first.sender_id !== second.sender_id) return false;
 
-    if (
-    getMessageDayKey(first.created_at) !==
-    getMessageDayKey(second.created_at)
-    ) return false;
+    if (getMessageDayKey(first.created_at) !== getMessageDayKey(second.created_at)) {
+        return false;
+    }
 
     const diff = new Date(second.created_at) - new Date(first.created_at);
     return diff >= 0 && diff <= 5 * 60 * 1000;
 }
 
-function getMessageGroupPosition(messages, index, getMessageDayKey) {
+function getMessageGroupPosition(messages, index) {
     const prev = messages[index - 1];
     const next = messages[index + 1];
 
-    const prevGroup = shouldGroupMessages(prev, messages[index], getMessageDayKey);
-    const nextGroup = shouldGroupMessages(messages[index], next, getMessageDayKey);
+    const prevGroup = shouldGroupMessages(prev, messages[index]);
+    const nextGroup = shouldGroupMessages(messages[index], next);
 
     if (prevGroup && nextGroup) return "middle";
     if (prevGroup) return "end";
@@ -486,14 +553,74 @@ function getMessageGroupPosition(messages, index, getMessageDayKey) {
     return "single";
 }
 
-function shouldShowTimeForMessage(messages, index, getMessageDayKey) {
+function shouldShowTimeForMessage(messages, index) {
     const current = messages[index];
     const next = messages[index + 1];
 
     if (!current) return false;
     if (!next) return true;
 
-    return !shouldGroupMessages(current, next, getMessageDayKey);
+    return !shouldGroupMessages(current, next);
+}
+
+/* =========================
+   MISC HELPERS
+========================= */
+
+function isImageAttachment(attachment) {
+    const mime = (attachment?.mime_type || "").toLowerCase();
+    return mime.startsWith("image/");
+}
+
+function getPendingMessageStatusText(message) {
+    if (message.status === "failed") return "Failed";
+    if (message.status === "sending") return "Sending";
+    return "Uploading";
+}
+
+function formatAttachmentSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+}
+
+function getMessageFileIcon(fileName = "") {
+    const ext = String(fileName).split(".").pop()?.toLowerCase() || "";
+
+    if (["png", "jpg", "jpeg", "webp", "gif"].includes(ext)) {
+        return "assets/icons_img.png";
+    }
+
+    if (ext === "pdf") {
+        return "assets/icon_pdf.png";
+    }
+
+    if (["doc", "docx"].includes(ext)) {
+        return "assets/icon_doc.png";
+    }
+
+    if (["txt"].includes(ext)) {
+        return "assets/icon_txt.png";
+    }
+
+    if (["xls", "xlsx", "csv"].includes(ext)) {
+        return "assets/icon_xls.png";
+    }
+
+    if (["zip", "rar", "7z"].includes(ext)) {
+        return "assets/icon_zip.png";
+    }
+
+    if (["mp4", "mov", "avi"].includes(ext)) {
+        return "assets/icon_video.png";
+    }
+
+    if (["mp3", "wav"].includes(ext)) {
+        return "assets/icon_audio.png";
+    }
+
+    return "assets/icon_file_file.png";
 }
 
 function createLinkPreviewCard(message) {
@@ -539,4 +666,8 @@ function createLinkPreviewCard(message) {
     card.appendChild(body);
 
     return card;
+}
+
+function getLocale() {
+    return localStorage.getItem("lang") || "en";
 }

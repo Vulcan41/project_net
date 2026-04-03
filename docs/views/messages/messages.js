@@ -1,7 +1,7 @@
 import { supabase } from "../../core/supabase.js";
 import { DEFAULT_AVATAR } from "../../state/userStore.js";
 import { loadView } from "../../core/router.js";
-import { t, getLocale } from "../../core/i18n.js";
+import { t } from "../../core/i18n.js";
 import { initLightboxModal, openLightboxGallery } from "../../components/lightboxModal/lightboxModal.js";
 import { initComposer } from "./layout/composer.js";
 import { renderMessages, renderPendingMessages } from "./layout/chatHistory.js";
@@ -384,112 +384,8 @@ function renderChatSkeleton(chatPanel, conversation) {
 }
 
 /* =========================
-   HELPER FUNCTION FOR LINKS
+   ATTACHMENT DOWNLOAD / CARDS
 ========================= */
-
-function renderMessageContent(container, text) {
-    const urlRegex = /(?:https?:\/\/|www\.)[^\s]+/g;
-
-    let lastIndex = 0;
-    let match;
-
-    while ((match = urlRegex.exec(text)) !== null) {
-        const url = match[0];
-        const start = match.index;
-
-        if (start > lastIndex) {
-            appendFormattedText(container, text.slice(lastIndex, start));
-        }
-
-        const link = document.createElement("a");
-        link.href = url.startsWith("http") ? url : `https://${url}`;
-        link.textContent = url;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-
-        container.appendChild(link);
-
-        lastIndex = start + url.length;
-    }
-
-    if (lastIndex < text.length) {
-        appendFormattedText(container, text.slice(lastIndex));
-    }
-}
-
-function appendFormattedText(container, text) {
-    const formatRegex = /(\*\*([^*]+)\*\*|\*([^*]+)\*)/g;
-
-    let lastIndex = 0;
-    let match;
-
-    while ((match = formatRegex.exec(text)) !== null) {
-        const fullMatch = match[0];
-        const start = match.index;
-
-        if (start > lastIndex) {
-            container.appendChild(
-                document.createTextNode(text.slice(lastIndex, start))
-            );
-        }
-
-        if (match[2] !== undefined) {
-            const strong = document.createElement("strong");
-            strong.textContent = match[2];
-            container.appendChild(strong);
-        } else if (match[3] !== undefined) {
-            const em = document.createElement("em");
-            em.textContent = match[3];
-            container.appendChild(em);
-        }
-
-        lastIndex = start + fullMatch.length;
-    }
-
-    if (lastIndex < text.length) {
-        container.appendChild(
-            document.createTextNode(text.slice(lastIndex))
-        );
-    }
-}
-
-/* =========================
-   HELPER FUNCTION FOR DAY DIVIDERS
-========================= */
-
-function getMessageDayKey(dateString) {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-}
-
-function formatMessageDayLabel(dateString) {
-    const date = new Date(dateString);
-
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
-
-    const dateKey = getMessageDayKey(dateString);
-    const todayKey = getMessageDayKey(today.toISOString());
-    const yesterdayKey = getMessageDayKey(yesterday.toISOString());
-
-    if (dateKey === todayKey) return t("messages.today");
-    if (dateKey === yesterdayKey) return t("messages.yesterday");
-
-    return date.toLocaleDateString(getLocale(), {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
-    });
-}
-
-function isImageAttachment(attachment) {
-    const mime = (attachment?.mime_type || "").toLowerCase();
-    return mime.startsWith("image/");
-}
 
 async function getMessageAttachmentDownloadUrl(objectKey, fileName) {
     if (!objectKey) return null;
@@ -626,6 +522,10 @@ function createImageAttachmentCard(attachment, imageItems = [], imageIndex = 0) 
     return wrap;
 }
 
+/* =========================
+   MESSAGES RENDER
+========================= */
+
 function renderActiveConversationWithPending() {
     const messagesArea = document.getElementById("chat-messages-area");
     if (!messagesArea) return;
@@ -634,11 +534,6 @@ function renderActiveConversationWithPending() {
         messagesArea,
         messages: activeConversationMessages,
         currentUserId,
-        renderMessageContent,
-        formatMessageTime,
-        getMessageDayKey,
-        formatMessageDayLabel,
-        isImageAttachment,
         createImageAttachmentCard,
         createFileAttachmentCard,
         scheduleScrollToBottom
@@ -648,18 +543,8 @@ function renderActiveConversationWithPending() {
         messagesArea,
         pendingMessages,
         activeConversationId,
-        renderMessageContent,
-        getPendingMessageStatusText,
-        getMessageFileIcon,
-        formatAttachmentSize,
         scheduleScrollToBottom
     });
-}
-
-function getPendingMessageStatusText(message) {
-    if (message.status === "failed") return t("messages.failed");
-    if (message.status === "sending") return t("messages.sending");
-    return t("messages.uploading");
 }
 
 /* =========================
@@ -717,11 +602,6 @@ async function loadMessages(conversationId, showLoading = false) {
         messagesArea,
         messages: activeConversationMessages,
         currentUserId,
-        renderMessageContent,
-        formatMessageTime,
-        getMessageDayKey,
-        formatMessageDayLabel,
-        isImageAttachment,
         createImageAttachmentCard,
         createFileAttachmentCard,
         scheduleScrollToBottom
@@ -731,10 +611,6 @@ async function loadMessages(conversationId, showLoading = false) {
         messagesArea,
         pendingMessages,
         activeConversationId,
-        renderMessageContent,
-        getPendingMessageStatusText,
-        getMessageFileIcon,
-        formatAttachmentSize,
         scheduleScrollToBottom
     });
 }
@@ -1279,11 +1155,6 @@ function subscribeToActiveConversation() {
                 messagesArea: document.getElementById("chat-messages-area"),
                 messages: activeConversationMessages,
                 currentUserId,
-                renderMessageContent,
-                formatMessageTime,
-                getMessageDayKey,
-                formatMessageDayLabel,
-                isImageAttachment,
                 createImageAttachmentCard,
                 createFileAttachmentCard,
                 scheduleScrollToBottom
@@ -1293,10 +1164,6 @@ function subscribeToActiveConversation() {
                 messagesArea: document.getElementById("chat-messages-area"),
                 pendingMessages,
                 activeConversationId,
-                renderMessageContent,
-                getPendingMessageStatusText,
-                getMessageFileIcon,
-                formatAttachmentSize,
                 scheduleScrollToBottom
             });
 
@@ -1314,17 +1181,8 @@ function cleanupMessagesRealtime() {
 }
 
 /* =========================
-   TIME FORMAT
+   HELPERS
 ========================= */
-
-function formatMessageTime(dateString) {
-    const date = new Date(dateString);
-
-    return date.toLocaleTimeString(getLocale(), {
-        hour: "2-digit",
-        minute: "2-digit"
-    });
-}
 
 function getMessageFileIcon(fileName = "") {
     const ext = String(fileName).split(".").pop()?.toLowerCase() || "";
@@ -1406,12 +1264,6 @@ function removePendingMessage(tempId) {
 
     const el = document.querySelector(`[data-pending-id="${tempId}"]`);
     if (el) el.remove();
-}
-
-function getPendingMessagesForActiveConversation() {
-    return pendingMessages.filter(
-        (msg) => msg.conversationId === activeConversationId
-    );
 }
 
 function isUserNearBottom() {
