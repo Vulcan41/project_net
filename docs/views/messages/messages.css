@@ -1414,7 +1414,8 @@
     z-index: 5;
 }
 
-.message-row:hover .message-reaction-picker {
+.message-stack:hover .message-reaction-picker,
+.message-reaction-picker:hover {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);

@@ -497,7 +497,8 @@ function renderActiveConversationWithPending() {
         currentUserId,
         createImageAttachmentCard,
         createFileAttachmentCard,
-        scheduleScrollToBottom
+        scheduleScrollToBottom,
+        onReact: handleReaction
     });
 
     renderPendingMessages({
@@ -571,7 +572,8 @@ async function loadMessages(conversationId, showLoading = false) {
         currentUserId,
         createImageAttachmentCard,
         createFileAttachmentCard,
-        scheduleScrollToBottom
+        scheduleScrollToBottom,
+        onReact: handleReaction
     });
 
     renderPendingMessages({
@@ -1100,6 +1102,64 @@ async function handleSendMessage(content) {
    REALTIME
 ========================= */
 
+async function handleReaction({ messageId, emoji }) {
+    if (!currentUserId || !messageId || !emoji) return;
+
+    const { data: existingReaction, error: existingError } = await supabase
+        .from("message_reactions")
+        .select("id, emoji")
+        .eq("message_id", messageId)
+        .eq("user_id", currentUserId)
+        .maybeSingle();
+
+    if (existingError) {
+        console.error("Failed to load existing reaction:", existingError);
+        return;
+    }
+
+    if (existingReaction) {
+        if (existingReaction.emoji === emoji) {
+            const { error: deleteError } = await supabase
+                .from("message_reactions")
+                .delete()
+                .eq("id", existingReaction.id);
+
+            if (deleteError) {
+                console.error("Failed to delete reaction:", deleteError);
+                return;
+            }
+        } else {
+            const { error: updateError } = await supabase
+                .from("message_reactions")
+                .update({
+                emoji,
+                updated_at: new Date().toISOString()
+            })
+                .eq("id", existingReaction.id);
+
+            if (updateError) {
+                console.error("Failed to update reaction:", updateError);
+                return;
+            }
+        }
+    } else {
+        const { error: insertError } = await supabase
+            .from("message_reactions")
+            .insert({
+            message_id: messageId,
+            user_id: currentUserId,
+            emoji
+        });
+
+        if (insertError) {
+            console.error("Failed to insert reaction:", insertError);
+            return;
+        }
+    }
+
+    await loadMessages(activeConversationId);
+}
+
 function subscribeToActiveConversation() {
     cleanupMessagesRealtime();
 
@@ -1170,7 +1230,8 @@ function subscribeToActiveConversation() {
                 currentUserId,
                 createImageAttachmentCard,
                 createFileAttachmentCard,
-                scheduleScrollToBottom
+                scheduleScrollToBottom,
+                onReact: handleReaction
             });
 
             renderPendingMessages({
