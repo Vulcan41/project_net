@@ -129,7 +129,7 @@ function renderSingleRealMessage({
         }
 
         if (message.reactions?.length) {
-            const reactionsNode = createMessageReactions(message.reactions);
+            const reactionsNode = createMessageReactions(message.reactions, currentUserId);
             stack.appendChild(reactionsNode);
         }
 
@@ -168,7 +168,7 @@ function renderSingleRealMessage({
         stack.appendChild(bubble);
 
         if (message.reactions?.length) {
-            const reactionsNode = createMessageReactions(message.reactions);
+            const reactionsNode = createMessageReactions(message.reactions, currentUserId);
             stack.appendChild(reactionsNode);
         }
 
@@ -686,8 +686,8 @@ function getLocale() {
    REACTIONS
 ========================= */
 
-function createMessageReactions(reactions = []) {
-    const grouped = groupMessageReactions(reactions);
+function createMessageReactions(reactions = [], currentUserId) {
+    const grouped = groupMessageReactions(reactions, currentUserId);
 
     if (!grouped.length) return null;
 
@@ -697,6 +697,10 @@ function createMessageReactions(reactions = []) {
     grouped.forEach((item) => {
         const pill = document.createElement("div");
         pill.className = "message-reaction-pill";
+
+        if (item.reactedByMe) {
+            pill.classList.add("is-own-reaction");
+        }
 
         const emoji = document.createElement("span");
         emoji.className = "message-reaction-emoji";
@@ -714,7 +718,7 @@ function createMessageReactions(reactions = []) {
     return wrap;
 }
 
-function groupMessageReactions(reactions = []) {
+function groupMessageReactions(reactions = [], currentUserId) {
     const map = new Map();
 
     reactions.forEach((reaction) => {
@@ -724,11 +728,17 @@ function groupMessageReactions(reactions = []) {
         if (!map.has(emoji)) {
             map.set(emoji, {
                 emoji,
-                count: 0
+                count: 0,
+                reactedByMe: false
             });
         }
 
-        map.get(emoji).count += 1;
+        const item = map.get(emoji);
+        item.count += 1;
+
+        if (reaction.user_id === currentUserId) {
+            item.reactedByMe = true;
+        }
     });
 
     return Array.from(map.values());

@@ -1385,3 +1385,8 @@
     color: #555;
     line-height: 1;
 }
+
+.message-reaction-pill.is-own-reaction {
+    background: #e7f0ff;
+    border-color: #b7d0ff;
+}
