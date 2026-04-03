@@ -8,7 +8,8 @@ export function renderMessages({
     currentUserId,
     createImageAttachmentCard,
     createFileAttachmentCard,
-    scheduleScrollToBottom
+    scheduleScrollToBottom,
+    onReact
 }) {
     if (!messagesArea) return;
 
@@ -45,7 +46,8 @@ export function renderMessages({
             messages: sortedMessages,
             currentUserId,
             createImageAttachmentCard,
-            createFileAttachmentCard
+            createFileAttachmentCard,
+            onReact
         });
     });
 
@@ -95,7 +97,8 @@ function renderSingleRealMessage({
     messages,
     currentUserId,
     createImageAttachmentCard,
-    createFileAttachmentCard
+    createFileAttachmentCard,
+    onReact
 }) {
     const isOwn = message.sender_id === currentUserId;
     const hasText = !!String(message.content || "").trim();
@@ -111,6 +114,12 @@ function renderSingleRealMessage({
 
         const stack = document.createElement("div");
         stack.className = "message-stack";
+
+        const reactionPicker = createReactionPicker({
+            messageId: message.id,
+            onReact
+        });
+        stack.appendChild(reactionPicker);
 
         if (hasText) {
             const bubble = document.createElement("div");
@@ -150,6 +159,12 @@ function renderSingleRealMessage({
 
         const stack = document.createElement("div");
         stack.className = "message-stack";
+
+        const reactionPicker = createReactionPicker({
+            messageId: message.id,
+            onReact
+        });
+        stack.appendChild(reactionPicker);
 
         const bubble = document.createElement("div");
         bubble.className = `message-bubble message-bubble-attachment-only message-bubble-${groupPosition}`;
@@ -742,4 +757,30 @@ function groupMessageReactions(reactions = [], currentUserId) {
     });
 
     return Array.from(map.values());
+}
+
+function createReactionPicker({ messageId, onReact }) {
+    const emojis = ["❤️", "👍", "😂", "😮", "😢", "🔥"];
+
+    const wrap = document.createElement("div");
+    wrap.className = "message-reaction-picker";
+
+    emojis.forEach((emoji) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "message-reaction-picker-btn";
+        btn.textContent = emoji;
+
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            onReact?.({
+                messageId,
+                emoji
+            });
+        });
+
+        wrap.appendChild(btn);
+    });
+
+    return wrap;
 }

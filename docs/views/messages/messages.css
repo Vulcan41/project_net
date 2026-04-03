@@ -1390,3 +1390,51 @@
     background: #e7f0ff;
     border-color: #b7d0ff;
 }
+
+.message-stack {
+    position: relative;
+}
+
+.message-reaction-picker {
+    position: absolute;
+    top: -38px;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 6px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #e6e6e6;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px);
+    transition: opacity 180ms ease, transform 180ms ease;
+    z-index: 5;
+}
+
+.message-row:hover .message-reaction-picker {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.message-row.own .message-reaction-picker {
+    left: auto;
+    right: 0;
+}
+
+.message-reaction-picker-btn {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 4px;
+    border-radius: 999px;
+}
+
+.message-reaction-picker-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
