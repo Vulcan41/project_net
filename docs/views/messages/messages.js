@@ -1124,8 +1124,6 @@ function subscribeToActiveConversation() {
 
             const { data, error } = await supabase
                 .from("messages")
-            const { data, error } = await supabase
-                .from("messages")
                 .select(`
         id,
         sender_id,
