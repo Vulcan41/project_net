@@ -139,7 +139,10 @@ function renderSingleRealMessage({
 
         if (message.reactions?.length) {
             const reactionsNode = createMessageReactions(message.reactions, currentUserId);
-            stack.appendChild(reactionsNode);
+            if (reactionsNode) {
+                stack.appendChild(reactionsNode);
+                stack.classList.add("has-reactions");
+            }
         }
 
         if (showTime) {
@@ -184,7 +187,10 @@ function renderSingleRealMessage({
 
         if (message.reactions?.length) {
             const reactionsNode = createMessageReactions(message.reactions, currentUserId);
-            stack.appendChild(reactionsNode);
+            if (reactionsNode) {
+                stack.appendChild(reactionsNode);
+                stack.classList.add("has-reactions");
+            }
         }
 
         if (showTime) {
@@ -721,12 +727,7 @@ function createMessageReactions(reactions = [], currentUserId) {
         emoji.className = "message-reaction-emoji";
         emoji.textContent = item.emoji;
 
-        const count = document.createElement("span");
-        count.className = "message-reaction-count";
-        count.textContent = item.count;
-
         pill.appendChild(emoji);
-        pill.appendChild(count);
         wrap.appendChild(pill);
     });
 
