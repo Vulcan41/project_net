@@ -102,7 +102,9 @@ function renderSingleRealMessage({
 }) {
     const isOwn = message.sender_id === currentUserId;
     const hasText = !!String(message.content || "").trim();
-    const hasAttachments = Array.isArray(message.attachments) && message.attachments.length > 0;
+    const hasAttachments =
+    Array.isArray(message.attachments) &&
+    message.attachments.length > 0;
     const hasLinkPreview = !!message.link_url;
 
     const groupPosition = getMessageGroupPosition(messages, index);
@@ -123,18 +125,33 @@ function renderSingleRealMessage({
 
         if (hasText) {
             const bubble = document.createElement("div");
-            bubble.className = `message-bubble message-bubble-${groupPosition}`;
+            bubble.className = `message-bubble message-bubble-${groupPosition} message-bubble-reactable`;
 
             const content = document.createElement("div");
             content.className = "message-content";
             renderMessageContent(content, message.content);
 
             bubble.appendChild(content);
+
+            bubble.addEventListener("click", (e) => {
+                e.stopPropagation();
+
+                document.querySelectorAll(".message-reaction-picker-wrap.is-open").forEach((node) => {
+                    if (node !== reactionPicker) {
+                        node.classList.remove("is-open");
+                    }
+                });
+
+                reactionPicker.classList.toggle("is-open");
+            });
+
             stack.appendChild(bubble);
         }
 
         if (hasLinkPreview) {
-            stack.appendChild(createLinkPreviewCard(message));
+            const previewCard = createLinkPreviewCard(message);
+
+            stack.appendChild(previewCard);
         }
 
         if (message.reactions?.length) {
@@ -162,12 +179,6 @@ function renderSingleRealMessage({
 
         const stack = document.createElement("div");
         stack.className = "message-stack";
-
-        const reactionPicker = createReactionPicker({
-            messageId: message.id,
-            onReact
-        });
-        stack.appendChild(reactionPicker);
 
         const bubble = document.createElement("div");
         bubble.className = `message-bubble message-bubble-attachment-only message-bubble-${groupPosition}`;
@@ -766,11 +777,6 @@ function createReactionPicker({ messageId, onReact }) {
     const wrap = document.createElement("div");
     wrap.className = "message-reaction-picker-wrap";
 
-    const trigger = document.createElement("button");
-    trigger.type = "button";
-    trigger.className = "message-reaction-trigger";
-    trigger.textContent = "+";
-
     const picker = document.createElement("div");
     picker.className = "message-reaction-picker";
 
@@ -793,19 +799,6 @@ function createReactionPicker({ messageId, onReact }) {
         picker.appendChild(btn);
     });
 
-    trigger.addEventListener("click", (e) => {
-        e.stopPropagation();
-
-        document.querySelectorAll(".message-reaction-picker-wrap.is-open").forEach((node) => {
-            if (node !== wrap) {
-                node.classList.remove("is-open");
-            }
-        });
-
-        wrap.classList.toggle("is-open");
-    });
-
-    wrap.appendChild(trigger);
     wrap.appendChild(picker);
 
     if (!window.__messageReactionOutsideClickBound) {

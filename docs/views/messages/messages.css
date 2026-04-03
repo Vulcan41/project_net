@@ -1444,59 +1444,49 @@
 }
 
 /* =========================
-   HOVER REACTION TRIGGER + PICKER
+   CLICKABLE BUBBLES
+========================= */
+
+.message-bubble-reactable {
+    cursor: pointer;
+    transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.message-bubble-reactable:hover {
+    transform: scale(1.02);
+}
+
+/* =========================
+   REACTION PICKER
 ========================= */
 
 .message-reaction-picker-wrap {
     position: absolute;
-    top: -34px;
+    bottom: calc(100% + 8px);
     z-index: 6;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px);
+    transition: opacity 180ms ease, transform 180ms ease;
 }
 
 .message-row.own .message-reaction-picker-wrap {
-    left: 10px;   /* inner edge for own bubble */
+    left: 10px;
     right: auto;
 }
 
 .message-row.other .message-reaction-picker-wrap {
-    right: 10px;  /* inner edge for other bubble */
+    right: 10px;
     left: auto;
 }
 
-.message-reaction-trigger {
-    width: 24px;
-    height: 24px;
-    border: 1px solid #dddddd;
-    border-radius: 50%;
-    background: #ffffff;
-    color: #666666;
-    font-size: 16px;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.10);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(4px) scale(0.96);
-    transition: opacity 180ms ease, transform 180ms ease, background 140ms ease;
-}
-
-.message-stack:hover .message-reaction-trigger,
-.message-reaction-picker-wrap.is-open .message-reaction-trigger {
+.message-reaction-picker-wrap.is-open {
     opacity: 1;
     pointer-events: auto;
-    transform: translateY(0) scale(1);
-}
-
-.message-reaction-trigger:hover {
-    background: #f7f7f7;
+    transform: translateY(0);
 }
 
 .message-reaction-picker {
-    position: absolute;
-    top: 30px;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -1505,25 +1495,7 @@
     background: #ffffff;
     border: 1px solid #e6e6e6;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(4px);
-    transition: opacity 180ms ease, transform 180ms ease;
     white-space: nowrap;
-}
-
-.message-row.own .message-reaction-picker {
-    left: 0;
-}
-
-.message-row.other .message-reaction-picker {
-    right: 0;
-}
-
-.message-reaction-picker-wrap.is-open .message-reaction-picker {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
 }
 
 .message-reaction-picker-btn {
