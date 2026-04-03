@@ -117,40 +117,33 @@ function renderSingleRealMessage({
         const stack = document.createElement("div");
         stack.className = "message-stack";
 
-        const reactionPicker = createReactionPicker({
-            messageId: message.id,
-            reactions: message.reactions || [],
-            currentUserId,
-            onReact
-        });
-        stack.appendChild(reactionPicker);
-
-        let lastBubble = null;
+        let textBubble = null;
 
         if (hasText) {
             const bubble = document.createElement("div");
             bubble.className = `message-bubble message-bubble-${groupPosition} message-bubble-reactable`;
 
+            const reactionPicker = createReactionPicker({
+                messageId: message.id,
+                reactions: message.reactions || [],
+                currentUserId,
+                onReact
+            });
+
             const content = document.createElement("div");
             content.className = "message-content";
             renderMessageContent(content, message.content);
 
+            bubble.appendChild(reactionPicker);
             bubble.appendChild(content);
 
             bubble.addEventListener("click", (e) => {
                 e.stopPropagation();
-
-                document.querySelectorAll(".message-reaction-picker-wrap.is-open").forEach((node) => {
-                    if (node !== reactionPicker) {
-                        node.classList.remove("is-open");
-                    }
-                });
-
                 reactionPicker.classList.toggle("is-open");
             });
 
             stack.appendChild(bubble);
-            lastBubble = bubble;
+            textBubble = bubble;
         }
 
         if (hasLinkPreview) {
@@ -164,9 +157,9 @@ function renderSingleRealMessage({
                 currentUserId
             );
 
-            if (reactionsNode && lastBubble) {
-                lastBubble.appendChild(reactionsNode);
-                lastBubble.classList.add("has-reactions");
+            if (reactionsNode && textBubble) {
+                textBubble.appendChild(reactionsNode);
+                textBubble.classList.add("has-reactions");
             }
         }
 
