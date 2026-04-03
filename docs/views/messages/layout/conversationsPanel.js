@@ -260,3 +260,74 @@ function getConversationPreviewText({
 function interpolateCount(template, count) {
     return String(template).replace("{count}", String(count));
 }
+
+/* =========================
+   INCREMENTAL UPDATES
+========================= */
+
+export function getConversationRow(container, conversationId) {
+    if (!container) return null;
+    return container.querySelector(`[data-conversation-id="${conversationId}"]`);
+}
+
+export function updateConversationRow({
+    container,
+    conversationId,
+    latestMessage,
+    currentUserId,
+    lastReadAt,
+    labels = {}
+}) {
+    const row = getConversationRow(container, conversationId);
+    if (!row) return;
+
+    const previewEl = row.querySelector(".conversation-meta");
+    const badgeEl = row.querySelector(".conversation-new-badge");
+
+    if (!previewEl) return;
+
+    // =========================
+    // PREVIEW TEXT
+    // =========================
+    const previewText = getConversationPreviewText({
+        message: latestMessage,
+        currentUserId,
+        labels
+    });
+
+    previewEl.textContent = previewText;
+
+    // =========================
+    // UNREAD STATE
+    // =========================
+    const isUnread =
+    latestMessage &&
+    latestMessage.sender_id !== currentUserId &&
+    (!lastReadAt || new Date(latestMessage.created_at) > new Date(lastReadAt));
+
+    // row styling
+    row.classList.toggle("unread-conversation", !!isUnread);
+
+    // text bolding (preview)
+    previewEl.classList.toggle("unread", !!isUnread);
+
+    // badge visibility
+    if (badgeEl) {
+        badgeEl.style.display = isUnread ? "inline-block" : "none";
+    }
+}
+
+export function moveConversationRowToTop({
+    container,
+    conversationId
+}) {
+    const row = getConversationRow(container, conversationId);
+    if (!row || !container) return;
+
+    const first = container.firstElementChild;
+
+    if (first === row) return;
+
+    container.insertBefore(row, first);
+}
+

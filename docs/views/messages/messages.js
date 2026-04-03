@@ -5,10 +5,7 @@ import { t } from "../../core/i18n.js";
 import { initLightboxModal, openLightboxGallery } from "../../components/lightboxModal/lightboxModal.js";
 import { initComposer } from "./layout/composer.js";
 import { renderMessages, renderPendingMessages } from "./layout/chatHistory.js";
-import {
-renderConversationsPanel,
-getConversationItemByOtherUserId
-} from "./layout/conversationsPanel.js";
+import { renderConversationsPanel, getConversationItemByOtherUserId, updateConversationRow, moveConversationRowToTop } from "./layout/conversationsPanel.js";
 import { renderChatHeader } from "./layout/chatHeader.js";
 
 let conversationsLoadToken = 0;
@@ -155,16 +152,7 @@ async function loadConversations(targetUserId = null) {
         conversations: conversationsWithLatest,
         currentUserId,
         selectedConversationId,
-        labels: {
-            you: t("messages.you"),
-            newBadge: t("messages.new_badge"),
-            noMessagesYet: t("messages.no_messages_yet"),
-            sentImage: t("messages.sent_image"),
-            sentFile: t("messages.sent_file"),
-            sentImages: t("messages.sent_images", { count: "{count}" }),
-            sentFiles: t("messages.sent_files", { count: "{count}" }),
-            userFallback: t("messages.user_fallback")
-        },
+        labels: getConversationPanelLabels(),
         onConversationClick: async (item) => {
             activeConversationId = item.conversationId;
             activeConversationMessages = [];
@@ -926,6 +914,19 @@ async function fetchLinkPreview(url) {
     return res.json();
 }
 
+function getConversationPanelLabels() {
+    return {
+        you: t("messages.you"),
+        newBadge: t("messages.new_badge"),
+        noMessagesYet: t("messages.no_messages_yet"),
+        sentImage: t("messages.sent_image"),
+        sentFile: t("messages.sent_file"),
+        sentImages: t("messages.sent_images", { count: "{count}" }),
+        sentFiles: t("messages.sent_files", { count: "{count}" }),
+        userFallback: t("messages.user_fallback")
+    };
+}
+
 async function handleSendMessage(content) {
     const conversationId = activeConversationId;
     const hasAttachments = pendingAttachments.length > 0;
@@ -1045,7 +1046,34 @@ async function handleSendMessage(content) {
         }
 
         await loadMessages(conversationId);
-        await loadConversations();
+
+        const container = document.getElementById("conversations-list");
+
+        if (container) {
+            const latestMessageForSidebar = {
+                sender_id: currentUserId,
+                content: content || "",
+                created_at: new Date().toISOString(),
+                attachments: uploadedAttachments.map((a) => ({
+                    mime_type: a.mime_type,
+                    file_name: a.file_name
+                }))
+            };
+
+            updateConversationRow({
+                container,
+                conversationId,
+                latestMessage: latestMessageForSidebar,
+                currentUserId,
+                lastReadAt: new Date().toISOString(),
+                labels: getConversationPanelLabels()
+            });
+
+            moveConversationRowToTop({
+                container,
+                conversationId
+            });
+        }
 
         return true;
     } catch (err) {
@@ -1140,7 +1168,27 @@ function subscribeToActiveConversation() {
                 scheduleScrollToBottom
             });
 
-            await loadConversations();
+            const container = document.getElementById("conversations-list");
+
+            if (container) {
+                const activeConversationIsOpen = activeConversationId === conversationId;
+
+                updateConversationRow({
+                    container,
+                    conversationId,
+                    latestMessage: data,
+                    currentUserId,
+                    lastReadAt: activeConversationIsOpen
+                    ? new Date().toISOString()
+                    : null,
+                    labels: getConversationPanelLabels()
+                });
+
+                moveConversationRowToTop({
+                    container,
+                    conversationId
+                });
+            }
         }
     )
         .subscribe();
