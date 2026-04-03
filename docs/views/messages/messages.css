@@ -305,7 +305,7 @@
 
 .message-row.own .message-stack {
     align-items: flex-end;
-    margin-right: 8px;
+    margin-right: 0;
 }
 
 .message-row.other .message-stack {
