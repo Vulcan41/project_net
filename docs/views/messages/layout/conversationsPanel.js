@@ -1,32 +1,30 @@
 import { DEFAULT_AVATAR } from "../../../state/userStore.js";
 
-export function applyFadeIfOverflow(element) {
-    if (!element) return;
-
-    requestAnimationFrame(() => {
-        const isOverflowing = element.scrollWidth > element.clientWidth + 1;
-
-        if (isOverflowing) {
-            element.classList.add("is-overflowing");
-        } else {
-            element.classList.remove("is-overflowing");
-        }
-    });
-}
-
 export function renderConversationsPanel({
     container,
-    items,
+    conversations,
+    currentUserId,
+    selectedConversationId,
+    labels,
     onConversationClick
 }) {
     if (!container) return;
 
     container.innerHTML = "";
 
+    const items = buildConversationItems({
+        conversations,
+        currentUserId,
+        selectedConversationId,
+        labels
+    });
+
     items.forEach((item) => {
         const row = createConversationRow(item, onConversationClick);
         container.appendChild(row);
     });
+
+    return items;
 }
 
 export function clearConversationSelection(container) {
@@ -35,6 +33,53 @@ export function clearConversationSelection(container) {
     container
         .querySelectorAll("#conversations-list > div")
         .forEach((el) => el.classList.remove("selected-conversation"));
+}
+
+export function getConversationItemByOtherUserId(items = [], otherUserId) {
+    return items.find((item) => item.otherUserId === otherUserId) || null;
+}
+
+function buildConversationItems({
+    conversations = [],
+    currentUserId,
+    selectedConversationId,
+    labels = {}
+}) {
+    return conversations
+        .map((conversation) => {
+        const friendship = conversation.friendship;
+        if (!friendship) return null;
+
+        const isRequester = friendship.requester_id === currentUserId;
+        const otherUser = isRequester ? friendship.receiver : friendship.requester;
+        const latestMessage = conversation.latestMessage || null;
+
+        return {
+            conversationId: conversation.id,
+            otherUserId: otherUser?.id || null,
+            status: friendship.status,
+            fullName:
+            otherUser?.full_name ||
+            otherUser?.username ||
+            labels.userFallback ||
+            "User",
+            username: otherUser?.username || "user",
+            avatarUrl: otherUser?.avatar_url || DEFAULT_AVATAR,
+            previewText: getConversationPreviewText({
+                message: latestMessage,
+                currentUserId,
+                labels
+            }),
+            isUnread: isConversationUnread({
+                conversation,
+                latestMessage,
+                currentUserId
+            }),
+            isSelected: conversation.id === selectedConversationId,
+            newBadgeText: labels.newBadge || "New"
+        };
+    })
+        .filter(Boolean);
 }
 
 function createConversationRow(item, onConversationClick) {
@@ -74,10 +119,6 @@ function createConversationRow(item, onConversationClick) {
     name.appendChild(nameText);
     name.appendChild(newBadge);
 
-    const username = document.createElement("div");
-    username.className = "conversation-username";
-    username.textContent = `@${item.username || "user"}`;
-
     const meta = document.createElement("div");
     meta.className = "conversation-meta";
     meta.textContent = item.previewText || "";
@@ -95,8 +136,127 @@ function createConversationRow(item, onConversationClick) {
     row.appendChild(text);
 
     row.addEventListener("click", async () => {
-        onConversationClick?.(item, row);
+        updateRowVisualState(row);
+        await onConversationClick?.(item, row);
     });
 
     return row;
+}
+
+function updateRowVisualState(row) {
+    if (!row) return;
+
+    const container = row.parentElement;
+    if (container) {
+        clearConversationSelection(container);
+    }
+
+    row.classList.add("selected-conversation");
+    row.classList.remove("unread-conversation");
+
+    const metaEl = row.querySelector(".conversation-meta");
+    if (metaEl) {
+        metaEl.classList.remove("unread");
+    }
+
+    const badge = row.querySelector(".conversation-new-badge");
+    if (badge) {
+        badge.style.display = "none";
+    }
+}
+
+function applyFadeIfOverflow(element) {
+    if (!element) return;
+
+    requestAnimationFrame(() => {
+        const isOverflowing = element.scrollWidth > element.clientWidth + 1;
+
+        if (isOverflowing) {
+            element.classList.add("is-overflowing");
+        } else {
+            element.classList.remove("is-overflowing");
+        }
+    });
+}
+
+function isConversationUnread({
+    conversation,
+    latestMessage,
+    currentUserId
+}) {
+    if (!latestMessage) return false;
+    if (latestMessage.sender_id === currentUserId) return false;
+
+    const lastReadAt = conversation.last_read_at;
+
+    return !lastReadAt ||
+    new Date(latestMessage.created_at) > new Date(lastReadAt);
+}
+
+function getConversationPreviewText({
+    message,
+    currentUserId,
+    labels = {}
+}) {
+    if (!message) {
+        return labels.noMessagesYet || "No messages yet";
+    }
+
+    const content = String(message?.content || "").trim();
+    const attachments = message?.attachments || [];
+    const isOwnMessage = message.sender_id === currentUserId;
+
+    if (content) {
+        return isOwnMessage
+        ? `${labels.you || "You"}: ${content}`
+        : content;
+    }
+
+    if (!attachments.length) {
+        return isOwnMessage
+        ? `${labels.you || "You"}:`
+        : labels.noMessagesYet || "No messages yet";
+    }
+
+    const imageCount = attachments.filter((a) =>
+    String(a?.mime_type || "").toLowerCase().startsWith("image/")
+    ).length;
+
+    const totalCount = attachments.length;
+
+    if (totalCount === 1) {
+        if (imageCount === 1) {
+            return isOwnMessage
+            ? `${labels.you || "You"}: ${labels.sentImage || "Sent an image"}`
+            : labels.sentImage || "Sent an image";
+        }
+
+        return isOwnMessage
+        ? `${labels.you || "You"}: ${labels.sentFile || "Sent a file"}`
+        : labels.sentFile || "Sent a file";
+    }
+
+    if (imageCount === totalCount) {
+        const text = interpolateCount(
+            labels.sentImages || "Sent {count} images",
+            totalCount
+        );
+
+        return isOwnMessage
+        ? `${labels.you || "You"}: ${text}`
+        : text;
+    }
+
+    const text = interpolateCount(
+        labels.sentFiles || "Sent {count} files",
+        totalCount
+    );
+
+    return isOwnMessage
+    ? `${labels.you || "You"}: ${text}`
+    : text;
+}
+
+function interpolateCount(template, count) {
+    return String(template).replace("{count}", String(count));
 }

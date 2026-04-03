@@ -7,7 +7,7 @@ import { initComposer } from "./layout/composer.js";
 import { renderMessages, renderPendingMessages } from "./layout/chatHistory.js";
 import {
 renderConversationsPanel,
-clearConversationSelection
+getConversationItemByOtherUserId
 } from "./layout/conversationsPanel.js";
 
 let conversationsLoadToken = 0;
@@ -139,66 +139,32 @@ async function loadConversations(targetUserId = null) {
     if (localLoadToken !== conversationsLoadToken) return;
     if (!container.isConnected || !info.isConnected) return;
 
-    container.innerHTML = "";
+    const conversationsWithLatest = data.map((conversation) => ({
+        ...conversation,
+        latestMessage: latestMessagesMap.get(conversation.id) || null
+    }));
 
     info.textContent =
-    data.length === 1
+    conversationsWithLatest.length === 1
     ? t("messages.conversation_count_one", { count: 1 })
-    : t("messages.conversation_count_other", { count: data.length });
+    : t("messages.conversation_count_other", { count: conversationsWithLatest.length });
 
-    const items = data
-        .map((conversation) => {
-        const friendship = conversation.friendship;
-        if (!friendship) return null;
-
-        const isRequester = friendship.requester_id === currentUserId;
-        const otherUser = isRequester ? friendship.receiver : friendship.requester;
-
-        const latestMessage = latestMessagesMap.get(conversation.id);
-        const isOwnMessage = latestMessage?.sender_id === currentUserId;
-
-        const previewText = latestMessage
-        ? getConversationPreviewText(latestMessage, isOwnMessage)
-        : t("messages.no_messages_yet");
-
-        const lastReadAt = conversation.last_read_at;
-
-        const isUnread = !!latestMessage &&
-        latestMessage.sender_id !== currentUserId &&
-        (!lastReadAt || new Date(latestMessage.created_at) > new Date(lastReadAt));
-
-        return {
-            conversationId: conversation.id,
-            otherUserId: otherUser?.id || null,
-            status: friendship.status,
-            fullName:
-            otherUser?.full_name ||
-            otherUser?.username ||
-            t("messages.user_fallback"),
-            username: otherUser?.username || "user",
-            avatarUrl: otherUser?.avatar_url || DEFAULT_AVATAR,
-            previewText,
-            isUnread,
-            isSelected: conversation.id === selectedConversationId,
-            newBadgeText: t("messages.new_badge")
-        };
-    })
-        .filter(Boolean);
-
-    renderConversationsPanel({
+    const items = renderConversationsPanel({
         container,
-        items,
-        onConversationClick: async (item, row) => {
-            clearConversationSelection(container);
-            row.classList.add("selected-conversation");
-
-            const metaEl = row.querySelector(".conversation-meta");
-            if (metaEl) metaEl.classList.remove("unread");
-
-            row.classList.remove("unread-conversation");
-            const badge = row.querySelector(".conversation-new-badge");
-            if (badge) badge.style.display = "none";
-
+        conversations: conversationsWithLatest,
+        currentUserId,
+        selectedConversationId,
+        labels: {
+            you: t("messages.you"),
+            newBadge: t("messages.new_badge"),
+            noMessagesYet: t("messages.no_messages_yet"),
+            sentImage: t("messages.sent_image"),
+            sentFile: t("messages.sent_file"),
+            sentImages: t("messages.sent_images", { count: "{count}" }),
+            sentFiles: t("messages.sent_files", { count: "{count}" }),
+            userFallback: t("messages.user_fallback")
+        },
+        onConversationClick: async (item) => {
             activeConversationId = item.conversationId;
             activeConversationMessages = [];
             renderedMessageIds.clear();
@@ -216,7 +182,7 @@ async function loadConversations(targetUserId = null) {
                 status: item.status,
                 fullName: item.fullName,
                 username: item.username,
-                avatarUrl: item.avatarUrl
+                avatarUrl: item.avatarUrl || DEFAULT_AVATAR
             };
 
             renderChatSkeleton(chatPanel, activeConversationData);
@@ -243,7 +209,7 @@ async function loadConversations(targetUserId = null) {
     });
 
     if (targetUserId) {
-        const targetItem = items.find((item) => item.otherUserId === targetUserId);
+        const targetItem = getConversationItemByOtherUserId(items, targetUserId);
         if (targetItem) {
             const targetRow = container.querySelector(
                 `[data-conversation-id="${targetItem.conversationId}"]`
@@ -253,49 +219,6 @@ async function loadConversations(targetUserId = null) {
             }
         }
     }
-}
-
-function getConversationPreviewText(message, isOwnMessage) {
-    const content = String(message?.content || "").trim();
-    const attachments = message?.attachments || [];
-
-    if (content) {
-        return isOwnMessage ? t("messages.you") + ": " + content : content;
-    }
-
-    if (!attachments.length) {
-        return isOwnMessage
-        ? t("messages.you") + ":"
-        : t("messages.no_messages_yet");
-    }
-
-    const imageCount = attachments.filter((a) =>
-    String(a?.mime_type || "").toLowerCase().startsWith("image/")
-    ).length;
-
-    const totalCount = attachments.length;
-
-    if (totalCount === 1) {
-        if (imageCount === 1) {
-            return isOwnMessage
-            ? t("messages.you") + ": " + t("messages.sent_image")
-            : t("messages.sent_image");
-        }
-
-        return isOwnMessage
-        ? t("messages.you") + ": " + t("messages.sent_file")
-        : t("messages.sent_file");
-    }
-
-    if (imageCount === totalCount) {
-        return isOwnMessage
-        ? t("messages.you") + ": " + t("messages.sent_images", { count: totalCount })
-        : t("messages.sent_images", { count: totalCount });
-    }
-
-    return isOwnMessage
-    ? t("messages.you") + ": " + t("messages.sent_files", { count: totalCount })
-    : t("messages.sent_files", { count: totalCount });
 }
 
 async function loadLatestMessagesMap(conversationIds) {
