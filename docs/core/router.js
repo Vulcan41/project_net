@@ -59,7 +59,7 @@ export async function loadView(name, param = null) {
 
     try {
 
-        const module = await import(jsPath);
+        const module = await import(/* @vite-ignore */ jsPath);
 
         const initFunction =
         "init" + folder.charAt(0).toUpperCase() + folder.slice(1);

@@ -194,7 +194,7 @@ async function loadSection(section) {
     document.head.appendChild(link);
 
     try {
-        const module = await import(jsPath);
+        const module = await import(/* @vite-ignore */ jsPath);
 
         const initFunction =
         "init" + section.charAt(0).toUpperCase() + section.slice(1);

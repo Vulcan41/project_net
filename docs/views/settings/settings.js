@@ -47,7 +47,7 @@ async function loadSettingsPanelHtml(filePath) {
 
 async function loadSettingsPanelScript(filePath) {
     try {
-        const module = await import(filePath);
+        const module = await import(/* @vite-ignore */ filePath);
         return module;
     } catch (error) {
         console.error("Settings panel script load failed:", error);
