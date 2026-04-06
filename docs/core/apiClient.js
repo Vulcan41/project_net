@@ -1,4 +1,4 @@
-const BASE_URL = '';
+const BASE_URL = 'https://noesisflowapi-production.up.railway.app';
 
 export async function apiRequest(path, options = {}) {
   const url = BASE_URL ? `${BASE_URL}${path}` : path;
