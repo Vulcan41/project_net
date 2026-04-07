@@ -50,7 +50,7 @@ export default function NotificationsPage() {
               style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', padding: '1rem', border: '1px solid #eee', borderRadius: '8px', background: n.read ? 'white' : '#f0f7ff', cursor: n.read ? 'default' : 'pointer' }}>
               <Avatar profile={n.sender} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.95rem' }}>{n.link_title || n.message_type || n.type}</div>
+                <div style={{ fontSize: '0.95rem' }}>{n.type}</div>
                 <div style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '0.25rem' }}>{new Date(n.created_at).toLocaleString()}</div>
               </div>
               {!n.read && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#246e9d', flexShrink: 0, marginTop: '0.4rem' }} />}

@@ -6,9 +6,7 @@ export async function getMyNotifications() {
   const { data, error } = await supabase
     .from('notifications')
     .select(`
-      id, type, read, created_at,
-      link_url, link_title, link_description, link_image, link_site,
-      message_type, friendship_id, project_id,
+      id, type, read, created_at, friendship_id, project_id,
       sender:sender_id (id, username, full_name, avatar_url)
     `)
     .eq('receiver_id', user.id)
