@@ -62,7 +62,7 @@ export default function MessagesPage() {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, async payload => {
         const { data } = await supabase
           .from('messages')
-          .select('id, content, message_type, created_at, sender_id, message_attachments (id, object_key, file_name, mime_type, size_bytes)')
+          .select('id, content, message_type, created_at, sender_id, link_url, link_title, link_description, link_image, message_attachments (id, object_key, file_name, mime_type, size_bytes)')
           .eq('id', payload.new.id)
           .single()
         if (data) {

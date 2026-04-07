@@ -54,6 +54,7 @@ export async function getMessages(conversationId) {
     .from('messages')
     .select(`
       id, content, message_type, created_at, edited_at, deleted_at, sender_id,
+      link_url, link_title, link_description, link_image,
       message_attachments (id, object_key, file_name, mime_type, size_bytes)
     `)
     .eq('conversation_id', conversationId)
@@ -78,7 +79,7 @@ export async function sendMessage({ conversationId, content, attachments = [] })
 
   const { data, error } = await supabase
     .from('messages')
-    .insert({ conversation_id: conversationId, sender_id: user.id, content: content || '', message_type: attachments.length ? 'attachment' : 'text' })
+    .insert({ conversation_id: conversationId, sender_id: user.id, content: content || '', message_type: attachments.length ? 'file' : 'text' })
     .select()
     .single()
   if (error) throw error
