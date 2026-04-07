@@ -53,11 +53,10 @@ export async function getMessages(conversationId) {
   const { data, error } = await supabase
     .from('messages')
     .select(`
-      id, content, type, created_at, edited_at, deleted_at, sender_id,
+      id, content, message_type, created_at, edited_at, deleted_at, sender_id,
       message_attachments (id, object_key, file_name, mime_type, size_bytes)
     `)
     .eq('conversation_id', conversationId)
-    .is('deleted_at', null)
     .order('created_at', { ascending: true })
   if (error) throw error
   return data

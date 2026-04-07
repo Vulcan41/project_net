@@ -60,7 +60,7 @@ export default function MessagesPage() {
     realtimeRef.current = supabase
       .channel(`messages:${conversationId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, async payload => {
-        const { data } = await supabase.from('messages').select('id, content, type, created_at, sender_id, message_attachments (id, object_key, file_name, mime_type, size_bytes)').eq('id', payload.new.id).single()
+        const { data } = await supabase.from('messages').select('id, content, message_type, created_at, sender_id, message_attachments (id, object_key, file_name, mime_type, size_bytes)').eq('id', payload.new.id).single()
         if (data) {
           setMessages(prev => {
             if (prev.find(m => m.id === data.id)) return prev
