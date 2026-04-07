@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { signIn } from './authService.js'
 import RegisterModal from './RegisterModal.jsx'
 
@@ -41,6 +41,9 @@ export default function LoginPage() {
         {error && <p style={{ color: 'red', margin: 0 }}>{error}</p>}
         <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }} />
         <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }} />
+        <div style={{ textAlign: 'right', marginTop: '-0.5rem' }}>
+          <Link to="/forgot-password" style={{ fontSize: '0.85rem', color: '#246e9d', textDecoration: 'none' }}>Forgot password?</Link>
+        </div>
         <button onClick={handleAction} disabled={loading} style={{ padding: '0.75rem', background: '#246e9d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
           {loading ? '...' : isLogin ? 'Log in' : 'Sign up'}
         </button>

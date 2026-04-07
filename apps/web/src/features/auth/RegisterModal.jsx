@@ -26,7 +26,7 @@ export default function RegisterModal({ email, password, onClose }) {
         avatarUrl = pub.publicUrl
       }
       await supabase.from('profiles').upsert({ id: userId, username, full_name: fullName, bio: bio || null, avatar_url: avatarUrl })
-      window.location.href = '/home'
+      window.location.href = '/verify-email'
     } catch (err) {
       setError(err.message)
     } finally {
