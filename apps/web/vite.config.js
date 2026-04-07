@@ -18,6 +18,8 @@ export default defineConfig(({ mode }) => {
         '@features': resolve(__dirname, 'src/features'),
         '@assets': resolve(__dirname, 'assets'),
         '@locales': resolve(__dirname, 'src/locales'),
+        '@shared': resolve(__dirname, 'src/shared'),
+        '@app': resolve(__dirname, 'src/app'),
       }
     },
     build: {
