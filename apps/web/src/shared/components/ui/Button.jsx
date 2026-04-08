@@ -12,7 +12,7 @@ export default function Button({
   const base = {
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
     border: 'none', borderRadius: 'var(--radius)', cursor: disabled ? 'not-allowed' : 'pointer',
-    fontFamily: 'inherit', fontWeight: '500', transition: 'opacity 0.15s, background 0.15s',
+    fontFamily: 'inherit', fontWeight: '600', transition: 'opacity 0.15s, background 0.15s',
     opacity: disabled ? 0.5 : 1, width: fullWidth ? '100%' : 'auto',
     whiteSpace: 'nowrap',
   }
