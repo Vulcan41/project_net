@@ -92,7 +92,7 @@ function FriendRow({ friend, online, collapsed, onClick }) {
       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
       <div style={{ position: 'relative', flexShrink: 0 }}>
-        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '0.8rem' }}>
+        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#246e9d', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '0.8rem' }}>
           {friend.avatar_url ? <img src={friend.avatar_url} alt={friend.full_name} crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
         </div>
         <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', borderRadius: '50%', background: online ? '#3ba55c' : '#747f8d', border: '2px solid var(--bg-card)' }} />
