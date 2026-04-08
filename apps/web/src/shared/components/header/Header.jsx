@@ -34,7 +34,7 @@ export default function Header() {
         </button>
         <button onClick={() => navigate('/notifications')} title="Notifications"
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
-          <img src="/assets/2222.png" alt="Notifications" style={{ width: '22px', height: '22px', opacity: 0.75 }} />
+          <img src="/assets/2222.png" alt="Notifications" style={{ width: '18px', height: '18px', opacity: 1 }} />
         </button>
         {profile && <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text)' }}>{profile.credits ?? 0} ♦</span>}
         <div style={{ position: 'relative' }}>
