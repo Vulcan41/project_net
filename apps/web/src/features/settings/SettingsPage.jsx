@@ -232,7 +232,7 @@ function AppearanceTab() {
 
   function handleAccent(val) {
     setAccentColor(val)
-    document.documentElement.style.setProperty('--accent', val)
+    document.documentElement.style.setProperty('--btn-primary', val)
   }
 
   return (

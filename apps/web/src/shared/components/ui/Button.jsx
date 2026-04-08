@@ -24,7 +24,7 @@ export default function Button({
   }
 
   const variants = {
-    primary:   { background: 'var(--accent)', color: 'white' },
+    primary:   { background: 'var(--btn-primary)', color: 'var(--btn-primary-text)' },
     secondary: { background: 'var(--bg-secondary)', color: 'var(--text)', border: '1px solid var(--border)' },
     danger:    { background: 'var(--danger)', color: 'white' },
     ghost:     { background: 'transparent', color: 'var(--text)', border: '1px solid var(--border)' },
