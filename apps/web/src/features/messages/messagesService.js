@@ -95,7 +95,7 @@ export async function sendMessage({ conversationId, content, attachments = [] })
 export async function getOrCreateConversation(targetUserId) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
-  const { data, error } = await supabase.rpc('get_or_create_direct_conversation', { p_other_user_id: targetUserId })
+  const { data, error } = await supabase.rpc('get_or_create_conversation', { p_user_id: targetUserId })
   if (error) throw error
   return data
 }
