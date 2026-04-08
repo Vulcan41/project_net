@@ -33,6 +33,7 @@ export default function MessagesPage() {
       setOther(otherProfile)
 
       const convId = await getOrCreateConversation(targetUserId)
+      if (!convId) { setLoading(false); return }
       setConv({ id: convId })
 
       const msgs = await getMessages(convId)

@@ -95,9 +95,23 @@ export async function sendMessage({ conversationId, content, attachments = [] })
 export async function getOrCreateConversation(targetUserId) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
-  const { data, error } = await supabase.rpc('get_or_create_conversation', { p_user_id: targetUserId })
-  if (error) throw error
-  return data
+
+  const { data: myConvs } = await supabase
+    .from('conversation_participants')
+    .select('conversation_id')
+    .eq('user_id', user.id)
+
+  const myConvIds = myConvs?.map(c => c.conversation_id) ?? []
+  if (!myConvIds.length) return null
+
+  const { data: shared } = await supabase
+    .from('conversation_participants')
+    .select('conversation_id')
+    .eq('user_id', targetUserId)
+    .in('conversation_id', myConvIds)
+
+  if (shared?.length) return shared[0].conversation_id
+  return null
 }
 
 export async function markConversationRead(conversationId) {
