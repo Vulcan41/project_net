@@ -226,9 +226,11 @@ function PrivacyTab({ settings, onUpdate }) {
 }
 
 function AppearanceTab() {
-  const [accentColor, setAccentColor] = useState(
-    getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#000000'
-  )
+  const [accentColor, setAccentColor] = useState('#000000')
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--btn-primary', '#000000')
+  }, [])
 
   function handleAccent(val) {
     setAccentColor(val)
