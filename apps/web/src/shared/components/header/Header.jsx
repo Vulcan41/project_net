@@ -14,6 +14,7 @@ export default function Header() {
       if (!user) return
       const { data } = await supabase.from('profiles').select('username, avatar_url, credits').eq('id', user.id).single()
       setProfile(data)
+      console.log('Header profile loaded:', data)
     }
     loadProfile()
   }, [])
