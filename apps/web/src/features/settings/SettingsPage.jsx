@@ -230,11 +230,22 @@ function AppearanceTab() {
 
   useEffect(() => {
     document.documentElement.style.setProperty('--btn-primary', '#000000')
+    document.documentElement.style.setProperty('--icon-active-bg', '#000000')
   }, [])
 
   function handleAccent(val) {
     setAccentColor(val)
-    document.documentElement.style.setProperty('--btn-primary', val)
+    // Original color for sidebar icon
+    document.documentElement.style.setProperty('--icon-active-bg', val)
+    // Darkened version for buttons (ensures white text is readable)
+    const canvas = document.createElement('canvas')
+    canvas.width = 1; canvas.height = 1
+    const ctx = canvas.getContext('2d')
+    ctx.fillStyle = val
+    ctx.fillRect(0, 0, 1, 1)
+    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data
+    const darken = 0.7
+    document.documentElement.style.setProperty('--btn-primary', `rgb(${Math.floor(r*darken)},${Math.floor(g*darken)},${Math.floor(b*darken)})`)
   }
 
   return (
