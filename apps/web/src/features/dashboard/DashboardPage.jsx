@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Button from '@shared/components/ui/Button.jsx'
 import { getMyProjects } from './dashboardService.js'
 import { supabase } from '@core/supabase.js'
 
@@ -30,9 +31,7 @@ export default function DashboardPage() {
           <h1 style={{ margin: 0 }}>Dashboard</h1>
           <p style={{ margin: '0.25rem 0 0', color: '#888' }}>Your projects collection</p>
         </div>
-        <button onClick={handleNewProject} style={{ padding: '0.6rem 1.2rem', background: 'var(--btn-primary)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>
-          + New Project
-        </button>
+        <Button onClick={handleNewProject}>+ New Project</Button>
       </div>
 
       {projects.length === 0 ? (
