@@ -43,7 +43,7 @@ export default function ProfileOtherPage() {
     <div style={{ padding: '2rem', maxWidth: '600px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#246e9d', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '2rem', flexShrink: 0 }}>
-          {profile.avatar_url ? <img src={profile.avatar_url} alt={profile.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
+          {profile.avatar_url ? <img src={profile.avatar_url} alt={profile.full_name} crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
         </div>
         <div>
           <h1 style={{ margin: 0 }}>{profile.full_name}</h1>
