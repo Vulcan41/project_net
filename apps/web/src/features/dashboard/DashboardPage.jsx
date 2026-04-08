@@ -30,7 +30,7 @@ export default function DashboardPage() {
           <h1 style={{ margin: 0 }}>Dashboard</h1>
           <p style={{ margin: '0.25rem 0 0', color: '#888' }}>Your projects collection</p>
         </div>
-        <button onClick={handleNewProject} style={{ padding: '0.6rem 1.2rem', background: 'var(--btn-dark)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>
+        <button onClick={handleNewProject} style={{ padding: '0.6rem 1.2rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>
           + New Project
         </button>
       </div>
