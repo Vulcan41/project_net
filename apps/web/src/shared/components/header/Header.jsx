@@ -24,7 +24,7 @@ export default function Header() {
   }
 
   return (
-    <header style={{ height: '52px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.25rem', background: 'var(--bg-card)', flexShrink: 0, zIndex: 100 }}>
+    <header style={{ height: '40px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.25rem', background: 'var(--bg-card)', flexShrink: 0, zIndex: 100 }}>
       <div onClick={() => navigate('/home')} style={{ fontWeight: '800', fontSize: '1.1rem', letterSpacing: '0.08em', cursor: 'pointer', color: 'var(--text)' }}>NOESIS</div>
       <input placeholder="Search..." style={{ padding: '0.35rem 1rem', border: '1px solid var(--border)', borderRadius: '20px', width: '240px', outline: 'none', background: 'var(--input-bg)', color: 'var(--text)', fontSize: '0.9rem' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
