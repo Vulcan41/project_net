@@ -29,10 +29,13 @@ export default function Header() {
       <input placeholder="Search..." style={{ padding: '0.35rem 1rem', border: '1px solid var(--border)', borderRadius: '20px', width: '240px', outline: 'none', background: 'var(--input-bg)', color: 'var(--text)', fontSize: '0.9rem' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <button onClick={() => navigate('/home')} title="Dashboard"
-          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', color: 'var(--text)', padding: '0.25rem' }}>
-          🏠
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
+          <img src="/assets/home_icon.png" alt="Home" style={{ width: '22px', height: '22px', opacity: 0.75 }} />
         </button>
-        <button onClick={() => navigate('/notifications')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', color: 'var(--text)' }} title="Notifications">🔔</button>
+        <button onClick={() => navigate('/notifications')} title="Notifications"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
+          <img src="/assets/2222.png" alt="Notifications" style={{ width: '22px', height: '22px', opacity: 0.75 }} />
+        </button>
         {profile && <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text)' }}>{profile.credits ?? 0} ♦</span>}
         <div style={{ position: 'relative' }}>
           <div onClick={() => setDropdownOpen(o => !o)} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'var(--accent)', cursor: 'pointer', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '0.85rem' }}>
