@@ -22,9 +22,9 @@ export default function Header() {
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
           <img src="/assets/home_icon.png" alt="Home" style={{ width: '18px', height: '18px', opacity: 1 }} />
         </button>
-        <button onClick={() => navigate('/notifications')} title="Notifications"
+        <button onClick={() => navigate('/settings')} title="Settings"
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
-          <img src="/assets/2222.png" alt="Notifications" style={{ width: '18px', height: '18px', opacity: 1 }} />
+          <img src="/assets/3333.png" alt="Settings" style={{ width: '18px', height: '18px' }} />
         </button>
         {profile && <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text)' }}>{profile.credits ?? 0} ♦</span>}
         <div style={{ position: 'relative' }}>
