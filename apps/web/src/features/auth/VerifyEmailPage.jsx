@@ -29,7 +29,7 @@ export default function VerifyEmailPage() {
             <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📧</div>
             <h2 style={{ marginBottom: '0.5rem' }}>Check your email</h2>
             <p style={{ color: '#888', marginBottom: '1.5rem' }}>We sent you a verification link. Click it to activate your account.</p>
-            <Link to="/" style={{ color: '#246e9d', textDecoration: 'none' }}>Back to login</Link>
+            <Link to="/" style={{ color: 'var(--accent)', textDecoration: 'none' }}>Back to login</Link>
           </>
         )}
         {status === 'verified' && (

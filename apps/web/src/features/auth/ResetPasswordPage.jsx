@@ -45,7 +45,7 @@ export default function ResetPasswordPage() {
         <input type="password" placeholder="Confirm password" value={confirm} onChange={e => setConfirm(e.target.value)}
           style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }} />
         <button onClick={handleReset} disabled={loading}
-          style={{ padding: '0.75rem', background: '#246e9d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+          style={{ padding: '0.75rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
           {loading ? 'Saving...' : 'Set new password'}
         </button>
       </div>

@@ -30,11 +30,11 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages }
               <div style={{ textAlign: 'center', fontSize: '0.75rem', color: '#aaa', margin: '0.75rem 0' }}>{new Date(msg.created_at).toLocaleDateString()}</div>
             )}
             <div style={{ display: 'flex', justifyContent: isOwn ? 'flex-end' : 'flex-start', marginBottom: '0.15rem' }}>
-              <div style={{ maxWidth: '65%', padding: '0.5rem 0.85rem', borderRadius: isOwn ? '18px 18px 4px 18px' : '18px 18px 18px 4px', background: isOwn ? '#246e9d' : '#f2f3f5', color: isOwn ? 'white' : '#111', fontSize: '0.92rem', opacity: isPending ? 0.6 : 1 }}>
+              <div style={{ maxWidth: '65%', padding: '0.5rem 0.85rem', borderRadius: isOwn ? '18px 18px 4px 18px' : '18px 18px 18px 4px', background: isOwn ? 'var(--accent)' : '#f2f3f5', color: isOwn ? 'white' : 'var(--text)', fontSize: '0.92rem', opacity: isPending ? 0.6 : 1 }}>
                 {msg.content && <div>{msg.content}</div>}
                 {msg.link_url && (
                   <a href={msg.link_url} target="_blank" rel="noopener noreferrer"
-                    style={{ display: 'block', marginTop: '0.4rem', fontSize: '0.82rem', color: isOwn ? 'rgba(255,255,255,0.85)' : '#246e9d', wordBreak: 'break-all' }}>
+                    style={{ display: 'block', marginTop: '0.4rem', fontSize: '0.82rem', color: isOwn ? 'rgba(255,255,255,0.85)' : 'var(--accent)', wordBreak: 'break-all' }}>
                     {msg.link_title || msg.link_url}
                   </a>
                 )}

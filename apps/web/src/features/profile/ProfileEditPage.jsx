@@ -51,7 +51,7 @@ export default function ProfileEditPage() {
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: '#246e9d', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '1.5rem', flexShrink: 0 }}>
+          <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'var(--accent)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '1.5rem', flexShrink: 0 }}>
             {avatarPreview ? <img src={avatarPreview} alt="avatar" crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
           </div>
           <input type="file" accept="image/*" onChange={handleAvatarChange} />
@@ -61,7 +61,7 @@ export default function ProfileEditPage() {
         <textarea placeholder="Bio" value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', minHeight: '80px' }} />
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button onClick={() => navigate('/profile')} style={{ flex: 1, padding: '0.6rem' }}>Cancel</button>
-          <button onClick={handleSave} disabled={saving} style={{ flex: 1, padding: '0.6rem', background: '#246e9d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          <button onClick={handleSave} disabled={saving} style={{ flex: 1, padding: '0.6rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
             {saving ? 'Saving...' : 'Save'}
           </button>
         </div>

@@ -43,7 +43,7 @@ export default function Composer({ onSend, disabled }) {
           style={{ flex: 1, padding: '0.6rem 0.85rem', border: '1px solid #ddd', borderRadius: '20px', resize: 'none', outline: 'none', fontFamily: 'inherit', fontSize: '0.92rem', maxHeight: '80px', overflowY: 'auto' }}
           rows={1} />
         <button onClick={handleSend} disabled={disabled || (!text.trim() && !files.length)}
-          style={{ padding: '0.5rem 1.1rem', background: '#111', color: 'white', border: 'none', borderRadius: '20px', cursor: 'pointer', fontWeight: '500', flexShrink: 0 }}>
+          style={{ padding: '0.5rem 1.1rem', background: 'var(--btn-dark)', color: 'white', border: 'none', borderRadius: '20px', cursor: 'pointer', fontWeight: '500', flexShrink: 0 }}>
           Send
         </button>
       </div>

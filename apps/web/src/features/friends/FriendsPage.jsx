@@ -56,7 +56,7 @@ export default function FriendsPage() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button onClick={() => handle('accept', f.id)} style={{ padding: '0.4rem 1rem', background: '#246e9d', color: 'white', border: 'none', borderRadius: '20px', cursor: 'pointer' }}>Accept</button>
+                  <button onClick={() => handle('accept', f.id)} style={{ padding: '0.4rem 1rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '20px', cursor: 'pointer' }}>Accept</button>
                   <button onClick={() => handle('reject', f.id)} style={{ padding: '0.4rem 1rem', background: '#f0f0f0', color: '#555', border: 'none', borderRadius: '20px', cursor: 'pointer' }}>Reject</button>
                 </div>
               </div>
@@ -94,7 +94,7 @@ export default function FriendsPage() {
 function Avatar({ profile }) {
   const initial = profile?.full_name?.[0]?.toUpperCase() ?? '?'
   return (
-    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#246e9d', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', flexShrink: 0 }}>
+    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', flexShrink: 0 }}>
       {profile?.avatar_url ? <img src={profile.avatar_url} alt={profile.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
     </div>
   )

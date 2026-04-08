@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
         <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📧</div>
         <h2 style={{ marginBottom: '0.5rem' }}>Check your email</h2>
         <p style={{ color: '#888', marginBottom: '1.5rem' }}>We sent a password reset link to <strong>{email}</strong></p>
-        <Link to="/" style={{ color: '#246e9d', textDecoration: 'none' }}>Back to login</Link>
+        <Link to="/" style={{ color: 'var(--accent)', textDecoration: 'none' }}>Back to login</Link>
       </div>
     </div>
   )
@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
         <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}
           style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }} />
         <button onClick={handleSubmit} disabled={loading}
-          style={{ padding: '0.75rem', background: '#246e9d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+          style={{ padding: '0.75rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
           {loading ? 'Sending...' : 'Send reset link'}
         </button>
         <Link to="/" style={{ textAlign: 'center', color: '#888', fontSize: '0.9rem', textDecoration: 'none' }}>Back to login</Link>

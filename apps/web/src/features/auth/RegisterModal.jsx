@@ -45,7 +45,7 @@ export default function RegisterModal({ email, password, onClose }) {
         <input type="file" accept="image/*" onChange={e => setAvatarFile(e.target.files?.[0])} />
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button onClick={onClose} style={{ flex: 1, padding: '0.5rem' }}>Cancel</button>
-          <button onClick={handleSubmit} disabled={loading} style={{ flex: 1, padding: '0.5rem', background: '#246e9d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          <button onClick={handleSubmit} disabled={loading} style={{ flex: 1, padding: '0.5rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
             {loading ? 'Creating...' : 'Create account'}
           </button>
         </div>
