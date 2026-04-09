@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { getDownloadUrl } from '../messagesService.js'
 
-export default function ChatHistory({ messages, currentUserId, pendingMessages, otherProfile, currentUserProfile }) {
+export default function ChatHistory({ messages, currentUserId, pendingMessages, otherProfile, currentUserProfile, conversationId }) {
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -121,7 +121,7 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
                     </a>
                   )}
                   {msg.message_attachments?.map(att => (
-                    <AttachmentCard key={att.id} attachment={att} />
+                    <AttachmentCard key={att.id} attachment={att} conversationId={conversationId} />
                   ))}
                 </div>
               ))}
@@ -147,9 +147,9 @@ function getFileIcon(fileName = '') {
   return '/assets/icon_file_file.png'
 }
 
-function AttachmentCard({ attachment }) {
+function AttachmentCard({ attachment, conversationId }) {
   async function handleClick() {
-    const url = await getDownloadUrl(attachment.object_key)
+    const url = await getDownloadUrl(attachment.object_key, attachment.file_name, conversationId)
     window.open(url, '_blank')
   }
   return (

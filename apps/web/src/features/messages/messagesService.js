@@ -67,61 +67,60 @@ export async function sendMessage({ conversationId, content, attachments = [] })
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  const uploadedAttachments = []
-  for (const file of attachments) {
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('conversationId', conversationId)
-    const res = await apiRequest(API_PATHS.MESSAGES_UPLOAD_ATTACHMENT, { method: 'POST', body: formData })
-    const data = await res.json()
-    if (data.objectKey) uploadedAttachments.push({ objectKey: data.objectKey, fileName: file.name, mimeType: file.type, sizeBytes: file.size })
+  const { data: { session } } = await supabase.auth.getSession()
+  const authHeaders = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${session?.access_token || ''}`
   }
 
-  // Detect URL in content and fetch link preview
+  // Upload attachments first
+  const uploadedAttachments = []
+  for (const file of attachments) {
+    const res = await apiRequest(API_PATHS.MESSAGES_UPLOAD_ATTACHMENT, {
+      method: 'POST',
+      headers: authHeaders,
+      body: JSON.stringify({ conversationId, fileName: file.name, contentType: file.type })
+    })
+    if (!res.ok) throw new Error('Failed to get upload URL')
+    const { uploadUrl, objectKey } = await res.json()
+    await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type || 'application/octet-stream' }, body: file })
+    uploadedAttachments.push({ object_key: objectKey, file_name: file.name, mime_type: file.type || null, size_bytes: file.size || 0 })
+  }
+
+  // Fetch link preview if URL detected
   let linkData = {}
   const urlMatch = content?.match(/https?:\/\/[^\s]+/)
   if (urlMatch) {
     try {
       const res = await apiRequest(API_PATHS.MESSAGES_LINK_PREVIEW, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({ url: urlMatch[0] })
       })
       const preview = await res.json()
       if (preview?.title) {
-        linkData = {
-          link_url: urlMatch[0],
-          link_title: preview.title || null,
-          link_description: preview.description || null,
-          link_image: preview.image || null,
-          link_site: preview.site || null,
-        }
+        linkData = { link_url: urlMatch[0], link_title: preview.title || null, link_description: preview.description || null, link_image: preview.image || null, link_site: preview.site || null }
       } else {
         linkData = { link_url: urlMatch[0] }
       }
-    } catch (e) {
-      linkData = { link_url: urlMatch[0] }
-    }
+    } catch { linkData = { link_url: urlMatch[0] } }
   }
 
+  // Insert message — NO message_type field
   const { data, error } = await supabase
     .from('messages')
-    .insert({
-      conversation_id: conversationId,
-      sender_id: user.id,
-      content: content || '',
-      message_type: attachments.length ? 'file' : 'text',
-      ...linkData
-    })
+    .insert({ conversation_id: conversationId, sender_id: user.id, content: content || '', ...linkData })
     .select()
     .single()
   if (error) throw error
 
+  // Insert attachments
   if (uploadedAttachments.length) {
     await supabase.from('message_attachments').insert(
-      uploadedAttachments.map(a => ({ message_id: data.id, conversation_id: conversationId, sender_id: user.id, object_key: a.objectKey, file_name: a.fileName, mime_type: a.mimeType, size_bytes: a.sizeBytes }))
+      uploadedAttachments.map(a => ({ message_id: data.id, conversation_id: conversationId, sender_id: user.id, object_key: a.object_key, file_name: a.file_name, mime_type: a.mime_type, size_bytes: a.size_bytes }))
     )
   }
+
   return data
 }
 
@@ -156,12 +155,13 @@ export async function markConversationRead(conversationId) {
     .eq('user_id', user.id)
 }
 
-export async function getDownloadUrl(objectKey) {
+export async function getDownloadUrl(objectKey, fileName, conversationId) {
+  const { data: { session } } = await supabase.auth.getSession()
   const res = await apiRequest(API_PATHS.MESSAGES_DOWNLOAD_ATTACHMENT, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ objectKey })
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
+    body: JSON.stringify({ objectKey, fileName, conversationId })
   })
   const data = await res.json()
-  return data.url
+  return data.downloadUrl
 }

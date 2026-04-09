@@ -94,7 +94,7 @@ export default function MessagesPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       <ChatHeader other={other} />
-      <ChatHistory messages={messages} currentUserId={currentUserId} pendingMessages={pendingMessages} otherProfile={other} currentUserProfile={currentUserProfile} />
+      <ChatHistory messages={messages} currentUserId={currentUserId} pendingMessages={pendingMessages} otherProfile={other} currentUserProfile={currentUserProfile} conversationId={conv?.id} />
       <Composer onSend={handleSend} disabled={sending} />
     </div>
   )
