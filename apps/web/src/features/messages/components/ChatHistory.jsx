@@ -102,9 +102,8 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
                           display: 'grid',
                           marginTop: '0.35rem',
                           gap: '3px',
-                          maxWidth: '320px',
-                          gridTemplateColumns: images.length === 1 ? '1fr' : images.length === 2 ? '1fr 1fr' : images.length === 3 ? '1fr 1fr' : '1fr 1fr',
-                          gridTemplateRows: images.length === 3 ? 'auto auto' : 'auto',
+                          maxWidth: images.length === 1 ? '320px' : images.length === 2 ? '320px' : images.length === 3 ? '360px' : images.length === 4 ? '320px' : '360px',
+                          gridTemplateColumns: images.length === 1 ? '1fr' : images.length === 2 ? '1fr 1fr' : images.length === 3 ? '1fr 1fr 1fr' : images.length === 4 ? '1fr 1fr' : '1fr 1fr 1fr',
                         }}>
                           {images.map((att, idx) => (
                             <ImageAttachmentCard
@@ -113,7 +112,7 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
                               conversationId={conversationId}
                               allImages={images}
                               index={idx}
-                              span={images.length === 3 && idx === 0}
+                              count={images.length}
                             />
                           ))}
                         </div>
@@ -193,7 +192,7 @@ function getFileIcon(fileName = '') {
   return '/assets/icon_file_file.png'
 }
 
-function ImageAttachmentCard({ attachment, conversationId, allImages, index, span }) {
+function ImageAttachmentCard({ attachment, conversationId, allImages, index, count }) {
   const [src, setSrc] = useState(null)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxSrcs, setLightboxSrcs] = useState([])
@@ -235,12 +234,12 @@ function ImageAttachmentCard({ attachment, conversationId, allImages, index, spa
     return () => window.removeEventListener('keydown', handler)
   }, [lightboxOpen, lightboxSrcs.length])
 
-  const height = allImages.length === 1 ? '240px' : '140px'
+  const height = count === 1 ? '240px' : count === 3 ? '120px' : count >= 5 ? '100px' : '140px'
 
   return (
     <>
       <div onClick={handleClick}
-        style={{ cursor: 'pointer', borderRadius: '6px', overflow: 'hidden', background: 'var(--bg-secondary)', border: '1px solid var(--border)', height, gridColumn: span ? '1 / -1' : 'auto' }}>
+        style={{ cursor: 'pointer', borderRadius: '6px', overflow: 'hidden', background: 'var(--bg-secondary)', border: '1px solid var(--border)', height }}>
         {src
           ? <img src={src} alt={attachment.file_name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
           : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>Loading...</div>
