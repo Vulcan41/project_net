@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getDownloadUrl } from '../messagesService.js'
 
 export default function ChatHistory({ messages, currentUserId, pendingMessages, otherProfile, currentUserProfile, conversationId }) {
@@ -120,9 +120,14 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
                       </div>
                     </a>
                   )}
-                  {msg.message_attachments?.map(att => (
-                    <AttachmentCard key={att.id} attachment={att} conversationId={conversationId} />
-                  ))}
+                  {(() => {
+                    const images = msg.message_attachments?.filter(a => a.mime_type?.startsWith('image/')) ?? []
+                    const files = msg.message_attachments?.filter(a => !a.mime_type?.startsWith('image/')) ?? []
+                    return <>
+                      {images.map((att, idx) => <ImageAttachmentCard key={att.id} attachment={att} conversationId={conversationId} allImages={images} index={idx} />)}
+                      {files.map(att => <FileAttachmentCard key={att.id} attachment={att} conversationId={conversationId} />)}
+                    </>
+                  })()}
                 </div>
               ))}
             </div>
@@ -147,7 +152,48 @@ function getFileIcon(fileName = '') {
   return '/assets/icon_file_file.png'
 }
 
-function AttachmentCard({ attachment, conversationId }) {
+function ImageAttachmentCard({ attachment, conversationId, allImages, index }) {
+  const [src, setSrc] = useState(null)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxSrcs, setLightboxSrcs] = useState([])
+
+  useEffect(() => {
+    getDownloadUrl(attachment.object_key, attachment.file_name, conversationId)
+      .then(url => setSrc(url))
+      .catch(() => {})
+  }, [attachment.object_key])
+
+  async function handleClick() {
+    const urls = await Promise.all(
+      allImages.map(a => getDownloadUrl(a.object_key, a.file_name, conversationId))
+    )
+    setLightboxSrcs(urls)
+    setLightboxOpen(true)
+  }
+
+  return (
+    <>
+      <div onClick={handleClick} style={{ marginTop: '0.35rem', borderRadius: '8px', overflow: 'hidden', maxWidth: '320px', cursor: 'pointer', background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
+        {src
+          ? <img src={src} alt={attachment.file_name} style={{ width: '100%', display: 'block', maxHeight: '240px', objectFit: 'cover' }} loading="lazy" />
+          : <div style={{ width: '320px', height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Loading...</div>
+        }
+      </div>
+      {lightboxOpen && (
+        <div onClick={() => setLightboxOpen(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+          <img src={lightboxSrcs[index]} alt="" style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain' }} onClick={e => e.stopPropagation()} />
+          <button onClick={() => setLightboxOpen(false)}
+            style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            ×
+          </button>
+        </div>
+      )}
+    </>
+  )
+}
+
+function FileAttachmentCard({ attachment, conversationId }) {
   async function handleClick() {
     const url = await getDownloadUrl(attachment.object_key, attachment.file_name, conversationId)
     window.open(url, '_blank')
