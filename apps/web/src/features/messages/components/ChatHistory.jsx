@@ -124,7 +124,27 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
                     const images = msg.message_attachments?.filter(a => a.mime_type?.startsWith('image/')) ?? []
                     const files = msg.message_attachments?.filter(a => !a.mime_type?.startsWith('image/')) ?? []
                     return <>
-                      {images.map((att, idx) => <ImageAttachmentCard key={att.id} attachment={att} conversationId={conversationId} allImages={images} index={idx} />)}
+                      {images.length > 0 && (
+                        <div style={{
+                          display: 'grid',
+                          marginTop: '0.35rem',
+                          gap: '3px',
+                          maxWidth: '320px',
+                          gridTemplateColumns: images.length === 1 ? '1fr' : images.length === 2 ? '1fr 1fr' : images.length === 3 ? '1fr 1fr' : '1fr 1fr',
+                          gridTemplateRows: images.length === 3 ? 'auto auto' : 'auto',
+                        }}>
+                          {images.map((att, idx) => (
+                            <ImageAttachmentCard
+                              key={att.id}
+                              attachment={att}
+                              conversationId={conversationId}
+                              allImages={images}
+                              index={idx}
+                              span={images.length === 3 && idx === 0}
+                            />
+                          ))}
+                        </div>
+                      )}
                       {files.map(att => <FileAttachmentCard key={att.id} attachment={att} conversationId={conversationId} />)}
                     </>
                   })()}
@@ -152,10 +172,11 @@ function getFileIcon(fileName = '') {
   return '/assets/icon_file_file.png'
 }
 
-function ImageAttachmentCard({ attachment, conversationId, allImages, index }) {
+function ImageAttachmentCard({ attachment, conversationId, allImages, index, span }) {
   const [src, setSrc] = useState(null)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxSrcs, setLightboxSrcs] = useState([])
+  const [lightboxIndex, setLightboxIndex] = useState(index)
 
   useEffect(() => {
     getDownloadUrl(attachment.object_key, attachment.file_name, conversationId)
@@ -168,23 +189,72 @@ function ImageAttachmentCard({ attachment, conversationId, allImages, index }) {
       allImages.map(a => getDownloadUrl(a.object_key, a.file_name, conversationId))
     )
     setLightboxSrcs(urls)
+    setLightboxIndex(index)
     setLightboxOpen(true)
   }
 
+  function handlePrev(e) {
+    e.stopPropagation()
+    setLightboxIndex(i => (i - 1 + lightboxSrcs.length) % lightboxSrcs.length)
+  }
+
+  function handleNext(e) {
+    e.stopPropagation()
+    setLightboxIndex(i => (i + 1) % lightboxSrcs.length)
+  }
+
+  useEffect(() => {
+    if (!lightboxOpen) return
+    const handler = e => {
+      if (e.key === 'ArrowLeft') setLightboxIndex(i => (i - 1 + lightboxSrcs.length) % lightboxSrcs.length)
+      if (e.key === 'ArrowRight') setLightboxIndex(i => (i + 1) % lightboxSrcs.length)
+      if (e.key === 'Escape') setLightboxOpen(false)
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [lightboxOpen, lightboxSrcs.length])
+
+  const height = allImages.length === 1 ? '240px' : '140px'
+
   return (
     <>
-      <div onClick={handleClick} style={{ marginTop: '0.35rem', borderRadius: '8px', overflow: 'hidden', maxWidth: '320px', cursor: 'pointer', background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
+      <div onClick={handleClick}
+        style={{ cursor: 'pointer', borderRadius: '6px', overflow: 'hidden', background: 'var(--bg-secondary)', border: '1px solid var(--border)', height, gridColumn: span ? '1 / -1' : 'auto' }}>
         {src
-          ? <img src={src} alt={attachment.file_name} style={{ width: '100%', display: 'block', maxHeight: '240px', objectFit: 'cover' }} loading="lazy" />
-          : <div style={{ width: '320px', height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Loading...</div>
+          ? <img src={src} alt={attachment.file_name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+          : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>Loading...</div>
         }
       </div>
+
       {lightboxOpen && (
         <div onClick={() => setLightboxOpen(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
-          <img src={lightboxSrcs[index]} alt="" style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain' }} onClick={e => e.stopPropagation()} />
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+          <img src={lightboxSrcs[lightboxIndex]} alt="" style={{ maxWidth: '88vw', maxHeight: '88vh', objectFit: 'contain', borderRadius: '6px' }} onClick={e => e.stopPropagation()} />
+
+          {lightboxSrcs.length > 1 && (
+            <>
+              <button onClick={handlePrev}
+                style={{ position: 'absolute', left: '1.5rem', background: 'rgba(255,255,255,0.15)', border: 'none', color: 'white', fontSize: '1.8rem', cursor: 'pointer', borderRadius: '50%', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}>
+                ‹
+              </button>
+              <button onClick={handleNext}
+                style={{ position: 'absolute', right: '1.5rem', background: 'rgba(255,255,255,0.15)', border: 'none', color: 'white', fontSize: '1.8rem', cursor: 'pointer', borderRadius: '50%', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}>
+                ›
+              </button>
+              <div style={{ position: 'absolute', bottom: '1.5rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
+                {lightboxIndex + 1} / {lightboxSrcs.length}
+              </div>
+            </>
+          )}
+
           <button onClick={() => setLightboxOpen(false)}
-            style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(255,255,255,0.15)', border: 'none', color: 'white', fontSize: '1.3rem', cursor: 'pointer', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}>
             ×
           </button>
         </div>
