@@ -33,6 +33,7 @@ export default function Composer({ onSend, disabled }) {
   const fileInputRef = useRef(null)
   const imageInputRef = useRef(null)
   const pickerRef = useRef(null)
+  const pickerContainerRef = useRef(null)
   let dragCounter = 0
 
   useEffect(() => {
@@ -46,7 +47,6 @@ export default function Composer({ onSend, disabled }) {
         },
         onEmojiSelect: (emoji) => {
           setText(t => t + emoji.native)
-          setShowEmojiPicker(false)
         },
         theme: 'auto',
         previewPosition: 'none',
@@ -55,6 +55,17 @@ export default function Composer({ onSend, disabled }) {
       })
       pickerRef.current.appendChild(picker)
     })
+  }, [showEmojiPicker])
+
+  useEffect(() => {
+    if (!showEmojiPicker) return
+    function handleClickOutside(e) {
+      if (pickerContainerRef.current && !pickerContainerRef.current.contains(e.target)) {
+        setShowEmojiPicker(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showEmojiPicker])
 
   function handleKeyDown(e) {
@@ -173,9 +184,10 @@ export default function Composer({ onSend, disabled }) {
                 <img src="/assets/icon_emoji_2.png" alt="Emoji" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
               </button>
               {showEmojiPicker && (
-                <div ref={pickerRef}
-                  style={{ position: 'absolute', bottom: '40px', right: '0', zIndex: 500 }}
-                  onMouseLeave={() => setShowEmojiPicker(false)} />
+                <div ref={pickerContainerRef}
+                  style={{ position: 'absolute', bottom: '40px', right: '0', zIndex: 500 }}>
+                  <div ref={pickerRef} />
+                </div>
               )}
             </div>
           </div>
