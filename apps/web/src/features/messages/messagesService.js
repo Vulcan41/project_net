@@ -77,16 +77,49 @@ export async function sendMessage({ conversationId, content, attachments = [] })
     if (data.objectKey) uploadedAttachments.push({ objectKey: data.objectKey, fileName: file.name, mimeType: file.type, sizeBytes: file.size })
   }
 
+  // Detect URL in content and fetch link preview
+  let linkData = {}
+  const urlMatch = content?.match(/https?:\/\/[^\s]+/)
+  if (urlMatch) {
+    try {
+      const res = await apiRequest(API_PATHS.MESSAGES_LINK_PREVIEW, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: urlMatch[0] })
+      })
+      const preview = await res.json()
+      if (preview?.title) {
+        linkData = {
+          link_url: urlMatch[0],
+          link_title: preview.title || null,
+          link_description: preview.description || null,
+          link_image: preview.image || null,
+          link_site: preview.site || null,
+        }
+      } else {
+        linkData = { link_url: urlMatch[0] }
+      }
+    } catch (e) {
+      linkData = { link_url: urlMatch[0] }
+    }
+  }
+
   const { data, error } = await supabase
     .from('messages')
-    .insert({ conversation_id: conversationId, sender_id: user.id, content: content || '', message_type: attachments.length ? 'file' : 'text' })
+    .insert({
+      conversation_id: conversationId,
+      sender_id: user.id,
+      content: content || '',
+      message_type: attachments.length ? 'file' : 'text',
+      ...linkData
+    })
     .select()
     .single()
   if (error) throw error
 
   if (uploadedAttachments.length) {
     await supabase.from('message_attachments').insert(
-      uploadedAttachments.map(a => ({ message_id: data.id, object_key: a.objectKey, file_name: a.fileName, mime_type: a.mimeType, size_bytes: a.sizeBytes }))
+      uploadedAttachments.map(a => ({ message_id: data.id, conversation_id: conversationId, sender_id: user.id, object_key: a.objectKey, file_name: a.fileName, mime_type: a.mimeType, size_bytes: a.sizeBytes }))
     )
   }
   return data
