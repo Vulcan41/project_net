@@ -15,6 +15,9 @@ export default function MessagesPage() {
   const [currentUserProfile, setCurrentUserProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
+  const [hasMore, setHasMore] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [oldestMessageDate, setOldestMessageDate] = useState(null)
   const [searchParams] = useSearchParams()
   const realtimeRef = useRef(null)
 
@@ -45,8 +48,10 @@ export default function MessagesPage() {
       if (!convId) { setLoading(false); return }
       setConv({ id: convId })
 
-      const msgs = await getMessages(convId)
+      const msgs = await getMessages(convId, { limit: 50 })
       setMessages(msgs)
+      setHasMore(msgs.length === 50)
+      setOldestMessageDate(msgs[0]?.created_at || null)
       await markConversationRead(convId)
       subscribeToMessages(convId)
       setLoading(false)
@@ -71,6 +76,20 @@ export default function MessagesPage() {
         }
       })
       .subscribe()
+  }
+
+  async function loadMore() {
+    if (!conv || !hasMore || loadingMore || !oldestMessageDate) return
+    setLoadingMore(true)
+    const older = await getMessages(conv.id, { limit: 50, before: oldestMessageDate })
+    if (older.length > 0) {
+      setMessages(prev => [...older, ...prev])
+      setOldestMessageDate(older[0].created_at)
+      setHasMore(older.length === 50)
+    } else {
+      setHasMore(false)
+    }
+    setLoadingMore(false)
   }
 
   async function handleSend({ content, attachments, onProgress }) {
@@ -100,7 +119,17 @@ export default function MessagesPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       <ChatHeader other={other} />
-      <ChatHistory messages={messages} currentUserId={currentUserId} pendingMessages={pendingMessages} otherProfile={other} currentUserProfile={currentUserProfile} conversationId={conv?.id} />
+      <ChatHistory
+        messages={messages}
+        currentUserId={currentUserId}
+        pendingMessages={pendingMessages}
+        otherProfile={other}
+        currentUserProfile={currentUserProfile}
+        conversationId={conv?.id}
+        hasMore={hasMore}
+        loadingMore={loadingMore}
+        onLoadMore={loadMore}
+      />
       <Composer onSend={handleSend} disabled={sending} />
     </div>
   )

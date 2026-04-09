@@ -49,18 +49,26 @@ export async function getConversations() {
   return { userId: user.id, conversations }
 }
 
-export async function getMessages(conversationId) {
-  const { data, error } = await supabase
+export async function getMessages(conversationId, { limit = 50, before = null } = {}) {
+  let query = supabase
     .from('messages')
     .select(`
       id, content, message_type, created_at, edited_at, deleted_at, sender_id,
-      link_url, link_title, link_description, link_image,
+      link_url, link_title, link_description, link_image, link_site,
       message_attachments (id, object_key, file_name, mime_type, size_bytes)
     `)
     .eq('conversation_id', conversationId)
-    .order('created_at', { ascending: true })
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (before) {
+    query = query.lt('created_at', before)
+  }
+
+  const { data, error } = await query
   if (error) throw error
-  return data
+  return (data || []).reverse()
 }
 
 export async function sendMessage({ conversationId, content, attachments = [], onProgress }) {

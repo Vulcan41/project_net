@@ -1,12 +1,53 @@
 import { useEffect, useRef, useState } from 'react'
 import { getDownloadUrl } from '../messagesService.js'
 
-export default function ChatHistory({ messages, currentUserId, pendingMessages, otherProfile, currentUserProfile, conversationId }) {
-  const bottomRef = useRef(null)
+export default function ChatHistory({ messages, currentUserId, pendingMessages, otherProfile, currentUserProfile, conversationId, hasMore, loadingMore, onLoadMore }) {
+  const containerRef = useRef(null)
+  const isInitialLoad = useRef(true)
+  const prevScrollHeight = useRef(0)
 
+  // On initial load — jump to bottom instantly
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, pendingMessages])
+    if (!containerRef.current) return
+    if (isInitialLoad.current && messages.length > 0) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight
+      isInitialLoad.current = false
+    }
+  }, [messages.length > 0])
+
+  // Reset on conversation change
+  useEffect(() => {
+    isInitialLoad.current = true
+  }, [conversationId])
+
+  // When new messages arrive (realtime) — scroll to bottom only if already near bottom
+  useEffect(() => {
+    if (!containerRef.current || isInitialLoad.current) return
+    const el = containerRef.current
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120
+    if (isNearBottom) {
+      el.scrollTop = el.scrollHeight
+    }
+  }, [messages.length, pendingMessages?.length])
+
+  // When older messages are prepended — preserve scroll position
+  useEffect(() => {
+    if (!containerRef.current || loadingMore) return
+    if (prevScrollHeight.current > 0) {
+      const el = containerRef.current
+      el.scrollTop = el.scrollHeight - prevScrollHeight.current
+      prevScrollHeight.current = 0
+    }
+  }, [messages.length])
+
+  function handleScroll() {
+    if (!containerRef.current) return
+    const el = containerRef.current
+    if (el.scrollTop < 80 && hasMore && !loadingMore) {
+      prevScrollHeight.current = el.scrollHeight
+      onLoadMore?.()
+    }
+  }
 
   const allMessages = [...(messages || []), ...(pendingMessages || [])]
   if (!allMessages.length) return (
@@ -43,7 +84,14 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
   }
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 0' }}>
+    <div ref={containerRef} onScroll={handleScroll}
+      style={{ flex: 1, overflowY: 'auto', padding: '1rem 0' }}>
+      {loadingMore && (
+        <div style={{ textAlign: 'center', padding: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Loading older messages...</div>
+      )}
+      {hasMore === false && messages.length > 0 && (
+        <div style={{ textAlign: 'center', padding: '0.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Beginning of conversation</div>
+      )}
       {groups.map((group, i) => {
         if (group.type === 'divider') return (
           <div key={`divider-${i}`} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', margin: '0.5rem 0' }}>
@@ -130,7 +178,6 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
           </div>
         )
       })}
-      <div ref={bottomRef} />
     </div>
   )
 }
