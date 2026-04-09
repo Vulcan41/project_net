@@ -155,10 +155,10 @@ function FriendRow({ friend, online, onClick, justMoved }) {
       onMouseEnter={e => { if (!justMoved) e.currentTarget.style.background = 'var(--bg-secondary)' }}
       onMouseLeave={e => { if (!justMoved) e.currentTarget.style.background = 'transparent' }}>
       <div style={{ position: 'relative', flexShrink: 0 }}>
-        <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: '#e0e0e0' }}>
+        <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'white' }}>
           {friend.avatar_url
             ? <img src={friend.avatar_url} alt={friend.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} crossOrigin="anonymous" />
-            : <img src="/assets/user_icon_2.jpg" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+            : <img src="/assets/user_icon.png" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
         </div>
         <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', borderRadius: '50%', background: online ? '#3ba55c' : '#747f8d', border: '2px solid var(--bg-card)' }} />
       </div>
