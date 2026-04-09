@@ -27,6 +27,8 @@ export default function Composer({ onSend, disabled }) {
   const [text, setText] = useState('')
   const [files, setFiles] = useState([])
   const [dragOver, setDragOver] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState({})
+  const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef(null)
   const imageInputRef = useRef(null)
   let dragCounter = 0
@@ -38,11 +40,21 @@ export default function Composer({ onSend, disabled }) {
     }
   }
 
-  function handleSend() {
+  async function handleSend() {
     if (!text.trim() && !files.length) return
-    onSend({ content: text.trim(), attachments: files.map(f => f.file) })
+    setUploading(true)
+    setUploadProgress({})
+    await onSend({
+      content: text.trim(),
+      attachments: files.map(f => f.file),
+      onProgress: (index, pct, name) => {
+        setUploadProgress(prev => ({ ...prev, [index]: { pct, name } }))
+      }
+    })
     setText('')
     setFiles([])
+    setUploadProgress({})
+    setUploading(false)
   }
 
   function addFiles(newFiles) {
@@ -98,26 +110,38 @@ export default function Composer({ onSend, disabled }) {
         </div>
       )}
 
+      {uploading && Object.entries(uploadProgress).map(([idx, { pct, name }]) => (
+        <div key={idx} style={{ padding: '0.4rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '80%' }}>{name}</span>
+            <span>{pct}%</span>
+          </div>
+          <div style={{ height: '4px', background: 'var(--border)', borderRadius: '999px', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${pct}%`, background: 'var(--btn-primary)', borderRadius: '999px', transition: 'width 0.1s' }} />
+          </div>
+        </div>
+      ))}
+
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', padding: '0.6rem 1rem' }}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: '0.25rem', border: '1px solid var(--border)', borderRadius: '12px', background: 'var(--input-bg)', padding: '0.4rem 0.5rem' }}>
           <textarea value={text} onChange={e => setText(e.target.value)} onKeyDown={handleKeyDown}
             placeholder={dragOver ? 'Drop files here...' : 'Write a message...'}
-            disabled={disabled} rows={1}
+            disabled={disabled || uploading} rows={1}
             style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', color: 'var(--text)', fontFamily: 'inherit', fontSize: '0.92rem', resize: 'none', maxHeight: '80px', overflowY: 'auto', lineHeight: '1.5', padding: '0' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.1rem', flexShrink: 0 }}>
-            <button onClick={() => fileInputRef.current?.click()} title="Attach file" disabled={disabled}
+            <button onClick={() => fileInputRef.current?.click()} title="Attach file" disabled={disabled || uploading}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', opacity: 0.6, borderRadius: '6px' }}
               onMouseEnter={e => e.currentTarget.style.opacity = '1'}
               onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}>
               <img src="/assets/icon_attach_2.png" alt="Attach" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
             </button>
-            <button onClick={() => imageInputRef.current?.click()} title="Send image" disabled={disabled}
+            <button onClick={() => imageInputRef.current?.click()} title="Send image" disabled={disabled || uploading}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', opacity: 0.6, borderRadius: '6px' }}
               onMouseEnter={e => e.currentTarget.style.opacity = '1'}
               onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}>
               <img src="/assets/icons_img.png" alt="Image" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
             </button>
-            <button onClick={() => setText(t => t + '😊')} title="Emoji" disabled={disabled}
+            <button onClick={() => setText(t => t + '😊')} title="Emoji" disabled={disabled || uploading}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', opacity: 0.6, borderRadius: '6px' }}
               onMouseEnter={e => e.currentTarget.style.opacity = '1'}
               onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}>
@@ -125,8 +149,8 @@ export default function Composer({ onSend, disabled }) {
             </button>
           </div>
         </div>
-        <button onClick={handleSend} disabled={disabled || (!text.trim() && !files.length)}
-          style={{ padding: '0.5rem 1.1rem', background: 'var(--btn-primary)', color: 'white', border: 'none', borderRadius: '20px', cursor: 'pointer', fontWeight: '600', flexShrink: 0, opacity: (disabled || (!text.trim() && !files.length)) ? 0.5 : 1 }}>
+        <button onClick={handleSend} disabled={disabled || uploading || (!text.trim() && !files.length)}
+          style={{ padding: '0.5rem 1.1rem', background: 'var(--btn-primary)', color: 'white', border: 'none', borderRadius: '20px', cursor: 'pointer', fontWeight: '600', flexShrink: 0, opacity: (disabled || uploading || (!text.trim() && !files.length)) ? 0.5 : 1 }}>
           Send
         </button>
       </div>

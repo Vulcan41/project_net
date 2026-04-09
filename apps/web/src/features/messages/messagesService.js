@@ -63,7 +63,7 @@ export async function getMessages(conversationId) {
   return data
 }
 
-export async function sendMessage({ conversationId, content, attachments = [] }) {
+export async function sendMessage({ conversationId, content, attachments = [], onProgress }) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
@@ -75,7 +75,8 @@ export async function sendMessage({ conversationId, content, attachments = [] })
 
   // Upload attachments first
   const uploadedAttachments = []
-  for (const file of attachments) {
+  for (let i = 0; i < attachments.length; i++) {
+    const file = attachments[i]
     const res = await apiRequest(API_PATHS.MESSAGES_UPLOAD_ATTACHMENT, {
       method: 'POST',
       headers: authHeaders,
@@ -83,7 +84,22 @@ export async function sendMessage({ conversationId, content, attachments = [] })
     })
     if (!res.ok) throw new Error('Failed to get upload URL')
     const { uploadUrl, objectKey } = await res.json()
-    await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type || 'application/octet-stream' }, body: file })
+
+    await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('PUT', uploadUrl)
+      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
+      xhr.upload.onprogress = e => {
+        if (e.lengthComputable && onProgress) {
+          onProgress(i, Math.round((e.loaded / e.total) * 100), file.name)
+        }
+      }
+      xhr.onload = () => resolve()
+      xhr.onerror = () => reject(new Error('Upload failed'))
+      xhr.send(file)
+    })
+
+    if (onProgress) onProgress(i, 100, file.name)
     uploadedAttachments.push({ object_key: objectKey, file_name: file.name, mime_type: file.type || null, size_bytes: file.size || 0 })
   }
 

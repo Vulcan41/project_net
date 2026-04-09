@@ -67,14 +67,14 @@ export default function MessagesPage() {
       .subscribe()
   }
 
-  async function handleSend({ content, attachments }) {
+  async function handleSend({ content, attachments, onProgress }) {
     if (!conv) return
     setSending(true)
     const tempId = Date.now().toString()
     const optimistic = { id: `pending-${tempId}`, tempId, content, sender_id: currentUserId, created_at: new Date().toISOString(), pending: true, message_attachments: [] }
     setPendingMessages(prev => [...prev, optimistic])
     try {
-      await sendMessage({ conversationId: conv.id, content, attachments })
+      await sendMessage({ conversationId: conv.id, content, attachments, onProgress })
     } catch (e) {
       console.error('Send failed:', e)
       setPendingMessages(prev => prev.filter(p => p.tempId !== tempId))
