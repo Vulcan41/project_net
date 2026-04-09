@@ -137,6 +137,12 @@ export async function sendMessage({ conversationId, content, attachments = [], o
     )
   }
 
+  // Update conversation last_message_at
+  await supabase
+    .from('conversations')
+    .update({ last_message_at: new Date().toISOString() })
+    .eq('id', conversationId)
+
   return data
 }
 
