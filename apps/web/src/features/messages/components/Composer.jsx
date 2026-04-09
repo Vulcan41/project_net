@@ -1,4 +1,6 @@
 import { useState, useRef } from 'react'
+import Picker from '@emoji-mart/react'
+import data from '@emoji-mart/data'
 
 function getFileIcon(fileName = '') {
   const ext = fileName.split('.').pop()?.toLowerCase() || ''
@@ -27,6 +29,7 @@ export default function Composer({ onSend, disabled }) {
   const [text, setText] = useState('')
   const [files, setFiles] = useState([])
   const [dragOver, setDragOver] = useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [uploadProgress, setUploadProgress] = useState({})
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef(null)
@@ -141,12 +144,30 @@ export default function Composer({ onSend, disabled }) {
               onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}>
               <img src="/assets/icons_img.png" alt="Image" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
             </button>
-            <button onClick={() => setText(t => t + '😊')} title="Emoji" disabled={disabled || uploading}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', opacity: 0.6, borderRadius: '6px' }}
-              onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-              onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}>
-              <img src="/assets/icon_emoji_2.png" alt="Emoji" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
-            </button>
+            <div style={{ position: 'relative' }}>
+              <button onClick={() => setShowEmojiPicker(o => !o)} title="Emoji" disabled={disabled || uploading}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', opacity: 0.6, borderRadius: '6px' }}
+                onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}>
+                <img src="/assets/icon_emoji_2.png" alt="Emoji" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+              </button>
+              {showEmojiPicker && (
+                <div style={{ position: 'absolute', bottom: '40px', right: '0', zIndex: 500 }}
+                  onMouseLeave={() => setShowEmojiPicker(false)}>
+                  <Picker
+                    data={data}
+                    onEmojiSelect={emoji => {
+                      setText(t => t + emoji.native)
+                      setShowEmojiPicker(false)
+                    }}
+                    theme="auto"
+                    previewPosition="none"
+                    skinTonePosition="none"
+                    maxFrequentRows={2}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <button onClick={handleSend} disabled={disabled || uploading || (!text.trim() && !files.length)}
