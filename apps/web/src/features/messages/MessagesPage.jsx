@@ -12,6 +12,7 @@ export default function MessagesPage() {
   const [messages, setMessages] = useState([])
   const [pendingMessages, setPendingMessages] = useState([])
   const [currentUserId, setCurrentUserId] = useState(null)
+  const [currentUserProfile, setCurrentUserProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [searchParams] = useSearchParams()
@@ -21,6 +22,8 @@ export default function MessagesPage() {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUserId(user?.id)
+      const { data: myProfile } = await supabase.from('profiles').select('id, username, full_name, avatar_url').eq('id', user.id).single()
+      setCurrentUserProfile(myProfile)
 
       const targetUserId = searchParams.get('userId')
       if (!targetUserId) { setLoading(false); return }
@@ -91,7 +94,7 @@ export default function MessagesPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       <ChatHeader other={other} />
-      <ChatHistory messages={messages} currentUserId={currentUserId} pendingMessages={pendingMessages} />
+      <ChatHistory messages={messages} currentUserId={currentUserId} pendingMessages={pendingMessages} otherProfile={other} currentUserProfile={currentUserProfile} />
       <Composer onSend={handleSend} disabled={sending} />
     </div>
   )

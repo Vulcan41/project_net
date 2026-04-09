@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { getDownloadUrl } from '../messagesService.js'
 
-export default function ChatHistory({ messages, currentUserId, pendingMessages }) {
+export default function ChatHistory({ messages, currentUserId, pendingMessages, otherProfile, currentUserProfile }) {
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -50,6 +50,10 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages }
 
         const firstMsg = group.messages[0]
         const time = new Date(firstMsg.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+        const avatarProfile = group.isOwn ? currentUserProfile : otherProfile
+        const avatarUrl = avatarProfile?.avatar_url
+        const avatarName = avatarProfile?.full_name
+        const displayName = group.isOwn ? (currentUserProfile?.full_name ?? 'You') : (otherProfile?.full_name ?? 'User')
 
         return (
           <div key={`group-${i}`} style={{ display: 'flex', gap: '0.85rem', padding: '0.15rem 1rem', alignItems: 'flex-start' }}
@@ -57,13 +61,15 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages }
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
             <div style={{ width: '40px', flexShrink: 0, paddingTop: '2px' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src="/assets/user_icon_2.jpg" alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {avatarUrl
+                  ? <img src={avatarUrl} alt={avatarName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <img src="/assets/user_icon_2.jpg" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.2rem' }}>
                 <span style={{ fontWeight: '600', fontSize: '0.95rem', color: group.isOwn ? 'var(--btn-primary)' : 'var(--text)' }}>
-                  {group.isOwn ? 'You' : 'User'}
+                  {displayName}
                 </span>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{time}</span>
               </div>
