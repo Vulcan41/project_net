@@ -84,9 +84,31 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
                 <div key={msg.id || `pending-${j}`} style={{ fontSize: '0.92rem', color: msg.pending ? 'var(--text-secondary)' : 'var(--text)', lineHeight: 1.5, marginBottom: '0.1rem', wordBreak: 'break-word' }}>
                   {msg.content && <div>{msg.content}</div>}
                   {msg.link_url && (
-                    <a href={msg.link_url} target="_blank" rel="noopener noreferrer"
-                      style={{ display: 'inline-block', marginTop: '0.25rem', color: 'var(--btn-primary)', fontSize: '0.85rem', wordBreak: 'break-all' }}>
-                      {msg.link_title || msg.link_url}
+                    <a href={msg.link_url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'block', marginTop: '0.4rem' }}>
+                      <div style={{ display: 'flex', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-secondary)', maxWidth: '480px', transition: 'background 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-secondary)'}>
+                        <div style={{ width: '4px', flexShrink: 0, background: 'var(--btn-primary)' }} />
+                        <div style={{ flex: 1, padding: '0.6rem 0.75rem', minWidth: 0 }}>
+                          {msg.link_site && (
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.03em' }}>{msg.link_site}</div>
+                          )}
+                          {msg.link_title && (
+                            <div style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text)', marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{msg.link_title}</div>
+                          )}
+                          {msg.link_description && (
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{msg.link_description}</div>
+                          )}
+                          {!msg.link_title && (
+                            <div style={{ fontSize: '0.82rem', color: 'var(--btn-primary)', wordBreak: 'break-all' }}>{msg.link_url}</div>
+                          )}
+                        </div>
+                        {msg.link_image && (
+                          <div style={{ width: '80px', flexShrink: 0 }}>
+                            <img src={msg.link_image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          </div>
+                        )}
+                      </div>
                     </a>
                   )}
                   {msg.message_attachments?.map(att => (
