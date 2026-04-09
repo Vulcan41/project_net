@@ -66,14 +66,14 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
           <div key={`group-${i}`} style={{ display: 'flex', gap: '0.85rem', padding: '0.15rem 1rem', alignItems: 'flex-start' }}
             onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-            <div style={{ width: '32px', flexShrink: 0, paddingTop: '4px' }}>
+            <div style={{ width: '32px', flexShrink: 0 }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {avatarUrl
                   ? <img src={avatarUrl} alt={avatarName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : <img src="/assets/user_icon_2.jpg" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
               </div>
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0, paddingTop: '4px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
                 <span style={{ fontWeight: '600', fontSize: '0.9rem', color: group.isOwn ? 'var(--btn-primary)' : 'var(--text)' }}>
                   {displayName}
