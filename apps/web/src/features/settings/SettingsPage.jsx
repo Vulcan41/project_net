@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { getMySettings, updatePreferences, updatePassword, updateEmail, deleteAccount } from './settingsService.js'
 import { signOut } from '@features/auth/authService.js'
 import { useAppContext } from '@app/AppProviders.jsx'
 
-const TABS = ['Account', 'Preferences', 'Appearance', 'Privacy', 'Danger Zone']
-
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('Account')
+  const { tab } = useParams()
+  const tabMap = { account: 'Account', preferences: 'Preferences', appearance: 'Appearance', privacy: 'Privacy', danger: 'Danger Zone' }
+  const activeTab = tabMap[tab] || 'Account'
   const [settings, setSettings] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -18,23 +18,12 @@ export default function SettingsPage() {
   if (loading) return <div style={{ padding: '2rem', color: 'var(--text)' }}>Loading...</div>
 
   return (
-    <div style={{ display: 'flex', height: '100%', background: 'var(--bg)' }}>
-      <aside style={{ width: '200px', borderRight: '1px solid var(--border)', padding: '1.5rem 1rem', flexShrink: 0 }}>
-        <h2 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '0.05em' }}>Settings</h2>
-        {TABS.map(tab => (
-          <div key={tab} onClick={() => setActiveTab(tab)}
-            style={{ padding: '0.6rem 0.75rem', borderRadius: '6px', cursor: 'pointer', marginBottom: '0.25rem', background: activeTab === tab ? 'var(--bg-secondary)' : 'transparent', fontWeight: activeTab === tab ? '500' : 'normal', color: tab === 'Danger Zone' ? 'var(--danger)' : 'var(--text)' }}>
-            {tab}
-          </div>
-        ))}
-      </aside>
-      <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
-        {activeTab === 'Account' && <AccountTab settings={settings} onUpdate={setSettings} />}
-        {activeTab === 'Preferences' && <PreferencesTab settings={settings} onUpdate={setSettings} />}
-        {activeTab === 'Appearance' && <AppearanceTab />}
-        {activeTab === 'Privacy' && <PrivacyTab settings={settings} onUpdate={setSettings} />}
-        {activeTab === 'Danger Zone' && <DangerTab />}
-      </main>
+    <div style={{ padding: '2rem', height: '100%', overflowY: 'auto', background: 'var(--bg)' }}>
+      {activeTab === 'Account' && <AccountTab settings={settings} onUpdate={setSettings} />}
+      {activeTab === 'Preferences' && <PreferencesTab settings={settings} onUpdate={setSettings} />}
+      {activeTab === 'Appearance' && <AppearanceTab />}
+      {activeTab === 'Privacy' && <PrivacyTab settings={settings} onUpdate={setSettings} />}
+      {activeTab === 'Danger Zone' && <DangerTab />}
     </div>
   )
 }

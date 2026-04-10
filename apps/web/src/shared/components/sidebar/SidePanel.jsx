@@ -1,8 +1,15 @@
 import FriendsList from './FriendsList.jsx'
 import NotificationsPanel from './NotificationsPanel.jsx'
+import SettingsPanel from './SettingsPanel.jsx'
 
-export default function SidePanel({ activeSection, collapsed, onToggleCollapse }) {
-  const titles = { friends: 'Direct Messages', notifications: 'Notifications' }
+export default function SidePanel({ activeSection, collapsed, onToggleCollapse, onNavigate }) {
+  const titles = {
+    friends: 'Direct Messages',
+    notifications: 'Notifications',
+    settings: 'Settings',
+  }
+
+  if (activeSection === 'home') return null
 
   return (
     <div style={{ width: collapsed ? '0px' : '240px', background: 'var(--bg-card)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', flexShrink: 0, overflow: 'hidden', transition: 'width 0.2s ease' }}>
@@ -17,6 +24,7 @@ export default function SidePanel({ activeSection, collapsed, onToggleCollapse }
           </div>
           {activeSection === 'friends' && <FriendsList />}
           {activeSection === 'notifications' && <NotificationsPanel />}
+          {activeSection === 'settings' && <SettingsPanel onNavigate={onNavigate} />}
         </>
       )}
     </div>

@@ -4,7 +4,7 @@ import { signOut } from '@features/auth/authService.js'
 import { useAppContext } from '@app/AppProviders.jsx'
 
 export default function Header() {
-  const { profile, setSettingsOpen } = useAppContext()
+  const { profile } = useAppContext()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const navigate = useNavigate()
 
@@ -55,14 +55,6 @@ export default function Header() {
       <input placeholder="Search..." style={{ padding: '0.35rem 1rem', border: '1px solid var(--border)', borderRadius: '20px', width: '240px', outline: 'none', background: 'var(--input-bg)', color: 'var(--text)', fontSize: '0.9rem' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
         <ConnectionIndicator ping={ping} quality={quality} connType={connType} />
-        <button onClick={() => navigate('/home')} title="Dashboard"
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
-          <img src="/assets/home.png" alt="Home" style={{ width: '18px', height: '18px', opacity: 1 }} />
-        </button>
-        <button onClick={() => setSettingsOpen(true)} title="Settings"
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
-          <img src="/assets/settings.png" alt="Settings" style={{ width: '18px', height: '18px' }} />
-        </button>
         {profile && <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text)' }}>{profile.credits ?? 0} ♦</span>}
         <div style={{ position: 'relative' }}>
           <div onClick={() => setDropdownOpen(o => !o)}
@@ -79,7 +71,6 @@ export default function Header() {
           {dropdownOpen && (
             <div style={{ position: 'absolute', right: 0, top: '38px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: 'var(--shadow)', minWidth: '160px', zIndex: 200 }}>
               <div onClick={() => { navigate('/profile'); setDropdownOpen(false) }} style={{ padding: '0.7rem 1rem', cursor: 'pointer', color: 'var(--text)', borderBottom: '1px solid var(--border)', fontSize: '0.9rem' }}>Profile</div>
-              <div onClick={() => { setSettingsOpen(true); setDropdownOpen(false) }} style={{ padding: '0.7rem 1rem', cursor: 'pointer', color: 'var(--text)', borderBottom: '1px solid var(--border)', fontSize: '0.9rem' }}>Settings</div>
               <div onClick={handleSignOut} style={{ padding: '0.7rem 1rem', cursor: 'pointer', color: 'var(--danger)', fontSize: '0.9rem' }}>Log out</div>
             </div>
           )}

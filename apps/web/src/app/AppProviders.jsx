@@ -12,7 +12,6 @@ export default function AppProviders({ children }) {
   const [theme, setThemeState] = useState(() => localStorage.getItem('theme') || 'system')
   const [language, setLanguageState] = useState(() => localStorage.getItem('language') || 'en')
   const [profile, setProfile] = useState(null)
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [onlineIds, setOnlineIds] = useState(new Set())
   const presenceRef = useRef(null)
 
@@ -71,7 +70,7 @@ export default function AppProviders({ children }) {
   }
 
   return (
-    <AppContext.Provider value={{ theme, setTheme, language, setLanguage, profile, setProfile, refreshProfile, onlineIds, settingsOpen, setSettingsOpen }}>
+    <AppContext.Provider value={{ theme, setTheme, language, setLanguage, profile, setProfile, refreshProfile, onlineIds }}>
       {children}
     </AppContext.Provider>
   )
