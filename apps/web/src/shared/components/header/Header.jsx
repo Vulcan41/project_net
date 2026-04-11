@@ -52,7 +52,7 @@ export default function Header() {
   return (
     <header style={{ height: '40px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.25rem', background: 'var(--bg-card)', flexShrink: 0, zIndex: 100 }}>
       <img src="/assets/logo_5.png" alt="Noesis" onClick={() => navigate('/home')} style={{ height: '18px', cursor: 'pointer', objectFit: 'contain' }} />
-      <input placeholder="Search..." style={{ padding: '0.35rem 1rem', border: '1px solid var(--border)', borderRadius: '10px', width: '240px', outline: 'none', background: 'var(--input-bg)', color: 'var(--text)', fontSize: '0.9rem' }} />
+      <input placeholder="Search..." style={{ padding: '0.35rem 1rem', border: '1px solid var(--border)', borderRadius: '10px', width: '260px', outline: 'none', background: 'var(--input-bg)', color: 'var(--text)', fontSize: '0.9rem' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
         <ConnectionIndicator ping={ping} quality={quality} connType={connType} />
         {profile && <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text)' }}>{profile.credits ?? 0} ♦</span>}
